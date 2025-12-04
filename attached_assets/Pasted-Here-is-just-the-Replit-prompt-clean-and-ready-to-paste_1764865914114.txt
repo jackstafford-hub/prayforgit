@@ -1,0 +1,104 @@
+Here is just the Replit prompt, clean and ready to paste:
+
+⸻
+
+⭐ REPLIT PROMPT — PrayForChange.org (Behaviour-Led MVP)
+
+Build the simplest possible responsive web app to test this behavioural question:
+
+Will strangers publicly submit prayers and join others in praying for them?
+
+Name: PrayForChange.org – A Shared Space to Pray Together
+
+⸻
+
+🎯 Target User (for MVP)
+
+People who already publicly share prayer requests online (Christian prayer groups, church WhatsApp groups, Christian TikTok/Facebook).
+
+⸻
+
+💜 Homepage Narrative (must be included prominently)
+
+Use this text exactly:
+
+“When faced with injustice or suffering, Jesus didn’t collect signatures—He taught us to pray.
+You’ve started petitions hoping someone else would help. Now invite God into the situation.
+PrayForChange connects you with a community that believes prayer still works miracles.
+Share your burden, receive a beautiful prayer for your cause, and watch what happens when God’s people unite in prayer.”
+
+Include above it a simple headline: “Pray with others. Right now.”
+And a button: “Add a Prayer”
+
+⸻
+
+🧱 Pages & Features (Ultra-Minimal)
+
+1. Homepage (/)**
+	•	Show the narrative text.
+	•	Button: “Add a Prayer”
+	•	Below: feed of prayer cards, each containing:
+	•	Title
+	•	Short description
+	•	“Pray Now” button
+	•	Counter
+	•	“Share” button
+
+2. Create Prayer (/create)
+
+Form fields:
+	•	Title
+	•	Description (optional)
+Button: “Publish Prayer”
+
+After submission → redirect to homepage.
+
+3. Prayer Detail Page (/prayer/:id)
+
+Show:
+	•	Title
+	•	Description
+	•	Big Pray Now button
+	•	Counter (increment on click)
+	•	Timestamp
+	•	Share buttons:
+	•	WhatsApp (use link: https://api.whatsapp.com/send?text=Join%20me%20in%20prayer:%20[TITLE]%0A[URL])
+	•	Email (use link: mailto:?subject=Pray with me for [TITLE]&body=Here is a prayer intention I'm supporting:%0A%0A[TITLE]%0A[URL])
+
+⸻
+
+🧰 Tech Stack
+	•	Node.js + Express
+	•	HTML + TailwindCSS
+	•	Minimal JS for “pray now” fetch
+	•	Data store: simple in-memory array or JSON file
+	•	Routes:
+	•	GET /
+	•	GET /create
+	•	POST /create
+	•	GET /prayer/:id
+	•	POST /prayer/:id/pray
+
+⸻
+
+🧪 Success Criteria
+	•	20+ strangers submit prayers
+	•	100+ “Pray Now” clicks
+	•	WhatsApp sharing used by real users
+	•	Some users return later
+
+⸻
+
+🚫 Do NOT Build Yet
+
+No accounts, profiles, categories, comments, trending, moderation, notifications, or algorithms.
+
+⸻
+
+🪶 Tone
+
+Clean, gentle, uplifting, Christian-friendly but open to all.
+
+⸻
+
+That’s the full prompt.
