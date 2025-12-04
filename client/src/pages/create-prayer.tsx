@@ -16,7 +16,8 @@ export default function CreatePrayer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
-    description: ""
+    description: "",
+    author: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,7 +29,8 @@ export default function CreatePrayer() {
 
     prayerStore.add({
       title: formData.title,
-      description: formData.description
+      description: formData.description,
+      author: formData.author || "Anonymous",
     });
 
     toast({
@@ -52,12 +54,12 @@ export default function CreatePrayer() {
 
         <Card className="border-none shadow-lg">
           <CardHeader>
-            <CardTitle className="font-serif text-2xl text-center">Share a Prayer Request</CardTitle>
+            <CardTitle className="font-serif text-2xl text-center">Start a Prayer Request</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="title">What are we praying for?</Label>
+                <Label htmlFor="title">What is the prayer for?</Label>
                 <Input
                   id="title"
                   placeholder="e.g., Healing for my sister"
@@ -67,12 +69,24 @@ export default function CreatePrayer() {
                   className="h-11 bg-muted/30"
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="author">Your Name</Label>
+                <Input
+                  id="author"
+                  placeholder="John Doe"
+                  required
+                  value={formData.author}
+                  onChange={e => setFormData(prev => ({ ...prev, author: e.target.value }))}
+                  className="h-11 bg-muted/30"
+                />
+              </div>
               
               <div className="space-y-2">
-                <Label htmlFor="description">Details (Optional)</Label>
+                <Label htmlFor="description">Tell the story (Optional)</Label>
                 <Textarea
                   id="description"
-                  placeholder="Share as much or as little as you feel comfortable with..."
+                  placeholder="Explain the situation so others can pray specifically..."
                   value={formData.description}
                   onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   className="min-h-[120px] bg-muted/30 resize-none"
@@ -81,10 +95,10 @@ export default function CreatePrayer() {
 
               <Button 
                 type="submit" 
-                className="w-full h-11 text-base font-medium" 
+                className="w-full h-11 text-base font-bold bg-primary hover:bg-primary/90" 
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Publishing..." : "Publish Prayer"}
+                {isSubmitting ? "Publishing..." : "Start Prayer"}
               </Button>
             </form>
           </CardContent>
