@@ -27,7 +27,7 @@ export default function Home() {
           </div>
           
           <h1 className="text-4xl md:text-5xl font-serif font-medium leading-tight mb-8 text-balance">
-            PrayForChange.org
+            Turn one prayer into hundreds
           </h1>
           
           <div className="prose prose-lg mx-auto text-muted-foreground leading-relaxed mb-10 max-w-xl">
