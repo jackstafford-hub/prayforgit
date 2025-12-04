@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 
+import prayer1 from "@assets/generated_images/older_woman_hands_holding_bible_in_hospital.png";
+import prayer2 from "@assets/generated_images/sad_couple_sitting_apart_at_kitchen_table.png";
+import prayer3 from "@assets/generated_images/stressed_man_looking_at_bills.png";
+import prayer4 from "@assets/generated_images/candlelight_vigil_for_peace.png";
+
 export interface Prayer {
   id: string;
   title: string;
@@ -9,6 +14,7 @@ export interface Prayer {
   goal: number;
   createdAt: string;
   topic: string;
+  imageUrl?: string;
 }
 
 // Initial seed data to make the prototype look alive
@@ -22,6 +28,7 @@ const INITIAL_PRAYERS: Prayer[] = [
     goal: 1500,
     topic: 'Health',
     createdAt: new Date(Date.now() - 10000000).toISOString(),
+    imageUrl: prayer1
   },
   {
     id: '2',
@@ -32,6 +39,7 @@ const INITIAL_PRAYERS: Prayer[] = [
     goal: 1000,
     topic: 'Family',
     createdAt: new Date(Date.now() - 5000000).toISOString(),
+    imageUrl: prayer2
   },
   {
     id: '3',
@@ -42,6 +50,7 @@ const INITIAL_PRAYERS: Prayer[] = [
     goal: 100,
     topic: 'Employment',
     createdAt: new Date(Date.now() - 2000000).toISOString(),
+    imageUrl: prayer3
   },
   {
     id: '4',
@@ -52,6 +61,7 @@ const INITIAL_PRAYERS: Prayer[] = [
     goal: 20000,
     topic: 'World Peace',
     createdAt: new Date(Date.now() - 15000000).toISOString(),
+    imageUrl: prayer4
   }
 ];
 
@@ -68,7 +78,7 @@ export const prayerStore = {
   
   getById: (id: string) => prayers.find(p => p.id === id),
   
-  add: (prayer: Omit<Prayer, 'id' | 'count' | 'createdAt' | 'goal' | 'topic'>) => {
+  add: (prayer: Omit<Prayer, 'id' | 'count' | 'createdAt' | 'goal' | 'topic' | 'imageUrl'>) => {
     const newPrayer: Prayer = {
       ...prayer,
       id: Math.random().toString(36).substr(2, 9),
@@ -77,6 +87,7 @@ export const prayerStore = {
       topic: 'General',
       author: 'Anonymous', // Default for now
       createdAt: new Date().toISOString(),
+      imageUrl: undefined
     };
     prayers = [newPrayer, ...prayers];
     notify();

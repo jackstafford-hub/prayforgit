@@ -47,18 +47,15 @@ export default function PrayerDetail() {
             </h1>
 
             {/* Hero Image Area */}
-            <div className="aspect-video w-full bg-muted rounded-xl overflow-hidden relative">
+            <div className="aspect-video w-full bg-muted rounded-xl overflow-hidden relative shadow-sm">
               <div 
-                className="absolute inset-0 opacity-50"
+                className="absolute inset-0 transition-transform duration-700 hover:scale-105"
                 style={{ 
-                  backgroundImage: `url(${bgTexture})`,
+                  backgroundImage: `url(${prayer.imageUrl || bgTexture})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }} 
               />
-              <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/50 font-serif italic text-2xl">
-                Prayer Focus Image
-              </div>
             </div>
 
             <div className="flex items-center gap-3 py-4 border-b">

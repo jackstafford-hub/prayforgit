@@ -20,7 +20,7 @@ export function PrayerCard({ prayer }: PrayerCardProps) {
         <div 
           className="h-48 w-full bg-muted relative overflow-hidden"
           style={{ 
-            backgroundImage: `url(${bgTexture})`,
+            backgroundImage: `url(${prayer.imageUrl || bgTexture})`,
             backgroundSize: 'cover', 
             backgroundPosition: 'center' 
           }}
