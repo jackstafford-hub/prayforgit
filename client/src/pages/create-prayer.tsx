@@ -58,7 +58,16 @@ export default function CreatePrayer() {
     const randomImage = MOCK_IMAGES[Math.floor(Math.random() * MOCK_IMAGES.length)];
     
     // Mock logic to create "content" from input
-    const mockSummary = `Praying for ${formData.title.toLowerCase()}. Seeking God's intervention and peace in this situation.`;
+    const mockSummary = `In today's fast-paced and ever-challenging world, I find myself reflecting on the power of prayer and its profound impact on situations like this. The need for ${formData.title.toLowerCase()} weighs heavily on my heart. The events unfolding can often leave us feeling overwhelmed, anxious, and at times, powerless. However, I firmly believe that prayer has the transformative ability to bring about positive change and foster a sense of peace, hope, and unity.
+
+${formData.description ? `This request is deeply personal to me. ${formData.description}\n\n` : ''}Throughout history, countless individuals and communities have turned to prayer in times of crisis and uncertainty, and it has served as a beacon of hope. Whether for guidance, healing, or strength, prayer transcends barriers and brings people together, no matter their faith or background.
+
+I envision a future where we are united through the practice of prayer, leading to enhanced understanding, compassion, and resilience. Encouraging more people to engage in prayer for ${formData.title.toLowerCase()} can inspire hope and action.
+
+I urge you to join me in fostering a movement that places prayer at the heart of our efforts. Together, we can encourage individuals and communities to recognize the power of prayer.
+
+Join me in praying for this cause, and let's hold onto the belief that through our shared faith and conviction, we can indeed change the world for the better. Your support not only amplifies this message but also paves the way for a more compassionate community.`;
+
     const mockPrayer = `Heavenly Father, we come before You today to lift up this request for ${formData.title.toLowerCase()}. We ask that You would intervene in this situation. Bring Your comfort, Your guidance, and Your healing power. We trust in Your perfect timing and Your unfailing love. In Jesus' name, Amen.`;
 
     setFormData(prev => ({
@@ -220,9 +229,10 @@ export default function CreatePrayer() {
 
               {/* B) Summary */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Story Summary</Label>
-                <div className="p-4 bg-muted/30 rounded-lg border">
-                  <p className="text-foreground/90 leading-relaxed">{formData.aiSummary}</p>
+                <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">The Story</Label>
+                <div className="p-6 bg-muted/30 rounded-lg border">
+                  <h3 className="font-serif text-xl font-bold mb-4">The Issue</h3>
+                  <p className="text-foreground/90 leading-relaxed whitespace-pre-wrap">{formData.aiSummary}</p>
                 </div>
               </div>
 

@@ -69,7 +69,14 @@ export default function PrayerDetail() {
             </div>
 
             <div className="prose prose-lg max-w-none text-foreground/80 leading-relaxed whitespace-pre-wrap">
-              {prayer.description}
+              {prayer.aiSummary ? (
+                <>
+                  <h3 className="font-serif text-2xl font-bold mb-4 text-foreground">The Issue</h3>
+                  {prayer.aiSummary}
+                </>
+              ) : (
+                prayer.description
+              )}
             </div>
             
             <div className="pt-8 flex gap-4 justify-center lg:justify-start">
