@@ -15,6 +15,8 @@ export interface Prayer {
   createdAt: string;
   topic: string;
   imageUrl?: string;
+  aiSummary?: string;
+  recitablePrayer?: string;
 }
 
 // Initial seed data to make the prototype look alive
@@ -23,6 +25,8 @@ const INITIAL_PRAYERS: Prayer[] = [
     id: '1',
     title: 'Healing for my mother fighting cancer',
     description: 'She has been battling stage 4 cancer for months. The doctors say it is aggressive, but we believe in a God who heals. We are praying for a complete recovery, strength for the chemotherapy, and peace for our family during this storm. Please join us in asking for a miracle.',
+    aiSummary: 'Seeking divine healing and strength for a mother battling aggressive stage 4 cancer, and peace for her family.',
+    recitablePrayer: 'Lord, we lift up this mother to You. We ask for Your healing touch to remove every cancer cell. Give her strength for the journey and surround her family with Your supernatural peace. We believe in Your power to heal. Amen.',
     author: 'Sarah Jenkins',
     count: 1243,
     goal: 1500,
@@ -78,16 +82,16 @@ export const prayerStore = {
   
   getById: (id: string) => prayers.find(p => p.id === id),
   
-  add: (prayer: Omit<Prayer, 'id' | 'count' | 'createdAt' | 'goal' | 'topic' | 'imageUrl'>) => {
+  add: (prayer: Omit<Prayer, 'id' | 'count' | 'createdAt' | 'goal' | 'topic'>) => {
     const newPrayer: Prayer = {
       ...prayer,
       id: Math.random().toString(36).substr(2, 9),
       count: 1, // Starts with 1 (the author)
       goal: 100,
       topic: 'General',
-      author: 'Anonymous', // Default for now
+      author: prayer.author || 'Anonymous', // Default for now
       createdAt: new Date().toISOString(),
-      imageUrl: undefined
+      imageUrl: prayer.imageUrl
     };
     prayers = [newPrayer, ...prayers];
     notify();
