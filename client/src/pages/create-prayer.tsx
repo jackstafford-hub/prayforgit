@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { prayerStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -11,14 +11,28 @@ import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
 export default function CreatePrayer() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Parse query params to get initial title if provided
+  const searchParams = new URLSearchParams(window.location.search);
+  const initialTitle = searchParams.get('title') || "";
+
   const [formData, setFormData] = useState({
-    title: "",
+    title: initialTitle,
     description: "",
     author: "",
   });
+  
+  // Ensure form updates if URL changes while component is mounted (though less likely with simple navigation)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const titleParam = params.get('title');
+    if (titleParam && titleParam !== formData.title) {
+       setFormData(prev => ({ ...prev, title: titleParam }));
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

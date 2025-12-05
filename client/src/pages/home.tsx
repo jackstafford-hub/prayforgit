@@ -2,10 +2,23 @@ import { usePrayers } from "@/lib/store";
 import { PrayerCard } from "@/components/prayer-card";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Input } from "@/components/ui/input";
+import { Link, useLocation } from "wouter";
+import { useState } from "react";
 
 export default function Home() {
   const prayers = usePrayers();
+  const [, setLocation] = useLocation();
+  const [prayerTopic, setPrayerTopic] = useState("");
+
+  const handleStartPrayer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (prayerTopic.trim()) {
+      setLocation(`/create?title=${encodeURIComponent(prayerTopic)}`);
+    } else {
+      setLocation('/create');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background font-sans">
@@ -23,15 +36,20 @@ export default function Home() {
             Share your burden and watch God's people unite.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/create">
-              <Button size="lg" className="h-14 px-8 rounded-full text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all">
-                Start a prayer
-              </Button>
-            </Link>
-            <Button variant="outline" size="lg" className="h-14 px-8 rounded-full text-lg font-medium border-2">
-              Browse prayers
-            </Button>
+          <div className="max-w-2xl mx-auto w-full mb-6">
+             <form onSubmit={handleStartPrayer} className="flex flex-col sm:flex-row gap-2 w-full">
+                <div className="relative flex-grow">
+                  <Input 
+                    className="h-14 text-lg px-6 rounded-full border-2 shadow-sm focus-visible:ring-0 focus-visible:border-primary" 
+                    placeholder="What do you want to pray for?" 
+                    value={prayerTopic}
+                    onChange={(e) => setPrayerTopic(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" size="lg" className="h-14 px-8 rounded-full text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all shrink-0">
+                  Start a prayer
+                </Button>
+             </form>
           </div>
         </div>
       </div>
