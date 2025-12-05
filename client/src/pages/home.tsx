@@ -28,7 +28,7 @@ export default function Home() {
       <div className="relative bg-background py-20 md:py-24 border-b">
         <div className="container mx-auto px-4 md:px-6 text-center max-w-4xl">
           <h1 className="text-5xl md:text-7xl font-serif font-bold leading-[1.1] tracking-tight mb-6 text-balance">
-            Turn one prayer into hundreds
+            Turn one prayer into thousands
           </h1>
           
           <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
