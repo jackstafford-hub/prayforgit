@@ -50,7 +50,7 @@ const PRAYER_TEMPLATES = [
   (title: string) => `God of all comfort, we stand in agreement today for ${title.toLowerCase()}. We believe that You are able to do immeasurably more than all we ask or imagine. Pour out Your blessing and let Your will be done. We place this in Your hands. Amen.`
 ];
 
-type Step = 'title' | 'story' | 'review' | 'details';
+type Step = 'title' | 'story' | 'review' | 'next-steps' | 'details';
 
 export default function CreatePrayer() {
   const [location, setLocation] = useLocation();
@@ -283,10 +283,49 @@ export default function CreatePrayer() {
                   Back
                 </Button>
                 <Button 
-                  onClick={() => setStep('details')}
+                  onClick={() => setStep('next-steps')}
                   className="flex-1 h-12 text-base font-bold bg-primary hover:bg-primary/90"
                 >
                   Looks Good
+                </Button>
+            </div>
+          </div>
+        );
+
+      case 'next-steps':
+        return (
+          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="space-y-2">
+              <h1 className="font-serif text-3xl font-bold">Your prayer is ready to inspire others.</h1>
+              <p className="text-muted-foreground text-lg">Now:</p>
+            </div>
+
+            <div className="space-y-6">
+              <ol className="list-decimal list-inside space-y-4 text-lg text-foreground/90 pl-1">
+                <li className="pl-2"><span className="font-medium">Log in</span> to keep it saved.</li>
+                <li className="pl-2"><span className="font-medium">Make any final edits</span> or additions.</li>
+                <li className="pl-2"><span className="font-medium">Share it</span> with those who’ll pray alongside you.</li>
+              </ol>
+
+              <div className="p-4 bg-muted/50 rounded-lg border text-sm text-muted-foreground">
+                It will be shown publicly on PrayForChange after it receives 5 prayers.
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+               <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setStep('review')}
+                  className="flex-1 h-12 text-base"
+                >
+                  Back
+                </Button>
+                <Button 
+                  onClick={() => setStep('details')}
+                  className="flex-1 h-12 text-base font-bold bg-primary hover:bg-primary/90"
+                >
+                  Continue
                 </Button>
             </div>
           </div>
