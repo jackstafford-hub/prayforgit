@@ -15,8 +15,40 @@ import { Skeleton } from "@/components/ui/skeleton";
 import gen1 from "@assets/generated_images/abstract_rays_of_light_through_clouds.png";
 import gen2 from "@assets/generated_images/peaceful_calm_water_at_sunrise.png";
 import gen3 from "@assets/generated_images/green_sprout_growing_in_sunlight.png";
+import gen4 from "@assets/generated_images/hopeful_sunrise_over_mountains.png";
+import gen5 from "@assets/generated_images/hands_holding_a_candle_in_darkness.png";
+import gen6 from "@assets/generated_images/group_of_people_holding_hands_in_circle_abstract.png";
 
-const MOCK_IMAGES = [gen1, gen2, gen3];
+const MOCK_IMAGES = [gen1, gen2, gen3, gen4, gen5, gen6];
+
+const STORY_TEMPLATES = [
+  // Template 1: The "Global Movement" angle
+  (title: string, desc: string) => `In today's fast-paced and ever-challenging world, I find myself reflecting on the power of prayer and its profound impact on situations like this. The need for ${title.toLowerCase()} weighs heavily on my heart. The events unfolding can often leave us feeling overwhelmed, anxious, and at times, powerless. However, I firmly believe that prayer has the transformative ability to bring about positive change and foster a sense of peace, hope, and unity.
+
+${desc ? `This request is deeply personal to me. ${desc}\n\n` : ''}Throughout history, countless individuals and communities have turned to prayer in times of crisis and uncertainty, and it has served as a beacon of hope. Whether for guidance, healing, or strength, prayer transcends barriers and brings people together, no matter their faith or background.
+
+I envision a future where we are united through the practice of prayer, leading to enhanced understanding, compassion, and resilience. Encouraging more people to engage in prayer for ${title.toLowerCase()} can inspire hope and action.`,
+
+  // Template 2: The "Spiritual Battle" angle
+  (title: string, desc: string) => `There are moments in life when we realize that our own strength is not enough. Facing the challenge of ${title.toLowerCase()} is one of those moments. It is a situation that calls not just for action, but for spiritual intervention.
+
+${desc ? `My heart is heavy because ${desc}\n\n` : ''}We are told that where two or three are gathered, God is there with them. Today, I am asking you to gather with me in spirit. I am asking you to pause, to breathe, and to lift this cause up to the One who holds the world in His hands.
+
+By joining together in prayer for ${title.toLowerCase()}, we are doing more than just wishing for a better outcome; we are actively inviting God's peace and power into the situation. We are standing in the gap.`,
+
+  // Template 3: The "Community & Compassion" angle
+  (title: string, desc: string) => `Compassion is the thread that binds us all together. When one of us hurts, we all hurt. When one of us hopes, we all hope. Today, I am reaching out to this community to ask for your prayers regarding ${title.toLowerCase()}.
+
+${desc ? `Here is why this matters so much: ${desc}\n\n` : ''}It is easy to feel isolated when facing difficult times, but prayer reminds us that we are never truly alone. Your prayer, no matter how short, is a gift of love. It is a way of saying, "I see you, and I am with you."
+
+Let us surround this situation with a canopy of prayer. Let us believe together for a breakthrough, for healing, and for a resolution that brings peace to everyone involved.`
+];
+
+const PRAYER_TEMPLATES = [
+  (title: string) => `Heavenly Father, we come before You today to lift up this request for ${title.toLowerCase()}. We ask that You would intervene in this situation. Bring Your comfort, Your guidance, and Your healing power. We trust in Your perfect timing and Your unfailing love. In Jesus' name, Amen.`,
+  (title: string) => `Lord, we bring the need for ${title.toLowerCase()} to Your throne of grace. You know every detail and every heart involved. We ask for Your wisdom to prevail and Your peace to surpass all understanding. Surround this situation with Your presence. Amen.`,
+  (title: string) => `God of all comfort, we stand in agreement today for ${title.toLowerCase()}. We believe that You are able to do immeasurably more than all we ask or imagine. Pour out Your blessing and let Your will be done. We place this in Your hands. Amen.`
+];
 
 type Step = 'title' | 'story' | 'review' | 'details';
 
@@ -57,18 +89,12 @@ export default function CreatePrayer() {
     
     const randomImage = MOCK_IMAGES[Math.floor(Math.random() * MOCK_IMAGES.length)];
     
-    // Mock logic to create "content" from input
-    const mockSummary = `In today's fast-paced and ever-challenging world, I find myself reflecting on the power of prayer and its profound impact on situations like this. The need for ${formData.title.toLowerCase()} weighs heavily on my heart. The events unfolding can often leave us feeling overwhelmed, anxious, and at times, powerless. However, I firmly believe that prayer has the transformative ability to bring about positive change and foster a sense of peace, hope, and unity.
+    // Randomly select templates
+    const randomTemplate = STORY_TEMPLATES[Math.floor(Math.random() * STORY_TEMPLATES.length)];
+    const randomPrayer = PRAYER_TEMPLATES[Math.floor(Math.random() * PRAYER_TEMPLATES.length)];
 
-${formData.description ? `This request is deeply personal to me. ${formData.description}\n\n` : ''}Throughout history, countless individuals and communities have turned to prayer in times of crisis and uncertainty, and it has served as a beacon of hope. Whether for guidance, healing, or strength, prayer transcends barriers and brings people together, no matter their faith or background.
-
-I envision a future where we are united through the practice of prayer, leading to enhanced understanding, compassion, and resilience. Encouraging more people to engage in prayer for ${formData.title.toLowerCase()} can inspire hope and action.
-
-I urge you to join me in fostering a movement that places prayer at the heart of our efforts. Together, we can encourage individuals and communities to recognize the power of prayer.
-
-Join me in praying for this cause, and let's hold onto the belief that through our shared faith and conviction, we can indeed change the world for the better. Your support not only amplifies this message but also paves the way for a more compassionate community.`;
-
-    const mockPrayer = `Heavenly Father, we come before You today to lift up this request for ${formData.title.toLowerCase()}. We ask that You would intervene in this situation. Bring Your comfort, Your guidance, and Your healing power. We trust in Your perfect timing and Your unfailing love. In Jesus' name, Amen.`;
+    const mockSummary = randomTemplate(formData.title, formData.description);
+    const mockPrayer = randomPrayer(formData.title);
 
     setFormData(prev => ({
       ...prev,
