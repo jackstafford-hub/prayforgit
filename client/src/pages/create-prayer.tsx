@@ -50,7 +50,7 @@ const PRAYER_TEMPLATES = [
   (title: string) => `God of all comfort, we stand in agreement today for ${title.toLowerCase()}. We believe that You are able to do immeasurably more than all we ask or imagine. Pour out Your blessing and let Your will be done. We place this in Your hands. Amen.`
 ];
 
-type Step = 'title' | 'story' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details' | 'live' | 'share-inner' | 'share-public';
+type Step = 'title' | 'story' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details' | 'live' | 'share-inner' | 'share-public' | 'dashboard-intro';
 
 export default function CreatePrayer() {
   const [location, setLocation] = useLocation();
@@ -672,10 +672,59 @@ export default function CreatePrayer() {
 
             <div className="pt-8">
               <Button 
-                onClick={() => setLocation(`/prayer/${createdPrayerId}`)}
+                onClick={() => setStep('dashboard-intro')}
                 className="w-full max-w-sm h-14 text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl uppercase tracking-wide"
               >
                 Continue
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 'dashboard-intro':
+        const firstName = formData.author.split(' ')[0] || 'Friend';
+        return (
+          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-center py-8">
+            <div className="space-y-4">
+              <h1 className="font-serif text-3xl md:text-4xl font-bold text-balance">That’s it, {firstName}!</h1>
+              <p className="text-xl font-medium text-foreground/80">
+                Your journey towards positive change has just started!
+              </p>
+              <p className="text-lg text-muted-foreground">
+                Soon, you’ll see your first prayers.
+              </p>
+            </div>
+
+            <div className="bg-muted/30 rounded-xl p-8 border max-w-md mx-auto text-left space-y-4">
+               <h3 className="font-serif text-xl font-bold text-center mb-6">Now, explore your prayer dashboard, where you can:</h3>
+               <ul className="space-y-4">
+                  <li className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    </div>
+                    <span className="text-lg">View recent prayers</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    </div>
+                    <span className="text-lg">Get custom tips and content</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    </div>
+                    <span className="text-lg">Send updates to supporters</span>
+                  </li>
+               </ul>
+            </div>
+
+            <div className="pt-4">
+              <Button 
+                onClick={() => setLocation(`/prayer/${createdPrayerId}`)}
+                className="w-full max-w-sm h-14 text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl uppercase tracking-wide"
+              >
+                Go to Dashboard
               </Button>
             </div>
           </div>
