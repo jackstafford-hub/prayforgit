@@ -9,7 +9,7 @@ export function Navbar() {
         <div className="flex items-center gap-6">
           <Link href="/">
             <a className="font-serif text-2xl font-bold tracking-tight hover:opacity-80 transition-opacity">
-              PrayForChange<span className="text-primary">.org</span>
+              <span className="text-primary">Pray</span>ForChange.org
             </a>
           </Link>
           
