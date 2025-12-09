@@ -23,7 +23,15 @@ export async function getPrayers(): Promise<Prayer[]> {
   if (!response.ok) {
     throw new Error('Failed to fetch prayers');
   }
-  return response.json();
+  const data = await response.json();
+  // Convert null to undefined for optional fields
+  return data.map((p: any) => ({
+    ...p,
+    description: p.description ?? undefined,
+    aiSummary: p.aiSummary ?? undefined,
+    recitablePrayer: p.recitablePrayer ?? undefined,
+    imageUrl: p.imageUrl ?? undefined,
+  }));
 }
 
 export async function getPrayerById(id: string): Promise<Prayer> {
@@ -31,7 +39,15 @@ export async function getPrayerById(id: string): Promise<Prayer> {
   if (!response.ok) {
     throw new Error('Failed to fetch prayer');
   }
-  return response.json();
+  const data = await response.json();
+  // Convert null to undefined for optional fields
+  return {
+    ...data,
+    description: data.description ?? undefined,
+    aiSummary: data.aiSummary ?? undefined,
+    recitablePrayer: data.recitablePrayer ?? undefined,
+    imageUrl: data.imageUrl ?? undefined,
+  };
 }
 
 export async function createPrayer(prayer: InsertPrayer): Promise<Prayer> {
