@@ -41,7 +41,7 @@ export default function Home() {
                 <div className="relative flex-grow">
                   <Input 
                     className="h-14 text-lg px-6 rounded-full border-2 shadow-sm focus-visible:ring-0 focus-visible:border-primary" 
-                    placeholder="What do you want the world to pray for?" 
+                    placeholder="What should the world pray for?" 
                     value={prayerTopic}
                     onChange={(e) => setPrayerTopic(e.target.value)}
                   />
