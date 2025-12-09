@@ -2,7 +2,7 @@ import { useRoute, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
-import { ArrowLeft, UserCircle, Flag } from "lucide-react";
+import { ArrowLeft, UserCircle, Flag, Pencil } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -74,9 +74,23 @@ export default function PrayerDetail() {
         <div className="grid lg:grid-cols-[1fr_380px] gap-12">
           {/* Left Column: Content */}
           <div className="space-y-8">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold leading-tight text-foreground text-balance">
-              {prayer.title}
-            </h1>
+            {/* Title Section */}
+            <div className="space-y-4">
+              <div className="flex items-start justify-between gap-4">
+                <h1 className="font-serif text-4xl md:text-5xl font-bold leading-tight text-foreground text-balance">
+                  {prayer.title}
+                </h1>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="shrink-0 gap-2"
+                  data-testid="button-edit-prayer"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Edit
+                </Button>
+              </div>
+            </div>
 
             {/* Hero Image Area */}
             <div className="aspect-video w-full bg-muted rounded-xl overflow-hidden relative shadow-sm">

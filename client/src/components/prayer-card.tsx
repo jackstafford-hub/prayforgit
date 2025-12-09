@@ -1,4 +1,4 @@
-import { Prayer } from "@/lib/store";
+import type { Prayer } from "@shared/schema";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
