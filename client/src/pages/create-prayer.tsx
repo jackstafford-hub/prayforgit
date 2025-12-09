@@ -50,7 +50,7 @@ const PRAYER_TEMPLATES = [
   (title: string) => `God of all comfort, we stand in agreement today for ${title.toLowerCase()}. We believe that You are able to do immeasurably more than all we ask or imagine. Pour out Your blessing and let Your will be done. We place this in Your hands. Amen.`
 ];
 
-type Step = 'title' | 'story' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details' | 'live';
+type Step = 'title' | 'story' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details' | 'live' | 'share-inner';
 
 export default function CreatePrayer() {
   const [location, setLocation] = useLocation();
@@ -563,6 +563,53 @@ export default function CreatePrayer() {
                    Prayers that gather a handful of “amen”s in the first day are far more likely to spread hope and touch hearts.
                  </p>
               </div>
+            </div>
+
+            <div className="pt-8">
+              <Button 
+                onClick={() => setStep('share-inner')}
+                className="w-full max-w-sm h-14 text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl uppercase tracking-wide"
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 'share-inner':
+        return (
+          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-center py-8">
+             <div className="space-y-4">
+              <h1 className="font-serif text-3xl md:text-4xl font-bold text-balance">Begin by inviting those who nurture your spirit.</h1>
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto">
+                Think of the people who quietly hold you in prayer already—parents, close friends, even the neighbour who knows your story. Ask this inner circle to be the first to echo your prayer, lifting it together with you before God.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 max-w-sm mx-auto">
+               <Button variant="outline" className="h-12 text-base gap-2" onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/prayer/${createdPrayerId}`);
+                  toast({ title: "Link copied" });
+               }}>
+                 Copy Link
+               </Button>
+               
+               <a 
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Join me in prayer: ${formData.title}\n${window.location.origin}/prayer/${createdPrayerId}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full"
+                >
+                  <Button variant="outline" className="h-12 text-base gap-2 w-full">
+                    WhatsApp
+                  </Button>
+                </a>
+                
+                <a href={`mailto:?subject=${encodeURIComponent(`Pray with me for ${formData.title}`)}&body=${encodeURIComponent(`Here is a prayer intention I'm supporting:\n\n${formData.title}\n${window.location.origin}/prayer/${createdPrayerId}`)}`} className="w-full">
+                  <Button variant="outline" className="h-12 text-base gap-2 w-full">
+                    Email
+                  </Button>
+                </a>
             </div>
 
             <div className="pt-8">
