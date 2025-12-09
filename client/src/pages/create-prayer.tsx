@@ -50,13 +50,14 @@ const PRAYER_TEMPLATES = [
   (title: string) => `God of all comfort, we stand in agreement today for ${title.toLowerCase()}. We believe that You are able to do immeasurably more than all we ask or imagine. Pour out Your blessing and let Your will be done. We place this in Your hands. Amen.`
 ];
 
-type Step = 'title' | 'story' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details';
+type Step = 'title' | 'story' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details' | 'live';
 
 export default function CreatePrayer() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [createdPrayerId, setCreatedPrayerId] = useState<string | null>(null);
   
   const searchParams = new URLSearchParams(window.location.search);
   const initialTitle = searchParams.get('title') || "";
@@ -126,7 +127,7 @@ export default function CreatePrayer() {
 
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    prayerStore.add({
+    const newPrayer = prayerStore.add({
       title: formData.title,
       description: formData.description,
       author: formData.author || "Anonymous",
@@ -134,6 +135,8 @@ export default function CreatePrayer() {
       aiSummary: formData.aiSummary,
       recitablePrayer: formData.recitablePrayer
     });
+    
+    setCreatedPrayerId(newPrayer.id);
 
     toast({
       title: "Prayer Published",
@@ -141,7 +144,7 @@ export default function CreatePrayer() {
     });
 
     setIsSubmitting(false);
-    setLocation("/");
+    setStep('live');
   };
 
   const handleSocialAuth = async (provider: 'google' | 'facebook') => {
@@ -540,6 +543,36 @@ export default function CreatePrayer() {
                 </Button>
               </div>
             </form>
+          </div>
+        );
+
+      case 'live':
+        return (
+          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-center py-8">
+            <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Sparkles className="w-10 h-10" />
+            </div>
+            
+            <div className="space-y-4">
+              <h1 className="font-serif text-4xl font-bold text-balance">Your prayer request is live!</h1>
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto">
+                Now let’s take a moment to help it flourish. Think of us as your prayer companion — we’ve learned what helps.
+              </p>
+              <div className="p-6 bg-primary/5 rounded-xl border border-primary/10 max-w-lg mx-auto mt-6">
+                 <p className="font-medium text-lg text-primary/90">
+                   Prayers that gather a handful of “amen”s in the first day are far more likely to spread hope and touch hearts.
+                 </p>
+              </div>
+            </div>
+
+            <div className="pt-8">
+              <Button 
+                onClick={() => setLocation(`/prayer/${createdPrayerId}`)}
+                className="w-full max-w-sm h-14 text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl uppercase tracking-wide"
+              >
+                Continue
+              </Button>
+            </div>
           </div>
         );
     }
