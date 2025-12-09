@@ -479,12 +479,17 @@ export default function CreatePrayer() {
 
       case 'details':
         return (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="space-y-2">
-              <h1 className="font-serif text-3xl font-bold">Almost done</h1>
-              <p className="text-muted-foreground text-lg">
-                Who is asking for prayer?
-              </p>
+              <h1 className="font-serif text-3xl font-bold">Your prayer is ready to share with others.</h1>
+            </div>
+
+            <div className="space-y-4">
+               <h3 className="text-lg font-medium">Now:</h3>
+               <ul className="list-decimal list-inside space-y-3 text-lg text-muted-foreground">
+                  <li><span className="text-foreground font-medium">Make any final edits or additions.</span></li>
+                  <li><span className="text-foreground font-medium">Share it</span> with those who’ll pray alongside you.</li>
+               </ul>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -513,21 +518,25 @@ export default function CreatePrayer() {
                 </div>
               </div>
 
+              <div className="p-4 bg-muted/50 rounded-lg text-sm text-muted-foreground text-center">
+                 It will be shown publicly on PrayForChange.org after it receives 5 prayers.
+              </div>
+
               <div className="flex gap-3">
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setStep('review')}
-                  className="flex-1 h-12 text-base"
+                  onClick={() => setStep('notifications')}
+                  className="flex-1 h-12 text-base uppercase font-bold tracking-wide"
                 >
                   Back
                 </Button>
                 <Button 
                   type="submit" 
-                  className="flex-1 h-12 text-base font-bold bg-primary hover:bg-primary/90" 
+                  className="flex-1 h-12 text-base font-bold bg-primary hover:bg-primary/90 uppercase tracking-wide" 
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Publishing..." : "Publish Prayer"}
+                  {isSubmitting ? "Creating..." : "Create Prayer"}
                 </Button>
               </div>
             </form>
