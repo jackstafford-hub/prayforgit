@@ -33,7 +33,7 @@ export default function Home() {
           
           <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
             PrayForChange is the world’s platform for spiritual support. 
-            Share your burden and watch God's people unite.
+            Share your burden and turn one prayer into thousands.
           </p>
           
           <div className="max-w-2xl mx-auto w-full mb-6">
