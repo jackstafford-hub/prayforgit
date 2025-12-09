@@ -50,7 +50,7 @@ const PRAYER_TEMPLATES = [
   (title: string) => `God of all comfort, we stand in agreement today for ${title.toLowerCase()}. We believe that You are able to do immeasurably more than all we ask or imagine. Pour out Your blessing and let Your will be done. We place this in Your hands. Amen.`
 ];
 
-type Step = 'title' | 'story' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details' | 'live' | 'share-inner';
+type Step = 'title' | 'story' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details' | 'live' | 'share-inner' | 'share-public';
 
 export default function CreatePrayer() {
   const [location, setLocation] = useLocation();
@@ -608,6 +608,64 @@ export default function CreatePrayer() {
                 <a href={`mailto:?subject=${encodeURIComponent(`Pray with me for ${formData.title}`)}&body=${encodeURIComponent(`Here is a prayer intention I'm supporting:\n\n${formData.title}\n${window.location.origin}/prayer/${createdPrayerId}`)}`} className="w-full">
                   <Button variant="outline" className="h-12 text-base gap-2 w-full">
                     Email
+                  </Button>
+                </a>
+            </div>
+
+            <div className="pt-8">
+              <Button 
+                onClick={() => setStep('share-public')}
+                className="w-full max-w-sm h-14 text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl uppercase tracking-wide"
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 'share-public':
+        return (
+          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-center py-8">
+             <div className="space-y-4">
+              <h1 className="font-serif text-3xl md:text-4xl font-bold text-balance">Next, it’s time to share publicly</h1>
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto">
+                You’re ready! The most important thing you can do today is share your prayer in relevant online communities.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 max-w-sm mx-auto">
+               <Button variant="outline" className="h-12 text-base gap-2" onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/prayer/${createdPrayerId}`);
+                  toast({ title: "Link copied" });
+               }}>
+                 Copy Link
+               </Button>
+               
+               <a 
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/prayer/${createdPrayerId}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full"
+                >
+                  <Button variant="outline" className="h-12 text-base gap-2 w-full">
+                    <svg className="h-5 w-5 text-[#1877F2] fill-current" viewBox="0 0 24 24">
+                        <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036c-2.148 0-2.797 1.603-2.797 4.16v1.957h5.049l-.65 3.667h-4.399v7.98h-5.012z" />
+                    </svg>
+                    Facebook
+                  </Button>
+                </a>
+                
+                <a 
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Join me in prayer: ${formData.title}`)}&url=${encodeURIComponent(`${window.location.origin}/prayer/${createdPrayerId}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full"
+                >
+                  <Button variant="outline" className="h-12 text-base gap-2 w-full">
+                    <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                    X
                   </Button>
                 </a>
             </div>
