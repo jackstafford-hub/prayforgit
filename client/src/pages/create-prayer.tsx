@@ -50,7 +50,7 @@ const PRAYER_TEMPLATES = [
   (title: string) => `God of all comfort, we stand in agreement today for ${title.toLowerCase()}. We believe that You are able to do immeasurably more than all we ask or imagine. Pour out Your blessing and let Your will be done. We place this in Your hands. Amen.`
 ];
 
-type Step = 'title' | 'story' | 'review' | 'next-steps' | 'auth' | 'details';
+type Step = 'title' | 'story' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details';
 
 export default function CreatePrayer() {
   const [location, setLocation] = useLocation();
@@ -71,6 +71,7 @@ export default function CreatePrayer() {
     recitablePrayer: "",
     imageUrl: ""
   });
+  const [emailUpdates, setEmailUpdates] = useState<boolean | null>(null);
   
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -159,7 +160,7 @@ export default function CreatePrayer() {
     });
     
     setIsSubmitting(false);
-    setStep('details');
+    setStep('notifications');
   };
 
   const renderStep = () => {
@@ -363,7 +364,7 @@ export default function CreatePrayer() {
                  <Input id="email" type="email" placeholder="Email address" className="h-12 text-base" />
                </div>
                <Button 
-                  onClick={() => setStep('details')} 
+                  onClick={() => setStep('notifications')} 
                   className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90"
                 >
                   Continue
@@ -416,6 +417,58 @@ export default function CreatePrayer() {
                <Button 
                   variant="ghost" 
                   onClick={() => setStep('next-steps')}
+                  className="text-muted-foreground"
+                >
+                  Back
+                </Button>
+            </div>
+          </div>
+        );
+
+      case 'notifications':
+        return (
+          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="space-y-2 text-center">
+              <h1 className="font-serif text-3xl font-bold">Would you like to get email updates?</h1>
+              <p className="text-muted-foreground text-lg">
+                Get updates via email on prayers you do and on supporting PrayForChange.org
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div 
+                className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all hover:border-primary/50 ${emailUpdates === true ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'bg-card'}`}
+                onClick={() => setEmailUpdates(true)}
+              >
+                <div className={`w-5 h-5 rounded-full border mr-3 flex items-center justify-center ${emailUpdates === true ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground'}`}>
+                  {emailUpdates === true && <div className="w-2.5 h-2.5 rounded-full bg-white" />}
+                </div>
+                <span className="font-medium">Yes, please</span>
+              </div>
+
+              <div 
+                className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all hover:border-primary/50 ${emailUpdates === false ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'bg-card'}`}
+                onClick={() => setEmailUpdates(false)}
+              >
+                 <div className={`w-5 h-5 rounded-full border mr-3 flex items-center justify-center ${emailUpdates === false ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground'}`}>
+                  {emailUpdates === false && <div className="w-2.5 h-2.5 rounded-full bg-white" />}
+                </div>
+                <span className="font-medium">No, thanks</span>
+              </div>
+            </div>
+
+            <Button 
+              onClick={() => setStep('details')}
+              className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90"
+              disabled={emailUpdates === null}
+            >
+              CONTINUE
+            </Button>
+
+             <div className="flex justify-center pt-2">
+               <Button 
+                  variant="ghost" 
+                  onClick={() => setStep('auth')}
                   className="text-muted-foreground"
                 >
                   Back
