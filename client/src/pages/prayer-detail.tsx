@@ -114,18 +114,25 @@ export default function PrayerDetail() {
               </div>
             </div>
 
-            <div className="prose prose-lg max-w-none text-foreground/80 leading-relaxed whitespace-pre-wrap">
-              {prayer.aiSummary ? (
-                <>
-                  <h3 className="font-serif text-2xl font-bold mb-4 text-foreground">The Issue</h3>
-                  {prayer.aiSummary}
-                </>
-              ) : (
-                prayer.description
-              )}
+            {/* Issue Section - Compact */}
+            <div className="prose max-w-none text-foreground/80 leading-relaxed">
+              <h3 className="font-serif text-xl font-bold mb-3 text-foreground">The Issue</h3>
+              <p className="text-base line-clamp-4">
+                {prayer.aiSummary || prayer.description}
+              </p>
             </div>
+
+            {/* Recitable Prayer Section - Prominent */}
+            {prayer.recitablePrayer && (
+              <div className="bg-muted/30 rounded-xl p-8 border">
+                <h3 className="font-serif text-2xl font-bold mb-6 text-foreground text-center">Prayer to Recite</h3>
+                <div className="prose prose-lg max-w-none text-foreground/90 leading-loose whitespace-pre-wrap italic text-center">
+                  {prayer.recitablePrayer}
+                </div>
+              </div>
+            )}
             
-            <div className="pt-8 flex gap-4 justify-center lg:justify-start">
+            <div className="pt-4 flex gap-4 justify-center lg:justify-start">
                <Button variant="ghost" className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 text-sm">
                  <Flag className="w-4 h-4 mr-2" />
                  Report this policy violation
