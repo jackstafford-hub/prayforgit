@@ -14,7 +14,7 @@ export function Navbar() {
           </Link>
           
           <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-            <Link href="/"><a className="hover:text-foreground transition-colors">Start a prayer</a></Link>
+            <Link href="/how-to-pray"><a className="hover:text-foreground transition-colors">How to pray</a></Link>
             <Link href="/"><a className="hover:text-foreground transition-colors">Browse</a></Link>
           </div>
         </div>
