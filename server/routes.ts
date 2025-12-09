@@ -76,7 +76,7 @@ Focus on: Light, nature, peace, hope, abstract spiritual elements like rays of l
         n: 1,
       });
 
-      const imageUrl = imageResponse.data[0]?.url || "";
+      const imageUrl = imageResponse.data?.[0]?.url || "";
 
       res.json({
         aiSummary,
