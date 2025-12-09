@@ -143,6 +143,25 @@ export default function CreatePrayer() {
     setLocation("/");
   };
 
+  const handleSocialAuth = async (provider: 'google' | 'facebook') => {
+    setIsSubmitting(true);
+    // Simulate auth delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    setFormData(prev => ({
+      ...prev,
+      author: "Alex Smith", // Simulate getting name from provider
+    }));
+    
+    toast({
+      title: `Welcome back, Alex!`,
+      description: `Successfully logged in with ${provider === 'google' ? 'Google' : 'Facebook'}.`,
+    });
+    
+    setIsSubmitting(false);
+    setStep('details');
+  };
+
   const renderStep = () => {
     if (isGenerating) {
       return (
@@ -359,7 +378,7 @@ export default function CreatePrayer() {
                   </div>
                 </div>
 
-               <Button variant="outline" className="w-full h-12 text-base font-medium relative" onClick={() => setStep('details')}>
+               <Button variant="outline" className="w-full h-12 text-base font-medium relative" onClick={() => handleSocialAuth('google')} disabled={isSubmitting}>
                  <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
                     <path
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -378,14 +397,14 @@ export default function CreatePrayer() {
                       fill="#EA4335"
                     />
                   </svg>
-                  Continue with Google
+                  {isSubmitting ? "Connecting..." : "Continue with Google"}
                </Button>
 
-               <Button variant="outline" className="w-full h-12 text-base font-medium relative" onClick={() => setStep('details')}>
+               <Button variant="outline" className="w-full h-12 text-base font-medium relative" onClick={() => handleSocialAuth('facebook')} disabled={isSubmitting}>
                  <svg className="mr-2 h-5 w-5 text-[#1877F2] fill-current" viewBox="0 0 24 24">
                     <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036c-2.148 0-2.797 1.603-2.797 4.16v1.957h5.049l-.65 3.667h-4.399v7.98h-5.012z" />
                  </svg>
-                 Continue with Facebook
+                 {isSubmitting ? "Connecting..." : "Continue with Facebook"}
                </Button>
             </div>
 
