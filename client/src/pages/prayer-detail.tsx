@@ -1,33 +1,65 @@
 import { useRoute, Link } from "wouter";
-import { usePrayer, prayerStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
 import { ArrowLeft, UserCircle, Flag } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import bgTexture from "@assets/generated_images/subtle_warm_paper_texture_background.png";
+import { getPrayerById, incrementPrayerCount } from "@/lib/api";
+import type { Prayer } from "@shared/schema";
 
 export default function PrayerDetail() {
   const [, params] = useRoute("/prayer/:id");
   const id = params?.id || "";
-  const prayer = usePrayer(id);
+  const [prayer, setPrayer] = useState<Prayer | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const [hasPrayed, setHasPrayed] = useState(false);
 
-  if (!prayer) {
-    return <div>Loading...</div>; // Simplified for brevity
+  useEffect(() => {
+    const fetchPrayer = async () => {
+      try {
+        const data = await getPrayerById(id);
+        setPrayer(data);
+      } catch (error) {
+        console.error("Failed to fetch prayer:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (id) {
+      fetchPrayer();
+    }
+  }, [id]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
-  const handlePray = () => {
+  if (!prayer) {
+    return <div>Prayer not found</div>;
+  }
+
+  const handlePray = async () => {
     if (!hasPrayed) {
-      prayerStore.incrementCount(id);
-      setHasPrayed(true);
-      toast({
-        title: "Prayer sent",
-        description: "You have joined in prayer for this cause.",
-      });
+      try {
+        const updated = await incrementPrayerCount(id);
+        setPrayer(updated);
+        setHasPrayed(true);
+        toast({
+          title: "Prayer sent",
+          description: "You have joined in prayer for this cause.",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to record prayer. Please try again.",
+          variant: "destructive"
+        });
+      }
     }
   };
 

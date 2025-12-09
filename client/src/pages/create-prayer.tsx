@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { prayerStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +9,7 @@ import { ArrowLeft, Sparkles, Wand2, RefreshCw } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { generatePrayerContent, createPrayer } from "@/lib/api";
 
 // Import mock generated images
 import gen1 from "@assets/generated_images/abstract_rays_of_light_through_clouds.png";
@@ -86,27 +86,27 @@ export default function CreatePrayer() {
   const generateAIContent = async () => {
     setIsGenerating(true);
     
-    // Simulate AI generation delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const randomImage = MOCK_IMAGES[Math.floor(Math.random() * MOCK_IMAGES.length)];
-    
-    // Randomly select templates
-    const randomTemplate = STORY_TEMPLATES[Math.floor(Math.random() * STORY_TEMPLATES.length)];
-    const randomPrayer = PRAYER_TEMPLATES[Math.floor(Math.random() * PRAYER_TEMPLATES.length)];
-
-    const mockSummary = randomTemplate(formData.title, formData.description);
-    const mockPrayer = randomPrayer(formData.title);
-
-    setFormData(prev => ({
-      ...prev,
-      imageUrl: randomImage,
-      aiSummary: mockSummary,
-      recitablePrayer: mockPrayer
-    }));
-    
-    setIsGenerating(false);
-    setStep('review');
+    try {
+      const result = await generatePrayerContent(formData.title, formData.description);
+      
+      setFormData(prev => ({
+        ...prev,
+        imageUrl: result.imageUrl,
+        aiSummary: result.aiSummary,
+        recitablePrayer: result.recitablePrayer
+      }));
+      
+      setStep('review');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate prayer content. Please try again.",
+        variant: "destructive"
+      });
+      console.error("Error generating AI content:", error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleStoryContinue = (e: React.FormEvent) => {
@@ -125,26 +125,37 @@ export default function CreatePrayer() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      const newPrayer = await createPrayer({
+        title: formData.title,
+        description: formData.description || undefined,
+        author: formData.author || "Anonymous",
+        imageUrl: formData.imageUrl || undefined,
+        aiSummary: formData.aiSummary || undefined,
+        recitablePrayer: formData.recitablePrayer || undefined,
+        count: 1,
+        goal: 100,
+        topic: 'General'
+      });
+      
+      setCreatedPrayerId(newPrayer.id);
 
-    const newPrayer = prayerStore.add({
-      title: formData.title,
-      description: formData.description,
-      author: formData.author || "Anonymous",
-      imageUrl: formData.imageUrl,
-      aiSummary: formData.aiSummary,
-      recitablePrayer: formData.recitablePrayer
-    });
-    
-    setCreatedPrayerId(newPrayer.id);
+      toast({
+        title: "Prayer Published",
+        description: "Your prayer request has been shared with the community.",
+      });
 
-    toast({
-      title: "Prayer Published",
-      description: "Your prayer request has been shared with the community.",
-    });
-
-    setIsSubmitting(false);
-    setStep('live');
+      setStep('live');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to publish prayer. Please try again.",
+        variant: "destructive"
+      });
+      console.error("Error creating prayer:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSocialAuth = async (provider: 'google' | 'facebook') => {

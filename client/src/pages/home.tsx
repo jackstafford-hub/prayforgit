@@ -1,15 +1,32 @@
-import { usePrayers } from "@/lib/store";
 import { PrayerCard } from "@/components/prayer-card";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getPrayers } from "@/lib/api";
+import type { Prayer } from "@shared/schema";
 
 export default function Home() {
-  const prayers = usePrayers();
+  const [prayers, setPrayers] = useState<Prayer[]>([]);
   const [, setLocation] = useLocation();
   const [prayerTopic, setPrayerTopic] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPrayers = async () => {
+      try {
+        const data = await getPrayers();
+        setPrayers(data);
+      } catch (error) {
+        console.error("Failed to fetch prayers:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchPrayers();
+  }, []);
 
   const handleStartPrayer = (e: React.FormEvent) => {
     e.preventDefault();
