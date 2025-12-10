@@ -114,12 +114,12 @@ export default function PrayerDetail() {
               </div>
             </div>
 
-            {/* Issue Section - Compact */}
-            <div className="prose max-w-none text-foreground/80 leading-relaxed">
-              <h3 className="font-serif text-xl font-bold mb-3 text-foreground">The Issue</h3>
-              <p className="text-base line-clamp-4">
+            {/* Issue Section - Full Content */}
+            <div className="prose prose-lg max-w-none text-foreground/80 leading-relaxed">
+              <h3 className="font-serif text-2xl font-bold mb-4 text-foreground">The Issue</h3>
+              <div className="whitespace-pre-wrap text-base leading-7">
                 {prayer.aiSummary || prayer.description}
-              </p>
+              </div>
             </div>
 
             {/* Recitable Prayer Section - Prominent */}
