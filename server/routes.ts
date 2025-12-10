@@ -62,19 +62,30 @@ The prayer should:
 
       const recitablePrayer = prayerResponse.choices[0].message.content || "";
 
-      // Generate image using DALL-E with HD quality
-      const imagePrompt = `Create a breathtaking, emotionally moving image for a prayer about: "${title}". 
-Style: Cinematic quality, dramatic golden hour lighting, rich warm tones mixed with ethereal blues and soft whites.
-Mood: Deeply hopeful, spiritually uplifting, peaceful yet powerful.
-Visual elements: Beautiful natural landscapes, rays of divine light breaking through clouds, serene waters reflecting sky, majestic mountains at dawn, or gentle meadows bathed in golden sunlight.
-Avoid: Any text, letters, words, people's faces, hands in prayer pose, crosses, or specific religious symbols.
-Quality: Ultra high detail, professional photography quality, emotionally evocative composition.`;
+      // Generate image using DALL-E based on the story content
+      // Extract key themes from the AI summary to create varied imagery
+      const summaryLower = aiSummary.toLowerCase();
+      let imagePrompt: string;
+      
+      if (summaryLower.includes('cancer') || summaryLower.includes('illness') || summaryLower.includes('hospital') || summaryLower.includes('health') || summaryLower.includes('healing')) {
+        imagePrompt = `An image symbolizing healing and hope: gentle sunlight streaming through a window onto fresh flowers, a butterfly emerging from a cocoon, or delicate light breaking through storm clouds. Style: soft, warm, comforting, ethereal. Avoid: Any text, faces, medical imagery.`;
+      } else if (summaryLower.includes('marriage') || summaryLower.includes('family') || summaryLower.includes('children') || summaryLower.includes('relationship') || summaryLower.includes('reconciliation')) {
+        imagePrompt = `An image symbolizing family love and restoration: two trees with intertwined branches, a broken heart being mended with golden light, or two birds building a nest together. Style: warm, emotional, romantic sunset lighting. Avoid: Any text, faces, specific people.`;
+      } else if (summaryLower.includes('job') || summaryLower.includes('employment') || summaryLower.includes('work') || summaryLower.includes('career') || summaryLower.includes('interview')) {
+        imagePrompt = `An image symbolizing breakthrough and new opportunities: a grand door opening to brilliant golden light, seeds sprouting through cracked concrete, or a winding path through a forest leading to a sunlit clearing. Style: hopeful, triumphant, inspiring. Avoid: Any text, faces, office imagery.`;
+      } else if (summaryLower.includes('peace') || summaryLower.includes('war') || summaryLower.includes('conflict') || summaryLower.includes('violence')) {
+        imagePrompt = `A hopeful image symbolizing peace and unity: a beautiful white dove carrying an olive branch over calm waters at sunrise, or hands of different shades clasped together in silhouette against a golden sky. Style: peaceful, hopeful, dawn lighting. Avoid: Any text, specific faces, violence.`;
+      } else if (summaryLower.includes('grief') || summaryLower.includes('loss') || summaryLower.includes('death') || summaryLower.includes('passed away')) {
+        imagePrompt = `An image symbolizing comfort and eternal hope: a single candle flame in soft darkness, a butterfly landing on a memorial flower, or sunlight breaking through clouds to illuminate a peaceful meadow. Style: serene, comforting, gentle. Avoid: Any text, faces, graves.`;
+      } else {
+        imagePrompt = `Create a unique, emotionally moving image with warm hopeful lighting. Visual elements: nature scenes, rays of light, calm water, or symbolic imagery of hope and transformation. Style: evocative, beautiful, peaceful. Avoid: Any text, faces, religious symbols.`;
+      }
 
       const imageResponse = await openai.images.generate({
         model: "dall-e-3",
         prompt: imagePrompt,
         size: "1792x1024",
-        quality: "hd",
+        quality: "standard",
         n: 1,
       });
 
@@ -156,18 +167,27 @@ Quality: Ultra high detail, professional photography quality, emotionally evocat
       
       for (const prayer of allPrayers) {
         try {
-          const imagePrompt = `Create a breathtaking, emotionally moving image for a prayer about: "${prayer.title}". 
-Style: Cinematic quality, dramatic golden hour lighting, rich warm tones mixed with ethereal blues and soft whites.
-Mood: Deeply hopeful, spiritually uplifting, peaceful yet powerful.
-Visual elements: Beautiful natural landscapes, rays of divine light breaking through clouds, serene waters reflecting sky, majestic mountains at dawn, or gentle meadows bathed in golden sunlight.
-Avoid: Any text, letters, words, people's faces, hands in prayer pose, crosses, or specific religious symbols.
-Quality: Ultra high detail, professional photography quality, emotionally evocative composition.`;
+          // Create topic-specific prompts for variety
+          let imagePrompt: string;
+          const topic = prayer.topic?.toLowerCase() || '';
+          
+          if (topic.includes('peace') || topic.includes('world')) {
+            imagePrompt = `A hopeful image symbolizing world peace and unity: a beautiful dove flying over a calm ocean at sunrise, olive branches, or diverse hands joining together in silhouette. Style: peaceful, hopeful, golden morning light. Avoid: Any text, faces, violence, weapons, specific locations.`;
+          } else if (topic.includes('health') || topic.includes('healing')) {
+            imagePrompt = `An image symbolizing healing and hope: gentle sunlight streaming through a hospital window onto flowers, a butterfly emerging from a cocoon, or hands gently cradling a glowing light. Style: soft, warm, comforting. Avoid: Any text, faces, medical equipment.`;
+          } else if (topic.includes('family') || topic.includes('marriage')) {
+            imagePrompt = `An image symbolizing family reconciliation and love: two trees with intertwined roots, a broken bridge being mended by golden light, or two birds returning to the same nest. Style: warm, emotional, romantic lighting. Avoid: Any text, faces, specific people.`;
+          } else if (topic.includes('employment') || topic.includes('job')) {
+            imagePrompt = `An image symbolizing breakthrough and new opportunities: a door opening to brilliant light, seeds sprouting through concrete, or a path emerging through a dark forest into sunlight. Style: hopeful, triumphant, golden hour lighting. Avoid: Any text, faces, office settings.`;
+          } else {
+            imagePrompt = `Create a hopeful, peaceful image with warm golden lighting. Include nature elements like sunlight, flowers, or calm water. Style: evocative, emotional, beautiful. Avoid: Any text, faces, religious symbols.`;
+          }
 
           const imageResponse = await openai.images.generate({
             model: "dall-e-3",
             prompt: imagePrompt,
             size: "1792x1024",
-            quality: "hd",
+            quality: "standard",
             n: 1,
           });
 
