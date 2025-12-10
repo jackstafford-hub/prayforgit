@@ -208,7 +208,7 @@ export default function CompleteSupport() {
               ) : (
                 <Heart className="w-5 h-5 mr-2" />
               )}
-              Yes, I'll invite others to pray
+              Yes, I'll make a donation
             </Button>
 
             <Button
@@ -218,7 +218,7 @@ export default function CompleteSupport() {
               data-testid="button-share"
             >
               <Share2 className="w-5 h-5 mr-2" />
-              No, I'll share instead
+              No, I'll invite others to pray instead
             </Button>
           </div>
 
