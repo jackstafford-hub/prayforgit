@@ -113,6 +113,10 @@ export default function PrayerDetail() {
             {prayer.recitablePrayer && (
               <div className="bg-muted/30 rounded-xl p-8 border">
                 <h3 className="font-serif text-2xl font-bold mb-6 text-foreground text-center">Prayer to Recite</h3>
+                <div className="text-sm text-muted-foreground mb-6 p-4 bg-background/50 rounded-lg border border-dashed">
+                  <p className="font-medium mb-2">Instructions for Prayer:</p>
+                  <p>Breathe slowly and deeply, and visualise white light descending through you. Let love and compassion fill your whole being. Raise your hands and send that loving white light from your palms and heart center to the focal point of your prayer.</p>
+                </div>
                 <div className="prose prose-lg max-w-none text-foreground/90 leading-loose whitespace-pre-wrap italic text-center">
                   {prayer.recitablePrayer}
                 </div>
