@@ -1,12 +1,11 @@
 import { db } from "./db";
-import { type User, type InsertUser, type Prayer, type InsertPrayer, users, prayers } from "@shared/schema";
+import { type User, type UpsertUser, type Prayer, type InsertPrayer, users, prayers } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
-  // User methods
+  // User methods (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
   
   // Prayer methods
   getPrayers(): Promise<Prayer[]>;
@@ -17,19 +16,24 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // User methods
+  // User methods (required for Replit Auth)
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
     return user;
   }
 
@@ -55,7 +59,6 @@ export class DatabaseStorage implements IStorage {
     const newCount = prayer.count + 1;
     let newGoal = prayer.goal;
     
-    // Dynamic goal logic (like Change.org)
     if (newCount >= prayer.goal) {
       newGoal = prayer.goal * 2;
     }
