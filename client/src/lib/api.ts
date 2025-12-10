@@ -1,21 +1,36 @@
 import type { Prayer, InsertPrayer } from "@shared/schema";
 
 export async function generatePrayerContent(title: string, description?: string) {
-  const response = await fetch('/api/generate-prayer', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, description }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 120000);
+  
+  try {
+    const response = await fetch('/api/generate-prayer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description }),
+      signal: controller.signal,
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to generate prayer content');
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.details || errorData.error || 'Failed to generate prayer content');
+    }
+
+    return response.json() as Promise<{
+      aiSummary: string;
+      recitablePrayer: string;
+      imageUrl: string;
+    }>;
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.');
+    }
+    throw error;
   }
-
-  return response.json() as Promise<{
-    aiSummary: string;
-    recitablePrayer: string;
-    imageUrl: string;
-  }>;
 }
 
 export async function getPrayers(): Promise<Prayer[]> {
