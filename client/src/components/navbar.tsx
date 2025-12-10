@@ -77,7 +77,7 @@ export function Navbar() {
           ) : (
             <Button 
               variant="ghost" 
-              className="hidden md:flex gap-2 text-sm font-medium"
+              className="hidden md:flex gap-2 text-sm font-medium cursor-pointer"
               onClick={handleLogin}
               data-testid="button-login"
             >
