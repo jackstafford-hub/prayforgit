@@ -13,6 +13,7 @@ export interface IStorage {
   getPrayerById(id: string): Promise<Prayer | undefined>;
   createPrayer(prayer: InsertPrayer): Promise<Prayer>;
   incrementPrayerCount(id: string): Promise<Prayer | undefined>;
+  updatePrayerImage(id: string, imageUrl: string): Promise<Prayer | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -62,6 +63,16 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db
       .update(prayers)
       .set({ count: newCount, goal: newGoal })
+      .where(eq(prayers.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async updatePrayerImage(id: string, imageUrl: string): Promise<Prayer | undefined> {
+    const [updated] = await db
+      .update(prayers)
+      .set({ imageUrl })
       .where(eq(prayers.id, id))
       .returning();
     

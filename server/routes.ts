@@ -62,17 +62,19 @@ The prayer should:
 
       const recitablePrayer = prayerResponse.choices[0].message.content || "";
 
-      // Generate image using DALL-E
-      const imagePrompt = `A peaceful, hopeful, and inspiring abstract image representing prayer and spiritual support for: ${title}. 
-Style: Soft, warm lighting, gentle colors (blues, golds, whites), peaceful atmosphere. 
-Avoid: Text, people's faces, specific religious symbols. 
-Focus on: Light, nature, peace, hope, abstract spiritual elements like rays of light, calm water, or gentle landscapes.`;
+      // Generate image using DALL-E with HD quality
+      const imagePrompt = `Create a breathtaking, emotionally moving image for a prayer about: "${title}". 
+Style: Cinematic quality, dramatic golden hour lighting, rich warm tones mixed with ethereal blues and soft whites.
+Mood: Deeply hopeful, spiritually uplifting, peaceful yet powerful.
+Visual elements: Beautiful natural landscapes, rays of divine light breaking through clouds, serene waters reflecting sky, majestic mountains at dawn, or gentle meadows bathed in golden sunlight.
+Avoid: Any text, letters, words, people's faces, hands in prayer pose, crosses, or specific religious symbols.
+Quality: Ultra high detail, professional photography quality, emotionally evocative composition.`;
 
       const imageResponse = await openai.images.generate({
         model: "dall-e-3",
         prompt: imagePrompt,
         size: "1792x1024",
-        quality: "standard",
+        quality: "hd",
         n: 1,
       });
 
@@ -143,6 +145,47 @@ Focus on: Light, nature, peace, hope, abstract spiritual elements like rays of l
     } catch (error: any) {
       console.error("Error incrementing prayer count:", error);
       res.status(500).json({ error: "Failed to increment prayer count" });
+    }
+  });
+
+  // Regenerate images for all prayers (admin endpoint)
+  app.post("/api/admin/regenerate-images", async (req, res) => {
+    try {
+      const allPrayers = await storage.getPrayers();
+      const results = [];
+      
+      for (const prayer of allPrayers) {
+        try {
+          const imagePrompt = `Create a breathtaking, emotionally moving image for a prayer about: "${prayer.title}". 
+Style: Cinematic quality, dramatic golden hour lighting, rich warm tones mixed with ethereal blues and soft whites.
+Mood: Deeply hopeful, spiritually uplifting, peaceful yet powerful.
+Visual elements: Beautiful natural landscapes, rays of divine light breaking through clouds, serene waters reflecting sky, majestic mountains at dawn, or gentle meadows bathed in golden sunlight.
+Avoid: Any text, letters, words, people's faces, hands in prayer pose, crosses, or specific religious symbols.
+Quality: Ultra high detail, professional photography quality, emotionally evocative composition.`;
+
+          const imageResponse = await openai.images.generate({
+            model: "dall-e-3",
+            prompt: imagePrompt,
+            size: "1792x1024",
+            quality: "hd",
+            n: 1,
+          });
+
+          const newImageUrl = imageResponse.data?.[0]?.url || "";
+          
+          if (newImageUrl) {
+            await storage.updatePrayerImage(prayer.id, newImageUrl);
+            results.push({ id: prayer.id, title: prayer.title, status: "success" });
+          }
+        } catch (imgError: any) {
+          results.push({ id: prayer.id, title: prayer.title, status: "failed", error: imgError.message });
+        }
+      }
+      
+      res.json({ message: "Image regeneration complete", results });
+    } catch (error: any) {
+      console.error("Error regenerating images:", error);
+      res.status(500).json({ error: "Failed to regenerate images" });
     }
   });
 
