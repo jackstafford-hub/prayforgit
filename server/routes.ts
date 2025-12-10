@@ -5,6 +5,7 @@ import { insertPrayerSchema } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -175,6 +176,67 @@ The prayer should:
     } catch (error: any) {
       console.error("Error incrementing prayer count:", error);
       res.status(500).json({ error: "Failed to increment prayer count" });
+    }
+  });
+
+  // Create donation checkout session
+  app.post("/api/create-donation-session", async (req, res) => {
+    try {
+      const { prayerId, amount = 100 } = req.body;
+      
+      if (!prayerId) {
+        return res.status(400).json({ error: "Prayer ID is required" });
+      }
+
+      const prayer = await storage.getPrayerById(prayerId);
+      if (!prayer) {
+        return res.status(404).json({ error: "Prayer not found" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const replitDomain = process.env.REPLIT_DOMAINS?.split(',')[0];
+      const baseUrl = replitDomain 
+        ? `https://${replitDomain}` 
+        : `${req.protocol}://${req.get('host')}`;
+      
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'eur',
+              product_data: {
+                name: 'Support PrayForChange',
+                description: `Help spread the prayer: "${prayer.title}"`,
+              },
+              unit_amount: amount,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${baseUrl}/prayer/${prayerId}?donated=true`,
+        cancel_url: `${baseUrl}/support/${prayerId}`,
+        metadata: {
+          prayerId,
+        },
+      });
+
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error("Error creating donation session:", error);
+      res.status(500).json({ error: "Failed to create donation session" });
+    }
+  });
+
+  // Get Stripe publishable key
+  app.get("/api/stripe/publishable-key", async (_req, res) => {
+    try {
+      const key = await getStripePublishableKey();
+      res.json({ publishableKey: key });
+    } catch (error: any) {
+      console.error("Error getting Stripe key:", error);
+      res.status(500).json({ error: "Failed to get payment configuration" });
     }
   });
 

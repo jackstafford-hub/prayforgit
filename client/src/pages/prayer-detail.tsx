@@ -1,4 +1,4 @@
-import { useRoute, Link } from "wouter";
+import { useRoute, Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
@@ -7,11 +7,12 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import bgTexture from "@assets/generated_images/subtle_warm_paper_texture_background.png";
-import { getPrayerById, incrementPrayerCount } from "@/lib/api";
+import { getPrayerById } from "@/lib/api";
 import type { Prayer } from "@shared/schema";
 
 export default function PrayerDetail() {
   const [, params] = useRoute("/prayer/:id");
+  const [, navigate] = useLocation();
   const id = params?.id || "";
   const [prayer, setPrayer] = useState<Prayer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,23 +44,9 @@ export default function PrayerDetail() {
     return <div>Prayer not found</div>;
   }
 
-  const handlePray = async () => {
+  const handlePray = () => {
     if (!hasPrayed) {
-      try {
-        const updated = await incrementPrayerCount(id);
-        setPrayer(updated);
-        setHasPrayed(true);
-        toast({
-          title: "Prayer sent",
-          description: "You have joined in prayer for this cause.",
-        });
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to record prayer. Please try again.",
-          variant: "destructive"
-        });
-      }
+      navigate(`/support/${id}`);
     }
   };
 
