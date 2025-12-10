@@ -31,7 +31,8 @@ async function initStripe() {
   const databaseUrl = process.env.DATABASE_URL;
 
   if (!databaseUrl) {
-    throw new Error('DATABASE_URL environment variable is required for Stripe integration.');
+    console.warn('DATABASE_URL not set, skipping Stripe initialization');
+    return;
   }
 
   try {
@@ -42,7 +43,12 @@ async function initStripe() {
     const stripeSync = await getStripeSync();
 
     console.log('Setting up managed webhook...');
-    const webhookBaseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+    const replitDomain = process.env.REPLIT_DOMAINS?.split(',')[0];
+    if (!replitDomain) {
+      console.warn('REPLIT_DOMAINS not set, skipping webhook setup');
+      return;
+    }
+    const webhookBaseUrl = `https://${replitDomain}`;
     const { webhook, uuid } = await stripeSync.findOrCreateManagedWebhook(
       `${webhookBaseUrl}/api/stripe/webhook`,
       {
@@ -62,14 +68,14 @@ async function initStripe() {
       });
   } catch (error) {
     console.error('Failed to initialize Stripe:', error);
-    throw error;
   }
 }
 
 (async () => {
-  await seedDatabase();
-  await initStripe();
-
+  // Start server immediately to avoid crash loop detection
+  const port = parseInt(process.env.PORT || "5000", 10);
+  
+  // Register webhook route first (before json middleware)
   app.post(
     '/api/stripe/webhook/:uuid',
     express.raw({ type: 'application/json' }),
@@ -152,7 +158,7 @@ async function initStripe() {
     await setupVite(httpServer, app);
   }
 
-  const port = parseInt(process.env.PORT || "5000", 10);
+  // Start server immediately
   httpServer.listen(
     {
       port,
@@ -161,6 +167,21 @@ async function initStripe() {
     },
     () => {
       log(`serving on port ${port}`);
+      
+      // Initialize database and Stripe in background after server starts
+      (async () => {
+        try {
+          await seedDatabase();
+        } catch (error) {
+          console.error('Database seeding failed:', error);
+        }
+        
+        try {
+          await initStripe();
+        } catch (error) {
+          console.error('Stripe initialization failed:', error);
+        }
+      })();
     },
   );
 })();
