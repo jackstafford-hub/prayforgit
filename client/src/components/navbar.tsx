@@ -1,6 +1,6 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, UserCircle, LogOut } from "lucide-react";
+import { Search, Menu, UserCircle, LogOut, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import type { User } from "@shared/schema";
 import {
@@ -9,10 +9,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { useState } from "react";
 
 export function Navbar() {
   const { user: authUser, isAuthenticated, isLoading } = useAuth();
   const user = authUser as User | null;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [, navigate] = useLocation();
 
   const handleLogin = () => {
     window.location.href = "/api/login";
@@ -85,9 +95,91 @@ export function Navbar() {
             </Button>
           )}
           
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="w-5 h-5" />
-          </Button>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden cursor-pointer" data-testid="button-mobile-menu">
+                <Menu className="w-5 h-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+              <SheetHeader>
+                <SheetTitle className="font-serif text-xl">
+                  <span className="text-primary">Pray</span>ForChange.org
+                </SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-4 mt-8">
+                <Button 
+                  variant="ghost" 
+                  className="justify-start text-base cursor-pointer"
+                  onClick={() => { navigate("/"); setMobileMenuOpen(false); }}
+                  data-testid="link-mobile-home"
+                >
+                  Home
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="justify-start text-base cursor-pointer"
+                  onClick={() => { navigate("/how-to-pray"); setMobileMenuOpen(false); }}
+                  data-testid="link-mobile-how-to-pray"
+                >
+                  How to pray
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="justify-start text-base cursor-pointer"
+                  onClick={() => { navigate("/browse"); setMobileMenuOpen(false); }}
+                  data-testid="link-mobile-browse"
+                >
+                  Browse
+                </Button>
+                <Button 
+                  variant="default" 
+                  className="justify-center text-base cursor-pointer mt-4"
+                  onClick={() => { navigate("/create"); setMobileMenuOpen(false); }}
+                  data-testid="link-mobile-create"
+                >
+                  Start a prayer
+                </Button>
+                
+                <div className="border-t pt-4 mt-4">
+                  {isAuthenticated && user ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-3 px-4 py-2">
+                        {user.profileImageUrl ? (
+                          <img 
+                            src={user.profileImageUrl} 
+                            alt="Profile" 
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <UserCircle className="w-10 h-10 text-muted-foreground" />
+                        )}
+                        <span className="font-medium">{user.firstName || user.email || 'User'}</span>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        className="justify-start text-base text-destructive cursor-pointer"
+                        onClick={handleLogout}
+                        data-testid="button-mobile-logout"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Log out
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-center text-base cursor-pointer"
+                      onClick={handleLogin}
+                      data-testid="button-mobile-login"
+                    >
+                      Log in
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </nav>
