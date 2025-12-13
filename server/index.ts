@@ -28,7 +28,7 @@ export function log(message: string, source = "express") {
 }
 
 async function initStripe() {
-  const databaseUrl = process.env.DATABASE_URL;
+  const { databaseUrl } = await import('./db');
 
   if (!databaseUrl) {
     console.warn('DATABASE_URL not set, skipping Stripe initialization');
