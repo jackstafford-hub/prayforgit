@@ -14,7 +14,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { useState } from "react";
 
@@ -95,12 +94,17 @@ export function Navbar() {
             </Button>
           )}
           
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden cursor-pointer touch-manipulation" 
+            onClick={() => setMobileMenuOpen(true)}
+            data-testid="button-mobile-menu"
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+          
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden cursor-pointer" data-testid="button-mobile-menu">
-                <Menu className="w-5 h-5" />
-              </Button>
-            </SheetTrigger>
             <SheetContent side="right" className="w-[280px] sm:w-[320px]">
               <SheetHeader>
                 <SheetTitle className="font-serif text-xl">
