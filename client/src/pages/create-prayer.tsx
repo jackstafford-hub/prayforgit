@@ -78,6 +78,8 @@ export default function CreatePrayer() {
   const [isRegeneratingIssue, setIsRegeneratingIssue] = useState(false);
   const [isRegeneratingPrayer, setIsRegeneratingPrayer] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [originalIssue, setOriginalIssue] = useState("");
+  const [originalPrayer, setOriginalPrayer] = useState("");
   
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -112,6 +114,70 @@ export default function CreatePrayer() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const regenerateIssue = async () => {
+    setIsRegeneratingIssue(true);
+    try {
+      const result = await generatePrayerContent(formData.title, formData.description);
+      setFormData(prev => ({ ...prev, aiSummary: result.aiSummary }));
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to regenerate the story.", variant: "destructive" });
+    } finally {
+      setIsRegeneratingIssue(false);
+    }
+  };
+
+  const regeneratePrayer = async () => {
+    setIsRegeneratingPrayer(true);
+    try {
+      const result = await generatePrayerContent(formData.title, formData.description);
+      setFormData(prev => ({ ...prev, recitablePrayer: result.recitablePrayer }));
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to regenerate the prayer.", variant: "destructive" });
+    } finally {
+      setIsRegeneratingPrayer(false);
+    }
+  };
+
+  const regenerateImage = async () => {
+    setIsGeneratingImage(true);
+    try {
+      const result = await generateImage(formData.title, formData.aiSummary);
+      setFormData(prev => ({ ...prev, imageUrl: result.imageUrl }));
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to regenerate image.", variant: "destructive" });
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  const startEditingIssue = () => {
+    setOriginalIssue(formData.aiSummary);
+    setIsEditingIssue(true);
+  };
+
+  const confirmIssueEdit = () => {
+    setIsEditingIssue(false);
+  };
+
+  const cancelIssueEdit = () => {
+    setFormData(prev => ({ ...prev, aiSummary: originalIssue }));
+    setIsEditingIssue(false);
+  };
+
+  const startEditingPrayer = () => {
+    setOriginalPrayer(formData.recitablePrayer);
+    setIsEditingPrayer(true);
+  };
+
+  const confirmPrayerEdit = () => {
+    setIsEditingPrayer(false);
+  };
+
+  const cancelPrayerEdit = () => {
+    setFormData(prev => ({ ...prev, recitablePrayer: originalPrayer }));
+    setIsEditingPrayer(false);
   };
 
   const handleStoryContinue = (e: React.FormEvent) => {
@@ -283,31 +349,118 @@ export default function CreatePrayer() {
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Generated Header Image</Label>
                 <div className="aspect-video w-full rounded-xl overflow-hidden relative shadow-md group">
-                   <img src={formData.imageUrl} alt="Generated header" className="w-full h-full object-cover" />
-                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="secondary" size="sm" onClick={generateAIContent} className="gap-2">
-                        <RefreshCw className="w-4 h-4" /> Regenerate
-                      </Button>
-                   </div>
+                   {isGeneratingImage ? (
+                     <div className="w-full h-full bg-muted flex items-center justify-center">
+                       <div className="text-center space-y-2">
+                         <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
+                         <p className="text-sm text-muted-foreground">Generating image...</p>
+                       </div>
+                     </div>
+                   ) : (
+                     <>
+                       <img src={formData.imageUrl} alt="Generated header" className="w-full h-full object-cover" />
+                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button variant="secondary" size="sm" onClick={regenerateImage} className="gap-2">
+                            <RefreshCw className="w-4 h-4" /> Regenerate
+                          </Button>
+                       </div>
+                     </>
+                   )}
                 </div>
               </div>
 
               {/* B) Summary */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">The Story</Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">The Story</Label>
+                  <div className="flex gap-2">
+                    {isEditingIssue ? (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={confirmIssueEdit} className="h-8 px-2">
+                          <Check className="w-4 h-4 text-green-600" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={cancelIssueEdit} className="h-8 px-2">
+                          <X className="w-4 h-4 text-red-600" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={startEditingIssue} className="h-8 px-2 gap-1 text-muted-foreground hover:text-foreground">
+                          <Pencil className="w-3.5 h-3.5" /> Edit
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={regenerateIssue} 
+                          disabled={isRegeneratingIssue}
+                          className="h-8 px-2 gap-1 text-muted-foreground hover:text-foreground"
+                        >
+                          {isRegeneratingIssue ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                          Regenerate
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
                 <div className="p-6 bg-muted/30 rounded-lg border">
                   <h3 className="font-serif text-xl font-bold mb-4">The Issue</h3>
-                  <p className="text-foreground/90 leading-relaxed whitespace-pre-wrap">{formData.aiSummary}</p>
+                  {isEditingIssue ? (
+                    <Textarea
+                      value={formData.aiSummary}
+                      onChange={e => setFormData(prev => ({ ...prev, aiSummary: e.target.value }))}
+                      className="min-h-[200px] text-base resize-none bg-background"
+                    />
+                  ) : (
+                    <p className="text-foreground/90 leading-relaxed whitespace-pre-wrap">{formData.aiSummary}</p>
+                  )}
                 </div>
               </div>
 
               {/* C) Prayer to Recite */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Community Prayer</Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Community Prayer</Label>
+                  <div className="flex gap-2">
+                    {isEditingPrayer ? (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={confirmPrayerEdit} className="h-8 px-2">
+                          <Check className="w-4 h-4 text-green-600" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={cancelPrayerEdit} className="h-8 px-2">
+                          <X className="w-4 h-4 text-red-600" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={startEditingPrayer} className="h-8 px-2 gap-1 text-muted-foreground hover:text-foreground">
+                          <Pencil className="w-3.5 h-3.5" /> Edit
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={regeneratePrayer} 
+                          disabled={isRegeneratingPrayer}
+                          className="h-8 px-2 gap-1 text-muted-foreground hover:text-foreground"
+                        >
+                          {isRegeneratingPrayer ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                          Regenerate
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
                 <div className="p-6 bg-primary/5 rounded-lg border border-primary/10">
-                   <p className="font-serif text-lg italic leading-relaxed text-primary/90">
-                     "{formData.recitablePrayer}"
-                   </p>
+                   {isEditingPrayer ? (
+                     <Textarea
+                       value={formData.recitablePrayer}
+                       onChange={e => setFormData(prev => ({ ...prev, recitablePrayer: e.target.value }))}
+                       className="min-h-[120px] text-base resize-none bg-background font-serif italic"
+                     />
+                   ) : (
+                     <p className="font-serif text-lg italic leading-relaxed text-primary/90">
+                       "{formData.recitablePrayer}"
+                     </p>
+                   )}
                 </div>
               </div>
             </div>
