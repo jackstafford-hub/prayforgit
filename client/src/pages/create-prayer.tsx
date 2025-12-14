@@ -5,11 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Sparkles, Wand2, RefreshCw } from "lucide-react";
+import { ArrowLeft, Sparkles, Wand2, RefreshCw, Pencil, Check, X, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { generatePrayerContent, createPrayer } from "@/lib/api";
+import { generatePrayerContent, createPrayer, generateImage } from "@/lib/api";
 
 // Import mock generated images
 import gen1 from "@assets/generated_images/abstract_rays_of_light_through_clouds.png";
@@ -73,6 +73,11 @@ export default function CreatePrayer() {
     imageUrl: ""
   });
   const [emailUpdates, setEmailUpdates] = useState<boolean | null>(null);
+  const [isEditingIssue, setIsEditingIssue] = useState(false);
+  const [isEditingPrayer, setIsEditingPrayer] = useState(false);
+  const [isRegeneratingIssue, setIsRegeneratingIssue] = useState(false);
+  const [isRegeneratingPrayer, setIsRegeneratingPrayer] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

@@ -34,7 +34,7 @@ export async function registerRoutes(
     }
   });
 
-  // Generate prayer content using OpenAI
+  // Generate prayer content using OpenAI (text only - fast)
   app.post("/api/generate-prayer", async (req, res) => {
     try {
       const { title, description } = req.body;
@@ -43,7 +43,7 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Title is required" });
       }
 
-      // Generate AI summary using GPT
+      // Generate AI summary and prayer in parallel
       const summaryPrompt = `You are writing a heartfelt prayer request story for a platform similar to Change.org but for prayers.
 
 Title: ${title}
@@ -57,15 +57,6 @@ Write a compelling 3-4 paragraph story that:
 
 Write in first person. Be compassionate, authentic, and inspiring. Use a tone similar to Change.org petitions but focused on spiritual support.`;
 
-      const summaryResponse = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: summaryPrompt }],
-        temperature: 0.8,
-      });
-
-      const aiSummary = summaryResponse.choices[0].message.content || "";
-
-      // Generate recitable prayer
       const prayerPrompt = `Write a short, powerful prayer (2-3 sentences) for: ${title}
 
 The prayer should:
@@ -74,17 +65,48 @@ The prayer should:
 - End with "Amen"
 - Be suitable for people of Christian faith to recite together`;
 
-      const prayerResponse = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prayerPrompt }],
-        temperature: 0.7,
-      });
+      // Run both GPT calls in parallel for speed
+      const [summaryResponse, prayerResponse] = await Promise.all([
+        openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: summaryPrompt }],
+          temperature: 0.8,
+        }),
+        openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prayerPrompt }],
+          temperature: 0.7,
+        })
+      ]);
 
+      const aiSummary = summaryResponse.choices[0].message.content || "";
       const recitablePrayer = prayerResponse.choices[0].message.content || "";
 
-      // Generate image using DALL-E based on the story content
-      // Extract key themes from the AI summary to create varied imagery
-      const summaryLower = aiSummary.toLowerCase();
+      // Return text immediately without waiting for image
+      res.json({
+        aiSummary,
+        recitablePrayer,
+        imageUrl: "", // Image will be generated separately
+      });
+    } catch (error: any) {
+      console.error("Error generating prayer:", error);
+      res.status(500).json({ 
+        error: "Failed to generate prayer content",
+        details: error.message 
+      });
+    }
+  });
+
+  // Generate image separately (slow operation)
+  app.post("/api/generate-image", async (req, res) => {
+    try {
+      const { title, aiSummary } = req.body;
+      
+      if (!title) {
+        return res.status(400).json({ error: "Title is required" });
+      }
+
+      const summaryLower = (aiSummary || title).toLowerCase();
       let imagePrompt: string;
       
       if (summaryLower.includes('cancer') || summaryLower.includes('illness') || summaryLower.includes('hospital') || summaryLower.includes('health') || summaryLower.includes('healing')) {
@@ -110,18 +132,10 @@ The prayer should:
       });
 
       const imageUrl = imageResponse.data?.[0]?.url || "";
-
-      res.json({
-        aiSummary,
-        recitablePrayer,
-        imageUrl,
-      });
+      res.json({ imageUrl });
     } catch (error: any) {
-      console.error("Error generating prayer:", error);
-      res.status(500).json({ 
-        error: "Failed to generate prayer content",
-        details: error.message 
-      });
+      console.error("Error generating image:", error);
+      res.status(500).json({ error: "Failed to generate image" });
     }
   });
 

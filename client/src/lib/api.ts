@@ -2,7 +2,7 @@ import type { Prayer, InsertPrayer } from "@shared/schema";
 
 export async function generatePrayerContent(title: string, description?: string) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 120000);
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
   
   try {
     const response = await fetch('/api/generate-prayer', {
@@ -28,6 +28,34 @@ export async function generatePrayerContent(title: string, description?: string)
     clearTimeout(timeoutId);
     if (error.name === 'AbortError') {
       throw new Error('Request timed out. Please try again.');
+    }
+    throw error;
+  }
+}
+
+export async function generateImage(title: string, aiSummary?: string): Promise<{ imageUrl: string }> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+  try {
+    const response = await fetch('/api/generate-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, aiSummary }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error('Failed to generate image');
+    }
+
+    return response.json();
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Image generation timed out. Please try again.');
     }
     throw error;
   }
