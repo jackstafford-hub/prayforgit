@@ -2,13 +2,14 @@ import { useRoute, Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
-import { ArrowLeft, UserCircle, Flag, Pencil } from "lucide-react";
+import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import bgTexture from "@assets/generated_images/subtle_warm_paper_texture_background.png";
-import { getPrayerById } from "@/lib/api";
+import { getPrayerById, updatePrayerContent, regeneratePrayerContent } from "@/lib/api";
 import type { Prayer } from "@shared/schema";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function PrayerDetail() {
   const [, params] = useRoute("/prayer/:id");
@@ -18,6 +19,15 @@ export default function PrayerDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const [hasPrayed, setHasPrayed] = useState(false);
+  
+  const [isEditingIssue, setIsEditingIssue] = useState(false);
+  const [isEditingPrayer, setIsEditingPrayer] = useState(false);
+  const [editedIssue, setEditedIssue] = useState("");
+  const [editedPrayer, setEditedPrayer] = useState("");
+  const [isSavingIssue, setIsSavingIssue] = useState(false);
+  const [isSavingPrayer, setIsSavingPrayer] = useState(false);
+  const [isRegeneratingIssue, setIsRegeneratingIssue] = useState(false);
+  const [isRegeneratingPrayer, setIsRegeneratingPrayer] = useState(false);
 
   useEffect(() => {
     const fetchPrayer = async () => {
@@ -35,6 +45,78 @@ export default function PrayerDetail() {
       fetchPrayer();
     }
   }, [id]);
+
+  const handleStartEditIssue = () => {
+    if (prayer) {
+      setEditedIssue(prayer.aiSummary || prayer.description || "");
+      setIsEditingIssue(true);
+    }
+  };
+
+  const handleSaveIssue = async () => {
+    if (!prayer) return;
+    setIsSavingIssue(true);
+    try {
+      const updated = await updatePrayerContent(prayer.id, { aiSummary: editedIssue });
+      setPrayer(updated);
+      setIsEditingIssue(false);
+      toast({ title: "Issue updated successfully" });
+    } catch (error) {
+      toast({ title: "Failed to save", variant: "destructive" });
+    } finally {
+      setIsSavingIssue(false);
+    }
+  };
+
+  const handleStartEditPrayer = () => {
+    if (prayer) {
+      setEditedPrayer(prayer.recitablePrayer || "");
+      setIsEditingPrayer(true);
+    }
+  };
+
+  const handleSavePrayer = async () => {
+    if (!prayer) return;
+    setIsSavingPrayer(true);
+    try {
+      const updated = await updatePrayerContent(prayer.id, { recitablePrayer: editedPrayer });
+      setPrayer(updated);
+      setIsEditingPrayer(false);
+      toast({ title: "Prayer updated successfully" });
+    } catch (error) {
+      toast({ title: "Failed to save", variant: "destructive" });
+    } finally {
+      setIsSavingPrayer(false);
+    }
+  };
+
+  const handleRegenerateIssue = async () => {
+    if (!prayer) return;
+    setIsRegeneratingIssue(true);
+    try {
+      const updated = await regeneratePrayerContent(prayer.id, 'issue');
+      setPrayer(updated);
+      toast({ title: "Issue regenerated successfully" });
+    } catch (error) {
+      toast({ title: "Failed to regenerate", variant: "destructive" });
+    } finally {
+      setIsRegeneratingIssue(false);
+    }
+  };
+
+  const handleRegeneratePrayer = async () => {
+    if (!prayer) return;
+    setIsRegeneratingPrayer(true);
+    try {
+      const updated = await regeneratePrayerContent(prayer.id, 'prayer');
+      setPrayer(updated);
+      toast({ title: "Prayer regenerated successfully" });
+    } catch (error) {
+      toast({ title: "Failed to regenerate", variant: "destructive" });
+    } finally {
+      setIsRegeneratingPrayer(false);
+    }
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -59,27 +141,15 @@ export default function PrayerDetail() {
       
       <div className="container mx-auto px-4 md:px-6 py-8 md:py-12">
         <div className="grid lg:grid-cols-[1fr_380px] gap-12">
-          {/* Left Column: Content */}
           <div className="space-y-8">
-            {/* Title Section */}
             <div className="space-y-4">
               <div className="flex items-start justify-between gap-4">
                 <h1 className="font-serif text-4xl md:text-5xl font-bold leading-tight text-foreground text-balance">
                   {prayer.title}
                 </h1>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="shrink-0 gap-2"
-                  data-testid="button-edit-prayer"
-                >
-                  <Pencil className="w-4 h-4" />
-                  Edit
-                </Button>
               </div>
             </div>
 
-            {/* Hero Image Area */}
             <div className="aspect-video w-full bg-muted rounded-xl overflow-hidden relative shadow-sm">
               <div 
                 className="absolute inset-0 transition-transform duration-700 hover:scale-105"
@@ -101,25 +171,163 @@ export default function PrayerDetail() {
               </div>
             </div>
 
-            {/* Issue Section - Full Content */}
             <div className="prose prose-lg max-w-none text-foreground/80 leading-relaxed">
-              <h3 className="font-serif text-2xl font-bold mb-4 text-foreground">The Issue</h3>
-              <div className="whitespace-pre-wrap text-base leading-7">
-                {prayer.aiSummary || prayer.description}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-serif text-2xl font-bold text-foreground m-0">The Issue</h3>
+                <div className="flex gap-2">
+                  {!isEditingIssue && (
+                    <>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleRegenerateIssue}
+                        disabled={isRegeneratingIssue}
+                        className="gap-2"
+                        data-testid="button-regenerate-issue"
+                      >
+                        {isRegeneratingIssue ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="w-4 h-4" />
+                        )}
+                        Regenerate
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleStartEditIssue}
+                        className="gap-2"
+                        data-testid="button-edit-issue"
+                      >
+                        <Pencil className="w-4 h-4" />
+                        Edit
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
+              
+              {isEditingIssue ? (
+                <div className="space-y-3">
+                  <Textarea
+                    value={editedIssue}
+                    onChange={(e) => setEditedIssue(e.target.value)}
+                    className="min-h-[200px] text-base leading-7"
+                    data-testid="textarea-edit-issue"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setIsEditingIssue(false)}
+                      disabled={isSavingIssue}
+                      data-testid="button-cancel-issue"
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Cancel
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={handleSaveIssue}
+                      disabled={isSavingIssue}
+                      data-testid="button-save-issue"
+                    >
+                      {isSavingIssue ? (
+                        <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                      ) : (
+                        <Check className="w-4 h-4 mr-1" />
+                      )}
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="whitespace-pre-wrap text-base leading-7">
+                  {prayer.aiSummary || prayer.description}
+                </div>
+              )}
             </div>
 
-            {/* Recitable Prayer Section - Prominent */}
             {prayer.recitablePrayer && (
               <div className="bg-muted/30 rounded-xl p-8 border">
-                <h3 className="font-serif text-2xl font-bold mb-6 text-foreground text-center">Prayer to Recite</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-serif text-2xl font-bold text-foreground text-center flex-1">Prayer to Recite</h3>
+                  <div className="flex gap-2">
+                    {!isEditingPrayer && (
+                      <>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={handleRegeneratePrayer}
+                          disabled={isRegeneratingPrayer}
+                          className="gap-2"
+                          data-testid="button-regenerate-prayer"
+                        >
+                          {isRegeneratingPrayer ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="w-4 h-4" />
+                          )}
+                          Regenerate
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={handleStartEditPrayer}
+                          className="gap-2"
+                          data-testid="button-edit-prayer"
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
                 <div className="text-sm text-muted-foreground mb-6 p-4 bg-background/50 rounded-lg border border-dashed">
                   <p className="font-medium mb-2">Instructions for Prayer:</p>
                   <p>Breathe slowly and deeply, and visualise white light descending through you. Let love and compassion fill your whole being. Raise your hands and send that loving white light from your palms and heart center to the focal point of your prayer.</p>
                 </div>
-                <div className="prose prose-lg max-w-none text-foreground/90 leading-loose whitespace-pre-wrap italic text-center">
-                  {prayer.recitablePrayer}
-                </div>
+                
+                {isEditingPrayer ? (
+                  <div className="space-y-3">
+                    <Textarea
+                      value={editedPrayer}
+                      onChange={(e) => setEditedPrayer(e.target.value)}
+                      className="min-h-[150px] text-base leading-7"
+                      data-testid="textarea-edit-prayer"
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setIsEditingPrayer(false)}
+                        disabled={isSavingPrayer}
+                        data-testid="button-cancel-prayer"
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Cancel
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        onClick={handleSavePrayer}
+                        disabled={isSavingPrayer}
+                        data-testid="button-save-prayer"
+                      >
+                        {isSavingPrayer ? (
+                          <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                        ) : (
+                          <Check className="w-4 h-4 mr-1" />
+                        )}
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="prose prose-lg max-w-none text-foreground/90 leading-loose whitespace-pre-wrap italic text-center">
+                    {prayer.recitablePrayer}
+                  </div>
+                )}
               </div>
             )}
             
@@ -131,7 +339,6 @@ export default function PrayerDetail() {
             </div>
           </div>
 
-          {/* Right Column: Sticky Sidebar (Action) */}
           <div className="lg:sticky lg:top-24 h-fit">
             <div className="bg-white border rounded-xl shadow-sm p-6 space-y-6">
               <div className="space-y-2">

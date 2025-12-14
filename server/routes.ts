@@ -240,6 +240,91 @@ The prayer should:
     }
   });
 
+  // Update prayer content (aiSummary, recitablePrayer)
+  app.patch("/api/prayers/:id/content", async (req, res) => {
+    try {
+      const { aiSummary, recitablePrayer } = req.body;
+      
+      if (aiSummary === undefined && recitablePrayer === undefined) {
+        return res.status(400).json({ error: "No content to update" });
+      }
+
+      const prayer = await storage.updatePrayerContent(req.params.id, { aiSummary, recitablePrayer });
+      if (!prayer) {
+        return res.status(404).json({ error: "Prayer not found" });
+      }
+      res.json(prayer);
+    } catch (error: any) {
+      console.error("Error updating prayer content:", error);
+      res.status(500).json({ error: "Failed to update prayer content" });
+    }
+  });
+
+  // Regenerate AI content for a specific prayer
+  app.post("/api/prayers/:id/regenerate", async (req, res) => {
+    try {
+      const { type } = req.body;
+      
+      if (!type || !['issue', 'prayer', 'both'].includes(type)) {
+        return res.status(400).json({ error: "Type must be 'issue', 'prayer', or 'both'" });
+      }
+
+      const prayer = await storage.getPrayerById(req.params.id);
+      if (!prayer) {
+        return res.status(404).json({ error: "Prayer not found" });
+      }
+
+      const updates: { aiSummary?: string; recitablePrayer?: string } = {};
+
+      if (type === 'issue' || type === 'both') {
+        const summaryPrompt = `You are writing a heartfelt prayer request story for a platform similar to Change.org but for prayers.
+
+Title: ${prayer.title}
+${prayer.description ? `Personal context: ${prayer.description}` : ''}
+
+Write a compelling 3-4 paragraph story that:
+1. Opens with the urgency and importance of this prayer need
+2. ${prayer.description ? 'Incorporates the personal context provided' : 'Expands on why this prayer matters'}
+3. Calls others to join in prayer
+4. Inspires hope and unity
+
+Write in first person. Be compassionate, authentic, and inspiring. Use a tone similar to Change.org petitions but focused on spiritual support.`;
+
+        const summaryResponse = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: summaryPrompt }],
+          temperature: 0.8,
+        });
+
+        updates.aiSummary = summaryResponse.choices[0].message.content || "";
+      }
+
+      if (type === 'prayer' || type === 'both') {
+        const prayerPrompt = `Write a short, powerful prayer (2-3 sentences) for: ${prayer.title}
+
+The prayer should:
+- Be heartfelt and sincere
+- Ask for divine intervention
+- End with "Amen"
+- Be suitable for people of Christian faith to recite together`;
+
+        const prayerResponse = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prayerPrompt }],
+          temperature: 0.7,
+        });
+
+        updates.recitablePrayer = prayerResponse.choices[0].message.content || "";
+      }
+
+      const updatedPrayer = await storage.updatePrayerContent(req.params.id, updates);
+      res.json(updatedPrayer);
+    } catch (error: any) {
+      console.error("Error regenerating prayer content:", error);
+      res.status(500).json({ error: "Failed to regenerate content" });
+    }
+  });
+
   // Regenerate images for all prayers (admin endpoint)
   app.post("/api/admin/regenerate-images", async (req, res) => {
     try {

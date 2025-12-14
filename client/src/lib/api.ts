@@ -90,3 +90,45 @@ export async function incrementPrayerCount(id: string): Promise<Prayer> {
 
   return response.json();
 }
+
+export async function updatePrayerContent(id: string, content: { aiSummary?: string; recitablePrayer?: string }): Promise<Prayer> {
+  const response = await fetch(`/api/prayers/${id}/content`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(content),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update prayer content');
+  }
+
+  return response.json();
+}
+
+export async function regeneratePrayerContent(id: string, type: 'issue' | 'prayer' | 'both'): Promise<Prayer> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+  try {
+    const response = await fetch(`/api/prayers/${id}/regenerate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error('Failed to regenerate content');
+    }
+
+    return response.json();
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.');
+    }
+    throw error;
+  }
+}
