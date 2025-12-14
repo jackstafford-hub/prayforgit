@@ -241,19 +241,26 @@ The prayer should:
   });
 
   // Update prayer content (aiSummary, recitablePrayer)
-  app.patch("/api/prayers/:id/content", async (req, res) => {
+  app.patch("/api/prayers/:id/content", isAuthenticated, async (req: any, res) => {
     try {
       const { aiSummary, recitablePrayer } = req.body;
+      const userId = req.user?.claims?.sub;
       
       if (aiSummary === undefined && recitablePrayer === undefined) {
         return res.status(400).json({ error: "No content to update" });
       }
 
-      const prayer = await storage.updatePrayerContent(req.params.id, { aiSummary, recitablePrayer });
+      const prayer = await storage.getPrayerById(req.params.id);
       if (!prayer) {
         return res.status(404).json({ error: "Prayer not found" });
       }
-      res.json(prayer);
+
+      if (prayer.authorId && prayer.authorId !== userId) {
+        return res.status(403).json({ error: "Not authorized to edit this prayer" });
+      }
+
+      const updated = await storage.updatePrayerContent(req.params.id, { aiSummary, recitablePrayer });
+      res.json(updated);
     } catch (error: any) {
       console.error("Error updating prayer content:", error);
       res.status(500).json({ error: "Failed to update prayer content" });
@@ -261,9 +268,10 @@ The prayer should:
   });
 
   // Regenerate AI content for a specific prayer
-  app.post("/api/prayers/:id/regenerate", async (req, res) => {
+  app.post("/api/prayers/:id/regenerate", isAuthenticated, async (req: any, res) => {
     try {
       const { type } = req.body;
+      const userId = req.user?.claims?.sub;
       
       if (!type || !['issue', 'prayer', 'both'].includes(type)) {
         return res.status(400).json({ error: "Type must be 'issue', 'prayer', or 'both'" });
@@ -272,6 +280,10 @@ The prayer should:
       const prayer = await storage.getPrayerById(req.params.id);
       if (!prayer) {
         return res.status(404).json({ error: "Prayer not found" });
+      }
+
+      if (prayer.authorId && prayer.authorId !== userId) {
+        return res.status(403).json({ error: "Not authorized to edit this prayer" });
       }
 
       const updates: { aiSummary?: string; recitablePrayer?: string } = {};

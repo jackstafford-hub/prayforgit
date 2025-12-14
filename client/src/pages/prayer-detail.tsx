@@ -8,8 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import bgTexture from "@assets/generated_images/subtle_warm_paper_texture_background.png";
 import { getPrayerById, updatePrayerContent, regeneratePrayerContent } from "@/lib/api";
-import type { Prayer } from "@shared/schema";
+import type { Prayer, User } from "@shared/schema";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function PrayerDetail() {
   const [, params] = useRoute("/prayer/:id");
@@ -19,6 +20,8 @@ export default function PrayerDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const [hasPrayed, setHasPrayed] = useState(false);
+  const { user: authUser, isAuthenticated } = useAuth();
+  const user = authUser as User | null;
   
   const [isEditingIssue, setIsEditingIssue] = useState(false);
   const [isEditingPrayer, setIsEditingPrayer] = useState(false);
@@ -28,6 +31,8 @@ export default function PrayerDetail() {
   const [isSavingPrayer, setIsSavingPrayer] = useState(false);
   const [isRegeneratingIssue, setIsRegeneratingIssue] = useState(false);
   const [isRegeneratingPrayer, setIsRegeneratingPrayer] = useState(false);
+  
+  const canEdit = isAuthenticated && prayer && (!prayer.authorId || prayer.authorId === user?.id);
 
   useEffect(() => {
     const fetchPrayer = async () => {
@@ -174,37 +179,39 @@ export default function PrayerDetail() {
             <div className="prose prose-lg max-w-none text-foreground/80 leading-relaxed">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-serif text-2xl font-bold text-foreground m-0">The Issue</h3>
-                <div className="flex gap-2">
-                  {!isEditingIssue && (
-                    <>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={handleRegenerateIssue}
-                        disabled={isRegeneratingIssue}
-                        className="gap-2"
-                        data-testid="button-regenerate-issue"
-                      >
-                        {isRegeneratingIssue ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <RefreshCw className="w-4 h-4" />
-                        )}
-                        Regenerate
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={handleStartEditIssue}
-                        className="gap-2"
-                        data-testid="button-edit-issue"
-                      >
-                        <Pencil className="w-4 h-4" />
-                        Edit
-                      </Button>
-                    </>
-                  )}
-                </div>
+                {canEdit && (
+                  <div className="flex gap-2">
+                    {!isEditingIssue && (
+                      <>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={handleRegenerateIssue}
+                          disabled={isRegeneratingIssue}
+                          className="gap-2"
+                          data-testid="button-regenerate-issue"
+                        >
+                          {isRegeneratingIssue ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="w-4 h-4" />
+                          )}
+                          Regenerate
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={handleStartEditIssue}
+                          className="gap-2"
+                          data-testid="button-edit-issue"
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
               
               {isEditingIssue ? (
@@ -252,37 +259,39 @@ export default function PrayerDetail() {
               <div className="bg-muted/30 rounded-xl p-8 border">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-serif text-2xl font-bold text-foreground text-center flex-1">Prayer to Recite</h3>
-                  <div className="flex gap-2">
-                    {!isEditingPrayer && (
-                      <>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={handleRegeneratePrayer}
-                          disabled={isRegeneratingPrayer}
-                          className="gap-2"
-                          data-testid="button-regenerate-prayer"
-                        >
-                          {isRegeneratingPrayer ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <RefreshCw className="w-4 h-4" />
-                          )}
-                          Regenerate
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={handleStartEditPrayer}
-                          className="gap-2"
-                          data-testid="button-edit-prayer"
-                        >
-                          <Pencil className="w-4 h-4" />
-                          Edit
-                        </Button>
-                      </>
-                    )}
-                  </div>
+                  {canEdit && (
+                    <div className="flex gap-2">
+                      {!isEditingPrayer && (
+                        <>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handleRegeneratePrayer}
+                            disabled={isRegeneratingPrayer}
+                            className="gap-2"
+                            data-testid="button-regenerate-prayer"
+                          >
+                            {isRegeneratingPrayer ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <RefreshCw className="w-4 h-4" />
+                            )}
+                            Regenerate
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handleStartEditPrayer}
+                            className="gap-2"
+                            data-testid="button-edit-prayer"
+                          >
+                            <Pencil className="w-4 h-4" />
+                            Edit
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="text-sm text-muted-foreground mb-6 p-4 bg-background/50 rounded-lg border border-dashed">
                   <p className="font-medium mb-2">Instructions for Prayer:</p>
