@@ -113,11 +113,18 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
+    console.log("Auth callback received for hostname:", req.hostname);
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
-    })(req, res, next);
+    })(req, res, (err: any) => {
+      if (err) {
+        console.error("Auth callback error:", err);
+        return res.redirect("/?auth_error=" + encodeURIComponent(err.message || "Unknown error"));
+      }
+      next();
+    });
   });
 
   app.get("/api/logout", (req, res) => {
