@@ -48,9 +48,11 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
-          <Button variant="ghost" size="icon" className="text-muted-foreground">
-            <Search className="w-5 h-5" />
-          </Button>
+          <Link href="/browse">
+            <Button variant="ghost" size="icon" className="text-muted-foreground" data-testid="button-search">
+              <Search className="w-5 h-5" />
+            </Button>
+          </Link>
           
           <Link href="/create">
             <Button variant="outline" className="hidden md:flex rounded-full px-6 border-primary text-primary hover:bg-primary/5 hover:text-primary font-medium">
