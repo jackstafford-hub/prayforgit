@@ -84,14 +84,14 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button 
-              variant="ghost" 
-              className="hidden md:flex gap-2 text-sm font-medium cursor-pointer"
-              onClick={handleLogin}
-              data-testid="button-login"
-            >
-              Log in
-            </Button>
+            <a href="/api/login" data-testid="button-login">
+              <Button 
+                variant="ghost" 
+                className="hidden md:flex gap-2 text-sm font-medium cursor-pointer"
+              >
+                Log in
+              </Button>
+            </a>
           )}
           
           <Button 
@@ -171,14 +171,14 @@ export function Navbar() {
                       </Button>
                     </div>
                   ) : (
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-center text-base cursor-pointer"
-                      onClick={handleLogin}
-                      data-testid="button-mobile-login"
-                    >
-                      Log in
-                    </Button>
+                    <a href="/api/login" className="w-full" data-testid="button-mobile-login">
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-center text-base cursor-pointer"
+                      >
+                        Log in
+                      </Button>
+                    </a>
                   )}
                 </div>
               </div>
