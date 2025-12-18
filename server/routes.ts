@@ -6,6 +6,8 @@ import { z } from "zod";
 import OpenAI from "openai";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
+import express from "express";
+import path from "path";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -15,6 +17,10 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  
+  // Serve static assets from attached_assets/generated_images
+  const assetsPath = path.resolve(process.cwd(), "attached_assets/generated_images");
+  app.use("/assets", express.static(assetsPath));
   
   // Setup authentication
   await setupAuth(app);

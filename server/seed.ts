@@ -5,6 +5,7 @@ const SEED_PRAYERS = [
   {
     title: 'Healing for my mother fighting cancer',
     description: 'My mother was diagnosed with stage 4 breast cancer six months ago. The diagnosis came as a complete shock to our family. She has always been the pillar of our home, the one who held us together through every storm. Now she is fighting the biggest battle of her life.',
+    imageUrl: '/assets/older_woman_hands_holding_bible_in_hospital.png',
     aiSummary: `My mother was diagnosed with stage 4 breast cancer six months ago. The diagnosis came as a complete shock to our family. She has always been the pillar of our home, the one who held us together through every storm. Now she is fighting the biggest battle of her life.
 
 The cancer has spread to her lymph nodes and the doctors have told us that the prognosis is uncertain. She has undergone three rounds of chemotherapy so far, and each treatment takes more out of her. We watch her lose her hair, her appetite, and sometimes her hope. But we refuse to give up.
@@ -31,6 +32,7 @@ In Jesus' name we pray, Amen.`,
   {
     title: 'Restore my marriage and bring peace to our home',
     description: 'After 12 years of marriage, my wife and I are separated. What started as small disagreements grew into walls of resentment and silence. We have two beautiful children who deserve to grow up in a loving, unified home.',
+    imageUrl: '/assets/sad_couple_sitting_apart_at_kitchen_table.png',
     aiSummary: `After 12 years of marriage, my wife and I are separated. What started as small disagreements grew into walls of resentment and silence. We have two beautiful children who deserve to grow up in a loving, unified home.
 
 I take responsibility for my part in this. I worked too much. I didn't listen when she needed to talk. I let stress make me irritable and distant. By the time I realized what was happening, she had already built walls around her heart.
@@ -61,6 +63,7 @@ We pray with faith, believing in Your power to restore. Amen.`,
   {
     title: 'Prayer for a breakthrough in employment',
     description: 'I was laid off six months ago when my company downsized. At first, I thought I would find something quickly with my experience and skills. But rejection after rejection has worn down my confidence and my savings.',
+    imageUrl: '/assets/stressed_man_looking_at_bills.png',
     aiSummary: `I was laid off six months ago when my company downsized. At first, I thought I would find something quickly with my experience and skills. But rejection after rejection has worn down my confidence and my savings.
 
 I have a wife and three children depending on me. Every month when the bills come, I feel the weight of their needs on my shoulders. We have already cut back on everything we can. The kids don't complain about the changes, but I see them notice.
@@ -91,6 +94,7 @@ In Jesus' mighty name, Amen.`,
   {
     title: 'Peace for the conflict in the Middle East',
     description: 'The ongoing violence in the Middle East has claimed thousands of innocent lives. Families are torn apart, children are orphaned, and communities are devastated. We must pray for peace.',
+    imageUrl: '/assets/candlelight_vigil_for_peace.png',
     aiSummary: `The ongoing violence in the Middle East has claimed thousands of innocent lives. Families are torn apart, children are orphaned, and communities are devastated. We must pray for peace.
 
 This is not a political prayer request. It is a human one. On all sides of this conflict are mothers who weep for their children, fathers who cannot protect their families, and young people whose futures have been stolen by violence they did not choose.
