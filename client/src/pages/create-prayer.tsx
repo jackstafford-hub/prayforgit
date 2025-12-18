@@ -585,14 +585,10 @@ export default function CreatePrayer() {
                   onClick={() => {
                     localStorage.setItem('pendingPrayer', JSON.stringify({ formData, step: 'details' }));
                   }}
-                  className="block w-full"
+                  className="flex items-center justify-center w-full h-12 text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-md"
+                  data-testid="button-login-create"
                 >
-                  <Button 
-                    type="button"
-                    className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90"
-                  >
-                    Continue to Log In
-                  </Button>
+                  Continue to Log In
                </a>
 
                <Button 
