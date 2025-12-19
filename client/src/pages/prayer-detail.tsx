@@ -389,12 +389,8 @@ export default function PrayerDetail() {
                       : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20'
                   }`}
                 >
-                  {hasPrayed ? "You prayed!" : "Pray for this"}
+                  {hasPrayed ? "You prayed!" : "I prayed for this"}
                 </Button>
-                
-                <div className="text-xs text-muted-foreground text-center px-4">
-                  By clicking "Pray for this", you agree to stand in agreement with {prayer.author} and our <a href="#" className="underline">Community Guidelines</a>.
-                </div>
               </div>
 
               {hasPrayed && (
