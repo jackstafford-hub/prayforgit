@@ -140,6 +140,20 @@ export default function PrayerDetail() {
   const percentage = Math.min((prayer.count / prayer.goal) * 100, 100);
   const remaining = prayer.goal - prayer.count;
 
+  // Extract title from AI summary if it starts with "**Title:" pattern
+  const getDisplayTitleAndCleanedSummary = () => {
+    const content = prayer.aiSummary || prayer.description || "";
+    const titleMatch = content.match(/^\*\*Title:\s*(.+?)\*\*/);
+    if (titleMatch) {
+      const extractedTitle = titleMatch[1].trim();
+      const cleanedSummary = content.replace(/^\*\*Title:\s*.+?\*\*\s*/, '').trim();
+      return { displayTitle: extractedTitle, cleanedSummary };
+    }
+    return { displayTitle: prayer.title, cleanedSummary: content };
+  };
+
+  const { displayTitle, cleanedSummary } = getDisplayTitleAndCleanedSummary();
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -149,8 +163,8 @@ export default function PrayerDetail() {
           <div className="space-y-8">
             <div className="space-y-4">
               <div className="flex items-start justify-between gap-4">
-                <h1 className="font-serif text-4xl md:text-5xl font-bold leading-tight text-foreground text-balance">
-                  {prayer.title}
+                <h1 className="font-serif text-2xl md:text-3xl font-bold leading-tight text-foreground text-balance">
+                  {displayTitle}
                 </h1>
               </div>
             </div>
@@ -250,7 +264,7 @@ export default function PrayerDetail() {
                 </div>
               ) : (
                 <div className="whitespace-pre-wrap text-base leading-7">
-                  {prayer.aiSummary || prayer.description}
+                  {cleanedSummary}
                 </div>
               )}
             </div>
