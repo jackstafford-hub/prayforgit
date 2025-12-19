@@ -12,14 +12,17 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [prayerTopic, setPrayerTopic] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPrayers = async () => {
       try {
+        setError(null);
         const data = await getPrayers();
         setPrayers(data);
-      } catch (error) {
-        console.error("Failed to fetch prayers:", error);
+      } catch (err) {
+        console.error("Failed to fetch prayers:", err);
+        setError("Unable to load prayers. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -97,6 +100,21 @@ export default function Home() {
           {isLoading ? (
             <div className="flex justify-center py-16">
               <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.reload()}
+                data-testid="button-retry-prayers"
+              >
+                Try again
+              </Button>
+            </div>
+          ) : prayers.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground">No prayers yet. Be the first to start one!</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
