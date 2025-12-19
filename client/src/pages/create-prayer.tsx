@@ -588,7 +588,7 @@ export default function CreatePrayer() {
                   className="flex items-center justify-center w-full h-12 text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-md"
                   data-testid="button-login-create"
                 >
-                  Continue to Log In
+                  Create a Log In
                </a>
 
                <Button 

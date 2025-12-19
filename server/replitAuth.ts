@@ -117,7 +117,7 @@ export async function setupAuth(app: Express) {
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
+      failureRedirect: "/?login_failed=true",
     })(req, res, (err: any) => {
       if (err) {
         console.error("Auth callback error:", err);
