@@ -148,6 +148,11 @@ The prayer should:
   // Get all prayers
   app.get("/api/prayers", async (_req, res) => {
     try {
+      // Set cache control headers to prevent mobile caching issues
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       const allPrayers = await storage.getPrayers();
       res.json(allPrayers);
     } catch (error: any) {

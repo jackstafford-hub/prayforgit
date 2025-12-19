@@ -62,7 +62,12 @@ export async function generateImage(title: string, aiSummary?: string): Promise<
 }
 
 export async function getPrayers(): Promise<Prayer[]> {
-  const response = await fetch('/api/prayers');
+  // Add cache-busting timestamp for mobile browsers
+  const response = await fetch(`/api/prayers?_t=${Date.now()}`, {
+    headers: {
+      'Cache-Control': 'no-cache',
+    },
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch prayers');
   }
