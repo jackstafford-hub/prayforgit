@@ -145,19 +145,38 @@ The prayer should:
     }
   });
 
-  // Get all prayers
+  // Get public prayers (only those with 5+ prayer count)
   app.get("/api/prayers", async (_req, res) => {
     try {
-      // Set cache control headers to prevent mobile caching issues
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
       
-      const allPrayers = await storage.getPrayers();
-      res.json(allPrayers);
+      const publicPrayers = await storage.getPublicPrayers();
+      res.json(publicPrayers);
     } catch (error: any) {
       console.error("Error fetching prayers:", error);
       res.status(500).json({ error: "Failed to fetch prayers" });
+    }
+  });
+
+  // Get prayers by current user (includes non-public prayers)
+  app.get("/api/my-prayers", async (req: any, res) => {
+    try {
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
+      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const userId = req.user.claims.sub;
+      const userPrayers = await storage.getPrayersByAuthor(userId);
+      res.json(userPrayers);
+    } catch (error: any) {
+      console.error("Error fetching user prayers:", error);
+      res.status(500).json({ error: "Failed to fetch user prayers" });
     }
   });
 

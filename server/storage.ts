@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { type User, type UpsertUser, type Prayer, type InsertPrayer, users, prayers } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, gte, or } from "drizzle-orm";
 
 export interface IStorage {
   // User methods (required for Replit Auth)
@@ -9,6 +9,8 @@ export interface IStorage {
   
   // Prayer methods
   getPrayers(): Promise<Prayer[]>;
+  getPublicPrayers(): Promise<Prayer[]>;
+  getPrayersByAuthor(authorId: string): Promise<Prayer[]>;
   getPrayerById(id: string): Promise<Prayer | undefined>;
   createPrayer(prayer: InsertPrayer): Promise<Prayer>;
   incrementPrayerCount(id: string): Promise<Prayer | undefined>;
@@ -41,6 +43,14 @@ export class DatabaseStorage implements IStorage {
   // Prayer methods
   async getPrayers(): Promise<Prayer[]> {
     return await db.select().from(prayers).orderBy(desc(prayers.count));
+  }
+
+  async getPublicPrayers(): Promise<Prayer[]> {
+    return await db.select().from(prayers).where(gte(prayers.count, 5)).orderBy(desc(prayers.count));
+  }
+
+  async getPrayersByAuthor(authorId: string): Promise<Prayer[]> {
+    return await db.select().from(prayers).where(eq(prayers.authorId, authorId)).orderBy(desc(prayers.createdAt));
   }
 
   async getPrayerById(id: string): Promise<Prayer | undefined> {
