@@ -87,6 +87,7 @@ export async function setupAuth(app: Express) {
   const ensureStrategy = (domain: string) => {
     const strategyName = `replitauth:${domain}`;
     if (!registeredStrategies.has(strategyName)) {
+      console.log(`Registering auth strategy for domain: ${domain}`);
       const strategy = new Strategy(
         {
           name: strategyName,
@@ -101,10 +102,30 @@ export async function setupAuth(app: Express) {
     }
   };
 
+  // Pre-register strategies for all known domains at startup
+  const replitDomains = process.env.REPLIT_DOMAINS?.split(',') || [];
+  const devDomain = process.env.REPLIT_DEV_DOMAIN;
+  
+  // Add custom domain explicitly
+  const allDomains = [...replitDomains];
+  if (devDomain && !allDomains.includes(devDomain)) {
+    allDomains.push(devDomain);
+  }
+  // Also add the custom domain if configured
+  allDomains.push('prayforchange.org');
+  
+  console.log('Pre-registering auth strategies for domains:', allDomains);
+  for (const domain of allDomains) {
+    if (domain && domain.trim()) {
+      ensureStrategy(domain.trim());
+    }
+  }
+
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
+    console.log("Login request from hostname:", req.hostname);
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
@@ -114,6 +135,7 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/callback", (req, res, next) => {
     console.log("Auth callback received for hostname:", req.hostname);
+    console.log("Callback query params:", req.query);
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
