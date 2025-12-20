@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { type User, type UpsertUser, type Prayer, type InsertPrayer, users, prayers } from "@shared/schema";
-import { eq, desc, gte, or } from "drizzle-orm";
+import { eq, desc, gte } from "drizzle-orm";
 
 export interface IStorage {
   // User methods (required for Replit Auth)
