@@ -16,19 +16,23 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function Navbar() {
   const { user: authUser, isAuthenticated, isLoading } = useAuth();
   const user = authUser as User | null;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
 
-  const handleLogin = () => {
-    window.location.href = "/api/login";
-  };
-
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -86,13 +90,15 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button 
-              asChild
-              variant="ghost" 
-              className="hidden md:flex gap-2 text-sm font-medium cursor-pointer"
-            >
-              <a href="/api/login" data-testid="button-login">Log in</a>
-            </Button>
+            <Link href="/auth">
+              <Button 
+                variant="ghost" 
+                className="hidden md:flex gap-2 text-sm font-medium cursor-pointer"
+                data-testid="button-login"
+              >
+                Log in
+              </Button>
+            </Link>
           )}
           
           <Button 
@@ -173,11 +179,12 @@ export function Navbar() {
                     </div>
                   ) : (
                     <Button 
-                      asChild
                       variant="outline" 
                       className="w-full justify-center text-base cursor-pointer"
+                      onClick={() => { navigate("/auth"); setMobileMenuOpen(false); }}
+                      data-testid="button-mobile-login"
                     >
-                      <a href="/api/login" data-testid="button-mobile-login">Log in</a>
+                      Log in
                     </Button>
                   )}
                 </div>

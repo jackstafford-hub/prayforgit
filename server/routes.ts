@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { insertPrayerSchema } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import express from "express";
 import path from "path";
@@ -25,20 +25,6 @@ export async function registerRoutes(
   // Setup authentication
   await setupAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', async (req: any, res) => {
-    if (!req.isAuthenticated() || !req.user?.claims?.sub) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
 
   // Generate prayer content using OpenAI (text only - fast)
   app.post("/api/generate-prayer", async (req, res) => {
@@ -169,11 +155,11 @@ The prayer should:
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
       
-      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const userPrayers = await storage.getPrayersByAuthor(userId);
       res.json(userPrayers);
     } catch (error: any) {
@@ -290,7 +276,7 @@ The prayer should:
   app.patch("/api/prayers/:id/content", isAuthenticated, async (req: any, res) => {
     try {
       const { aiSummary, recitablePrayer } = req.body;
-      const userId = req.user?.claims?.sub;
+      const userId = req.session?.userId;
       
       if (aiSummary === undefined && recitablePrayer === undefined) {
         return res.status(400).json({ error: "No content to update" });
@@ -317,7 +303,7 @@ The prayer should:
   app.post("/api/prayers/:id/regenerate", isAuthenticated, async (req: any, res) => {
     try {
       const { type } = req.body;
-      const userId = req.user?.claims?.sub;
+      const userId = req.session?.userId;
       
       if (!type || !['issue', 'prayer', 'both'].includes(type)) {
         return res.status(400).json({ error: "Type must be 'issue', 'prayer', or 'both'" });
