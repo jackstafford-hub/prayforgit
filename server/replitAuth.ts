@@ -82,70 +82,67 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  const registeredStrategies = new Set<string>();
-
-  const ensureStrategy = (domain: string) => {
-    const strategyName = `replitauth:${domain}`;
-    if (!registeredStrategies.has(strategyName)) {
-      console.log(`Registering auth strategy for domain: ${domain}`);
-      const strategy = new Strategy(
-        {
-          name: strategyName,
-          config,
-          scope: "openid email profile offline_access",
-          callbackURL: `https://${domain}/api/callback`,
-        },
-        verify,
-      );
-      passport.use(strategy);
-      registeredStrategies.add(strategyName);
-    }
-  };
-
-  // Pre-register strategies for all known domains at startup
+  // Get the primary Replit domain (first one in REPLIT_DOMAINS)
   const replitDomains = process.env.REPLIT_DOMAINS?.split(',') || [];
-  const devDomain = process.env.REPLIT_DEV_DOMAIN;
+  const primaryDomain = replitDomains[0] || process.env.REPLIT_DEV_DOMAIN || '';
   
-  // Add custom domain explicitly
-  const allDomains = [...replitDomains];
-  if (devDomain && !allDomains.includes(devDomain)) {
-    allDomains.push(devDomain);
-  }
-  // Also add the custom domain if configured
-  allDomains.push('prayforchange.org');
-  
-  console.log('Pre-registering auth strategies for domains:', allDomains);
-  for (const domain of allDomains) {
-    if (domain && domain.trim()) {
-      ensureStrategy(domain.trim());
-    }
-  }
+  console.log('Primary auth domain:', primaryDomain);
+  console.log('All REPLIT_DOMAINS:', replitDomains);
+
+  // Create a single strategy using the primary Replit domain
+  // This ensures the callback URL is always recognized by Replit's OIDC server
+  const strategy = new Strategy(
+    {
+      name: 'replitauth',
+      config,
+      scope: "openid email profile offline_access",
+      callbackURL: `https://${primaryDomain}/api/callback`,
+    },
+    verify,
+  );
+  passport.use(strategy);
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
     console.log("Login request from hostname:", req.hostname);
-    ensureStrategy(req.hostname);
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    // Store the original host for redirect after auth
+    const returnTo = `https://${req.hostname}`;
+    passport.authenticate('replitauth', {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
+      state: Buffer.from(JSON.stringify({ returnTo })).toString('base64'),
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
     console.log("Auth callback received for hostname:", req.hostname);
     console.log("Callback query params:", req.query);
-    ensureStrategy(req.hostname);
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
+    
+    // Extract the original return URL from state
+    let returnTo = '/';
+    try {
+      if (req.query.state) {
+        const state = JSON.parse(Buffer.from(req.query.state as string, 'base64').toString());
+        if (state.returnTo) {
+          returnTo = state.returnTo;
+        }
+      }
+    } catch (e) {
+      console.log("Could not parse state, using default redirect");
+    }
+    
+    passport.authenticate('replitauth', {
       failureRedirect: "/?login_failed=true",
     })(req, res, (err: any) => {
       if (err) {
         console.error("Auth callback error:", err);
         return res.redirect("/?auth_error=" + encodeURIComponent(err.message || "Unknown error"));
       }
-      next();
+      // Redirect to the original domain after successful auth
+      console.log("Auth successful, redirecting to:", returnTo);
+      res.redirect(returnTo);
     });
   });
 
