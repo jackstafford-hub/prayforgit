@@ -66,10 +66,12 @@ Write in first person. Be compassionate, authentic, and inspiring. Use a tone si
       const prayerPrompt = `Write a short, powerful prayer (2-3 sentences) for: ${title}
 
 The prayer should:
+- Be written in THIRD PERSON perspective (e.g., "protect them", "bless his family", "guide her through") because OTHER PEOPLE will be praying for this person, not the person themselves
 - Be heartfelt and sincere
 - Ask for divine intervention
 - End with "Amen"
-- Be suitable for people of Christian faith to recite together`;
+- Be suitable for people of Christian faith to recite together
+- Use "we" instead of "I" since a community is praying together`;
 
       // Run both GPT calls in parallel for speed
       const [summaryResponse, prayerResponse] = await Promise.all([
@@ -359,10 +361,12 @@ Write in first person. Be compassionate, authentic, and inspiring. Use a tone si
         const prayerPrompt = `Write a short, powerful prayer (2-3 sentences) for: ${prayer.title}
 
 The prayer should:
+- Be written in THIRD PERSON perspective (e.g., "protect them", "bless his family", "guide her through") because OTHER PEOPLE will be praying for this person, not the person themselves
 - Be heartfelt and sincere
 - Ask for divine intervention
 - End with "Amen"
-- Be suitable for people of Christian faith to recite together`;
+- Be suitable for people of Christian faith to recite together
+- Use "we" instead of "I" since a community is praying together`;
 
         const prayerResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
