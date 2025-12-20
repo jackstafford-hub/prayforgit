@@ -21,7 +21,7 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript
 - **API Design**: RESTful endpoints under `/api/` prefix
-- **Authentication**: Replit Auth with OpenID Connect, using Passport.js
+- **Authentication**: Custom email/password authentication with bcrypt password hashing
 - **Session Storage**: PostgreSQL-backed sessions via connect-pg-simple
 - **AI Integration**: OpenAI API for generating prayer summaries and recitable prayers
 
@@ -39,20 +39,24 @@ Preferred communication style: Simple, everyday language.
 - Prayer counter that tracks community participation
 - Goal-based progress tracking for each prayer
 - Browse and search functionality for prayers
-- User authentication via Replit Auth
+- Custom user authentication with email/password registration
 
 ## External Dependencies
 
 ### Third-Party Services
 - **OpenAI API**: Generates AI summaries and recitable prayers from user submissions (requires `OPENAI_API_KEY`)
-- **Replit Auth**: Handles user authentication via OpenID Connect (requires `ISSUER_URL`, `REPL_ID`, `SESSION_SECRET`)
 
 ### Database
 - **PostgreSQL**: Primary database (requires `DATABASE_URL` environment variable)
 
+### Authentication
+- Custom email/password authentication (requires `SESSION_SECRET` environment variable)
+- Passwords hashed with bcrypt (12 rounds)
+- Sessions stored in PostgreSQL via connect-pg-simple
+
 ### Key NPM Packages
 - `drizzle-orm` / `drizzle-kit`: Database ORM and migrations
 - `openai`: OpenAI API client for AI content generation
-- `passport` / `openid-client`: Authentication handling
+- `bcrypt`: Secure password hashing
 - `@tanstack/react-query`: Server state management
 - `shadcn/ui` components via Radix UI primitives
