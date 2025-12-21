@@ -43,7 +43,7 @@ export default function AuthPage() {
       }
 
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      navigate("/");
+      navigate("/"); // Login goes to home
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -81,7 +81,7 @@ export default function AuthPage() {
       }
 
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      navigate("/");
+      navigate("/create"); // New accounts go to create prayer page
     } catch (err: any) {
       setError(err.message);
     } finally {
