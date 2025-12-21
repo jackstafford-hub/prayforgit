@@ -944,7 +944,7 @@ export default function CreatePrayer() {
 
             <div className="pt-4">
               <Button 
-                onClick={() => setLocation(`/prayer/${createdPrayerId}`)}
+                onClick={() => setLocation('/dashboard')}
                 className="w-full max-w-sm h-14 text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl uppercase tracking-wide"
               >
                 Go to Dashboard

@@ -10,7 +10,7 @@ import HowToPray from "@/pages/how-to-pray";
 import Browse from "@/pages/browse";
 import CompleteSupport from "@/pages/complete-support";
 import AuthPage from "@/pages/auth";
-import MyPrayers from "@/pages/my-prayers";
+import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -23,7 +23,7 @@ function Router() {
       <Route path="/prayer/:id" component={PrayerDetail} />
       <Route path="/support/:id" component={CompleteSupport} />
       <Route path="/auth" component={AuthPage} />
-      <Route path="/my-prayers" component={MyPrayers} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route component={NotFound} />
     </Switch>
   );

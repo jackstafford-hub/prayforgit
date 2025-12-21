@@ -1,0 +1,196 @@
+import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { Navbar } from "@/components/navbar";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/hooks/useAuth";
+import { Plus, Loader2, TrendingUp, Users, Eye, Share2, ChevronRight } from "lucide-react";
+import type { Prayer } from "@shared/schema";
+
+export default function Dashboard() {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const [, navigate] = useLocation();
+
+  const { data: prayers, isLoading } = useQuery<Prayer[]>({
+    queryKey: ["/api/my-prayers"],
+    enabled: isAuthenticated,
+  });
+
+  const totalPrayers = prayers?.reduce((sum, p) => sum + p.count, 0) || 0;
+  const totalGoal = prayers?.reduce((sum, p) => sum + p.goal, 0) || 0;
+  const publicPrayers = prayers?.filter(p => p.count >= 5).length || 0;
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="font-serif text-3xl font-bold mb-4">Prayer Dashboard</h1>
+          <p className="text-muted-foreground mb-8">Please log in to see your dashboard.</p>
+          <Link href="/auth">
+            <Button data-testid="button-login-prompt">Log in</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="font-serif text-3xl font-bold">Your Prayer Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Track how your prayers are growing</p>
+          </div>
+          <Link href="/create">
+            <Button className="gap-2" data-testid="button-create-prayer">
+              <Plus className="w-4 h-4" />
+              New Prayer
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3 mb-8">
+          <div className="bg-card border rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Users className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-sm font-medium text-muted-foreground">Total Prayers Received</span>
+            </div>
+            <p className="text-3xl font-bold" data-testid="text-total-prayers">{totalPrayers.toLocaleString()}</p>
+          </div>
+          
+          <div className="bg-card border rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                <Eye className="w-5 h-5 text-green-600" />
+              </div>
+              <span className="text-sm font-medium text-muted-foreground">Public Prayers</span>
+            </div>
+            <p className="text-3xl font-bold" data-testid="text-public-prayers">{publicPrayers}</p>
+            <p className="text-xs text-muted-foreground mt-1">Visible on PrayForChange</p>
+          </div>
+          
+          <div className="bg-card border rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+              </div>
+              <span className="text-sm font-medium text-muted-foreground">Goal Progress</span>
+            </div>
+            <p className="text-3xl font-bold" data-testid="text-goal-progress">
+              {totalGoal > 0 ? Math.round((totalPrayers / totalGoal) * 100) : 0}%
+            </p>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <h2 className="font-serif text-xl font-bold mb-4">Your Prayers</h2>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : prayers && prayers.length > 0 ? (
+          <div className="space-y-4">
+            {prayers.map((prayer) => {
+              const progressPercent = Math.min((prayer.count / prayer.goal) * 100, 100);
+              const isPublic = prayer.count >= 5;
+              
+              return (
+                <div 
+                  key={prayer.id} 
+                  className="bg-card border rounded-xl p-4 md:p-6 hover:border-primary/30 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/prayer/${prayer.id}`)}
+                  data-testid={`card-prayer-${prayer.id}`}
+                >
+                  <div className="flex gap-4">
+                    {prayer.imageUrl && (
+                      <div className="hidden md:block w-24 h-20 rounded-lg overflow-hidden shrink-0 bg-muted">
+                        <img 
+                          src={prayer.imageUrl} 
+                          alt="" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-4 mb-2">
+                        <h3 className="font-serif font-bold text-lg line-clamp-1">{prayer.title}</h3>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {isPublic ? (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Public</span>
+                          ) : (
+                            <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">
+                              {5 - prayer.count} more to go public
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm text-muted-foreground line-clamp-1 mb-3">
+                        {prayer.aiSummary || prayer.description}
+                      </p>
+                      
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="font-medium">{prayer.count.toLocaleString()} prayers</span>
+                            <span className="text-muted-foreground">{prayer.goal.toLocaleString()} goal</span>
+                          </div>
+                          <Progress value={progressPercent} className="h-2" />
+                        </div>
+                        
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="shrink-0 gap-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(`${window.location.origin}/prayer/${prayer.id}`);
+                          }}
+                          data-testid={`button-share-${prayer.id}`}
+                        >
+                          <Share2 className="w-4 h-4" />
+                          <span className="hidden md:inline">Share</span>
+                        </Button>
+                        
+                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-16 bg-muted/30 rounded-xl border">
+            <p className="text-muted-foreground mb-6">You haven't created any prayers yet.</p>
+            <Link href="/create">
+              <Button className="gap-2" data-testid="button-create-first-prayer">
+                <Plus className="w-4 h-4" />
+                Start Your First Prayer
+              </Button>
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

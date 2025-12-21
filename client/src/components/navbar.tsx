@@ -83,7 +83,7 @@ export function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigate("/my-prayers")} className="cursor-pointer">
+                <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
                   <Heart className="w-4 h-4 mr-2" />
                   My Prayers
                 </DropdownMenuItem>
