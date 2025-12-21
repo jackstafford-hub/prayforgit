@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, UserCircle, LogOut, X } from "lucide-react";
+import { Search, Menu, UserCircle, LogOut, Heart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import type { User } from "@shared/schema";
 import {
@@ -83,6 +83,10 @@ export function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate("/my-prayers")} className="cursor-pointer">
+                  <Heart className="w-4 h-4 mr-2" />
+                  My Prayers
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                   <LogOut className="w-4 h-4 mr-2" />
                   Log out
