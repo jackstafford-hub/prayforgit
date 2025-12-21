@@ -578,18 +578,18 @@ export default function CreatePrayer() {
             </div>
 
             <div className="space-y-4">
-               <p className="text-center text-muted-foreground">Sign in with Google, GitHub, Apple, or email to save your prayer.</p>
+               <p className="text-center text-muted-foreground">Create an account or sign in to save your prayer.</p>
                
-               <a 
-                  href="/api/login"
+               <Link 
+                  href="/auth"
                   onClick={() => {
                     localStorage.setItem('pendingPrayer', JSON.stringify({ formData, step: 'details' }));
                   }}
                   className="flex items-center justify-center w-full h-12 text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-md"
                   data-testid="button-login-create"
                 >
-                  Create a Log In
-               </a>
+                  Create Account or Sign In
+               </Link>
 
                <Button 
                   variant="outline"
