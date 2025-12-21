@@ -236,8 +236,7 @@ export default function CreatePrayer() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitPrayer = async () => {
     setIsSubmitting(true);
 
     try {
@@ -270,6 +269,19 @@ export default function CreatePrayer() {
       console.error("Error creating prayer:", error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitPrayer();
+  };
+
+  const handleLooksGood = async () => {
+    if (isAuthenticated) {
+      await submitPrayer();
+    } else {
+      setStep('next-steps');
     }
   };
 
@@ -541,10 +553,12 @@ export default function CreatePrayer() {
                   Back
                 </Button>
                 <Button 
-                  onClick={() => setStep('next-steps')}
+                  onClick={handleLooksGood}
+                  disabled={isSubmitting}
                   className="flex-1 h-12 text-base font-bold bg-primary hover:bg-primary/90"
                 >
-                  Looks Good
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  {isSubmitting ? "Publishing..." : "Looks Good"}
                 </Button>
             </div>
           </div>
