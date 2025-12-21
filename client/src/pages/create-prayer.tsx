@@ -10,6 +10,8 @@ import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { generatePrayerContent, createPrayer, generateImage } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
+import type { User } from "@shared/schema";
 
 // Import mock generated images
 import gen1 from "@assets/generated_images/abstract_rays_of_light_through_clouds.png";
@@ -55,6 +57,8 @@ type Step = 'title' | 'story' | 'review' | 'next-steps' | 'auth' | 'notification
 export default function CreatePrayer() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user: authUser, isAuthenticated } = useAuth();
+  const user = authUser as User | null;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [createdPrayerId, setCreatedPrayerId] = useState<string | null>(null);
@@ -64,6 +68,14 @@ export default function CreatePrayer() {
 
   const [step, setStep] = useState<Step>(initialTitle ? 'story' : 'title');
 
+  // Get user's full name if authenticated
+  const getUserFullName = () => {
+    if (user?.firstName) {
+      return user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName;
+    }
+    return "";
+  };
+
   const [formData, setFormData] = useState({
     title: initialTitle,
     description: "",
@@ -72,6 +84,13 @@ export default function CreatePrayer() {
     recitablePrayer: "",
     imageUrl: ""
   });
+
+  // Pre-fill author name when user authenticates
+  useEffect(() => {
+    if (isAuthenticated && user && !formData.author) {
+      setFormData(prev => ({ ...prev, author: getUserFullName() }));
+    }
+  }, [isAuthenticated, user]);
   const [emailUpdates, setEmailUpdates] = useState<boolean | null>(null);
   const [isEditingIssue, setIsEditingIssue] = useState(false);
   const [isEditingPrayer, setIsEditingPrayer] = useState(false);
@@ -561,7 +580,7 @@ export default function CreatePrayer() {
                   Back
                 </Button>
                 <Button 
-                  onClick={() => setStep('auth')}
+                  onClick={() => setStep(isAuthenticated ? 'details' : 'auth')}
                   className="flex-1 h-12 text-base font-bold bg-primary hover:bg-primary/90"
                 >
                   Continue
@@ -695,18 +714,20 @@ export default function CreatePrayer() {
                     </div>
                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="author">Your Name</Label>
-                  <Input
-                    id="author"
-                    autoFocus
-                    placeholder="John Doe"
-                    required
-                    value={formData.author}
-                    onChange={e => setFormData(prev => ({ ...prev, author: e.target.value }))}
-                    className="h-12"
-                  />
-                </div>
+                {!isAuthenticated && (
+                  <div className="space-y-2">
+                    <Label htmlFor="author">Your Name</Label>
+                    <Input
+                      id="author"
+                      autoFocus
+                      placeholder="John Doe"
+                      required
+                      value={formData.author}
+                      onChange={e => setFormData(prev => ({ ...prev, author: e.target.value }))}
+                      className="h-12"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="p-4 bg-muted/50 rounded-lg text-sm text-muted-foreground text-center">
