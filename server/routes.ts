@@ -100,22 +100,35 @@ The prayer should:
         return res.status(400).json({ error: "Title is required" });
       }
 
-      const summaryLower = (aiSummary || title).toLowerCase();
-      let imagePrompt: string;
-      
-      if (summaryLower.includes('cancer') || summaryLower.includes('illness') || summaryLower.includes('hospital') || summaryLower.includes('health') || summaryLower.includes('healing')) {
-        imagePrompt = `An image symbolizing healing and hope: gentle sunlight streaming through a window onto fresh flowers, a butterfly emerging from a cocoon, or delicate light breaking through storm clouds. Style: soft, warm, comforting, ethereal. Avoid: Any text, faces, medical imagery.`;
-      } else if (summaryLower.includes('marriage') || summaryLower.includes('family') || summaryLower.includes('children') || summaryLower.includes('relationship') || summaryLower.includes('reconciliation')) {
-        imagePrompt = `An image symbolizing family love and restoration: two trees with intertwined branches, a broken heart being mended with golden light, or two birds building a nest together. Style: warm, emotional, romantic sunset lighting. Avoid: Any text, faces, specific people.`;
-      } else if (summaryLower.includes('job') || summaryLower.includes('employment') || summaryLower.includes('work') || summaryLower.includes('career') || summaryLower.includes('interview')) {
-        imagePrompt = `An image symbolizing breakthrough and new opportunities: a grand door opening to brilliant golden light, seeds sprouting through cracked concrete, or a winding path through a forest leading to a sunlit clearing. Style: hopeful, triumphant, inspiring. Avoid: Any text, faces, office imagery.`;
-      } else if (summaryLower.includes('peace') || summaryLower.includes('war') || summaryLower.includes('conflict') || summaryLower.includes('violence')) {
-        imagePrompt = `A hopeful image symbolizing peace and unity: a beautiful white dove carrying an olive branch over calm waters at sunrise, or hands of different shades clasped together in silhouette against a golden sky. Style: peaceful, hopeful, dawn lighting. Avoid: Any text, specific faces, violence.`;
-      } else if (summaryLower.includes('grief') || summaryLower.includes('loss') || summaryLower.includes('death') || summaryLower.includes('passed away')) {
-        imagePrompt = `An image symbolizing comfort and eternal hope: a single candle flame in soft darkness, a butterfly landing on a memorial flower, or sunlight breaking through clouds to illuminate a peaceful meadow. Style: serene, comforting, gentle. Avoid: Any text, faces, graves.`;
-      } else {
-        imagePrompt = `Create a unique, emotionally moving image with warm hopeful lighting. Visual elements: nature scenes, rays of light, calm water, or symbolic imagery of hope and transformation. Style: evocative, beautiful, peaceful. Avoid: Any text, faces, religious symbols.`;
-      }
+      // Use AI to generate a contextual image prompt based on the prayer content
+      const promptGenerationResponse = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{
+          role: "user",
+          content: `Based on this prayer request, create a DALL-E image prompt for a powerful, emotional image that captures the essence of this issue.
+
+Title: ${title}
+${aiSummary ? `Content: ${aiSummary.substring(0, 500)}` : ''}
+
+Create a detailed image prompt that:
+1. Captures the specific emotional theme and subject matter of this prayer (e.g., if about Sudan, show African landscape; if about a sick mother, show healing imagery)
+2. Uses symbolic and metaphorical imagery that relates directly to the content
+3. Has warm, hopeful lighting with emotional impact
+4. Is artistic and moving without being literal or graphic
+
+IMPORTANT RULES:
+- NO text, words, or letters in the image
+- NO human faces or specific people
+- NO religious symbols (crosses, etc.)
+- Focus on nature, light, symbolic objects, and abstract emotional imagery
+
+Respond with ONLY the image prompt, nothing else.`
+        }],
+        temperature: 0.7,
+      });
+
+      const imagePrompt = promptGenerationResponse.choices[0].message.content || 
+        `Evocative image symbolizing hope and healing: golden sunlight breaking through clouds over a peaceful landscape. Style: warm, emotional, cinematic. Avoid: text, faces, religious symbols.`;
 
       const imageResponse = await openai.images.generate({
         model: "dall-e-3",
