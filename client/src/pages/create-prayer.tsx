@@ -388,6 +388,14 @@ export default function CreatePrayer() {
                   Generate Prayer
                 </Button>
               </div>
+              
+              <div className="text-center pt-4">
+                <Link href="/personal-prayer">
+                  <span className="text-sm text-muted-foreground hover:text-primary underline cursor-pointer">
+                    Is this a Personal Prayer?
+                  </span>
+                </Link>
+              </div>
             </form>
           </div>
         );
