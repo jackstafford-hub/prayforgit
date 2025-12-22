@@ -10,7 +10,23 @@ import bgTexture from "@assets/generated_images/subtle_warm_paper_texture_backgr
 import { getPrayerById, updatePrayerContent, regeneratePrayerContent } from "@/lib/api";
 import type { Prayer, User } from "@shared/schema";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function PrayerDetail() {
   const [, params] = useRoute("/prayer/:id");
@@ -32,7 +48,43 @@ export default function PrayerDetail() {
   const [isRegeneratingIssue, setIsRegeneratingIssue] = useState(false);
   const [isRegeneratingPrayer, setIsRegeneratingPrayer] = useState(false);
   
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reporterEmail, setReporterEmail] = useState("");
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  
   const canEdit = isAuthenticated && prayer && (!prayer.authorId || prayer.authorId === user?.id);
+
+  const handleSubmitReport = async () => {
+    if (!prayer || !reportReason) return;
+    
+    setIsSubmittingReport(true);
+    try {
+      const response = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prayerId: prayer.id,
+          reason: reportReason,
+          details: reportDetails || undefined,
+          reporterEmail: reporterEmail || undefined,
+        }),
+      });
+      
+      if (!response.ok) throw new Error("Failed to submit report");
+      
+      toast({ title: "Report submitted", description: "Thank you for helping keep our community safe." });
+      setReportDialogOpen(false);
+      setReportReason("");
+      setReportDetails("");
+      setReporterEmail("");
+    } catch (error) {
+      toast({ title: "Failed to submit report", variant: "destructive" });
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
 
   useEffect(() => {
     const fetchPrayer = async () => {
@@ -355,11 +407,90 @@ export default function PrayerDetail() {
             )}
             
             <div className="pt-4 flex gap-4 justify-center lg:justify-start">
-               <Button variant="ghost" className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 text-sm">
+               <Button 
+                 variant="ghost" 
+                 className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 text-sm"
+                 onClick={() => setReportDialogOpen(true)}
+                 data-testid="button-report"
+               >
                  <Flag className="w-4 h-4 mr-2" />
                  Report this policy violation
                </Button>
             </div>
+            
+            <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Report Policy Violation</DialogTitle>
+                  <DialogDescription>
+                    Help us keep PrayForChange a safe and respectful community.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reason">Reason for report *</Label>
+                    <Select value={reportReason} onValueChange={setReportReason}>
+                      <SelectTrigger data-testid="select-report-reason">
+                        <SelectValue placeholder="Select a reason" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="spam">Spam or misleading</SelectItem>
+                        <SelectItem value="inappropriate">Inappropriate content</SelectItem>
+                        <SelectItem value="harmful">Harmful or dangerous</SelectItem>
+                        <SelectItem value="fraud">Fraud or scam</SelectItem>
+                        <SelectItem value="hate">Hate speech or discrimination</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="details">Additional details (optional)</Label>
+                    <Textarea
+                      id="details"
+                      placeholder="Please provide any additional context..."
+                      value={reportDetails}
+                      onChange={(e) => setReportDetails(e.target.value)}
+                      className="min-h-[100px]"
+                      data-testid="textarea-report-details"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Your email (optional)</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="For follow-up if needed"
+                      value={reporterEmail}
+                      onChange={(e) => setReporterEmail(e.target.value)}
+                      data-testid="input-reporter-email"
+                    />
+                  </div>
+                  
+                  <div className="flex gap-3 pt-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => setReportDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      className="flex-1"
+                      onClick={handleSubmitReport}
+                      disabled={!reportReason || isSubmittingReport}
+                      data-testid="button-submit-report"
+                    >
+                      {isSubmittingReport ? (
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      ) : null}
+                      Submit Report
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="lg:sticky lg:top-24 h-fit">

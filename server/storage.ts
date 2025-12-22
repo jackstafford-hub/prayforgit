@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { type User, type UpsertUser, type Prayer, type InsertPrayer, users, prayers } from "@shared/schema";
+import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, users, prayers, reports } from "@shared/schema";
 import { eq, desc, gte } from "drizzle-orm";
 
 export interface IStorage {
@@ -18,6 +18,9 @@ export interface IStorage {
   incrementPrayerCount(id: string): Promise<Prayer | undefined>;
   updatePrayerImage(id: string, imageUrl: string): Promise<Prayer | undefined>;
   updatePrayerContent(id: string, content: { aiSummary?: string; recitablePrayer?: string }): Promise<Prayer | undefined>;
+  
+  // Report methods
+  createReport(report: InsertReport): Promise<Report>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -117,6 +120,12 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updated;
+  }
+
+  // Report methods
+  async createReport(report: InsertReport): Promise<Report> {
+    const [created] = await db.insert(reports).values(report).returning();
+    return created;
   }
 }
 

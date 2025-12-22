@@ -68,3 +68,21 @@ export const loginSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+
+// Reports table for policy violations
+export const reports = pgTable("reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  prayerId: varchar("prayer_id").references(() => prayers.id).notNull(),
+  reason: text("reason").notNull(),
+  details: text("details"),
+  reporterEmail: varchar("reporter_email"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertReportSchema = createInsertSchema(reports).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertReport = z.infer<typeof insertReportSchema>;
+export type Report = typeof reports.$inferSelect;

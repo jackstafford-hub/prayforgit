@@ -1,13 +1,14 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPrayerSchema } from "@shared/schema";
+import { insertPrayerSchema, insertReportSchema } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
 import { setupAuth, isAuthenticated } from "./auth";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import express from "express";
 import path from "path";
+import { Resend } from "resend";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -443,6 +444,49 @@ The prayer should:
     } catch (error: any) {
       console.error("Error regenerating images:", error);
       res.status(500).json({ error: "Failed to regenerate images" });
+    }
+  });
+
+  // Report policy violation
+  app.post("/api/reports", async (req, res) => {
+    try {
+      const validatedData = insertReportSchema.parse(req.body);
+      const report = await storage.createReport(validatedData);
+      
+      // Send email notification
+      const resendApiKey = process.env.RESEND_API_KEY;
+      if (resendApiKey) {
+        try {
+          const resend = new Resend(resendApiKey);
+          const prayer = await storage.getPrayerById(validatedData.prayerId);
+          
+          await resend.emails.send({
+            from: "PrayForChange <notifications@prayforchange.org>",
+            to: "jack.stafford@aetherius.org",
+            subject: `Policy Violation Report: ${prayer?.title || 'Unknown Prayer'}`,
+            html: `
+              <h2>New Policy Violation Report</h2>
+              <p><strong>Prayer:</strong> ${prayer?.title || 'Unknown'}</p>
+              <p><strong>Prayer ID:</strong> ${validatedData.prayerId}</p>
+              <p><strong>Reason:</strong> ${validatedData.reason}</p>
+              <p><strong>Details:</strong> ${validatedData.details || 'No additional details provided'}</p>
+              <p><strong>Reporter Email:</strong> ${validatedData.reporterEmail || 'Anonymous'}</p>
+              <hr>
+              <p><a href="https://prayforchange.org/prayer/${validatedData.prayerId}">View Prayer</a></p>
+            `,
+          });
+        } catch (emailError) {
+          console.error("Failed to send report email:", emailError);
+        }
+      }
+      
+      res.status(201).json({ message: "Report submitted successfully" });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid report data", details: error.errors });
+      }
+      console.error("Error creating report:", error);
+      res.status(500).json({ error: "Failed to submit report" });
     }
   });
 
