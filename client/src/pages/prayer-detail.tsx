@@ -531,6 +531,14 @@ export default function PrayerDetail() {
                   <Button variant="outline" className="w-full">Copy Link</Button>
                 </div>
               )}
+              
+              <div className="pt-4 border-t text-center">
+                <Link href="/personal-prayer">
+                  <span className="text-sm text-muted-foreground hover:text-primary underline cursor-pointer">
+                    Is this a Personal Prayer?
+                  </span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

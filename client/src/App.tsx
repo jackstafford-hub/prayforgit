@@ -11,6 +11,7 @@ import Browse from "@/pages/browse";
 import CompleteSupport from "@/pages/complete-support";
 import AuthPage from "@/pages/auth";
 import Dashboard from "@/pages/dashboard";
+import PersonalPrayer from "@/pages/personal-prayer";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/support/:id" component={CompleteSupport} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/personal-prayer" component={PersonalPrayer} />
       <Route component={NotFound} />
     </Switch>
   );
