@@ -48,8 +48,6 @@ export function Navbar() {
           
           <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
             <Link href="/how-to-pray"><span className="hover:text-foreground transition-colors cursor-pointer">How to pray</span></Link>
-            <Link href="/personal-prayer"><span className="hover:text-foreground transition-colors cursor-pointer">Personal Prayer</span></Link>
-            <Link href="/browse"><span className="hover:text-foreground transition-colors cursor-pointer">Browse</span></Link>
           </div>
         </div>
 
@@ -140,14 +138,6 @@ export function Navbar() {
                   data-testid="link-mobile-how-to-pray"
                 >
                   How to pray
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  className="justify-start text-base cursor-pointer"
-                  onClick={() => { navigate("/personal-prayer"); setMobileMenuOpen(false); }}
-                  data-testid="link-mobile-personal-prayer"
-                >
-                  Personal Prayer
                 </Button>
                 <Button 
                   variant="ghost" 
