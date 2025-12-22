@@ -543,7 +543,7 @@ export default function CreatePrayer() {
                        className="min-h-[120px] text-base resize-none bg-background font-serif italic"
                      />
                    ) : (
-                     <p className="font-serif text-lg italic leading-relaxed text-primary/90">
+                     <p className="font-serif text-lg italic leading-relaxed text-primary/90 whitespace-pre-line">
                        "{formData.recitablePrayer}"
                      </p>
                    )}
