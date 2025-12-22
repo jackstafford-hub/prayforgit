@@ -28,6 +28,7 @@ export function Navbar() {
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
+      queryClient.setQueryData(["/api/auth/user"], null);
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       navigate("/");
     } catch (error) {
