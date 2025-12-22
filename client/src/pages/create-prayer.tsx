@@ -627,7 +627,7 @@ export default function CreatePrayer() {
             </div>
 
             <div className="space-y-4">
-               <p className="text-center text-muted-foreground">Create an account or sign in to save your prayer.</p>
+               <p className="text-center text-muted-foreground">You need an account to share your prayer with the community.</p>
                
                <Link 
                   href="/auth"
@@ -639,14 +639,6 @@ export default function CreatePrayer() {
                 >
                   Create Account or Sign In
                </Link>
-
-               <Button 
-                  variant="outline"
-                  onClick={() => setStep('details')}
-                  className="w-full h-12 text-base"
-                >
-                  Continue as Guest
-               </Button>
             </div>
 
             <p className="text-xs text-center text-muted-foreground px-4">
