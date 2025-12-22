@@ -55,19 +55,20 @@ Write in first person. Be compassionate, authentic, and inspiring. Use a tone si
       const prayerPrompt = `Write a beautiful, structured prayer for a community to recite together for: ${title}
 ${description ? `Context: ${description}` : ''}
 
-Use this Prayer for Peace as a template for the structure and tone:
+You MUST closely follow this exact prayer template, using similar terminology and phrases:
 
 ---
-Oh Mighty God, Creator of Life
+Oh Mighty Brahma, Creator of Life
 We ask that we may be used as Channels for
 Thy vibrant Healing Power to flow through us
 In a living stream of radiant loving energy
-To bring peace and harmony to [name of issue/area]
+To bring peace and harmony to Ukraine
 And healing and protection to 
-All the people who are injured and suffering 
+All the people who are injured and suffering in this
+War-torn country
 
 Oh Divine Father of Life,
-May thy wondrous power flood this area now
+May thy wondrous power flood this country now
 Bringing hope wherever it touches.
 healing to the sick and wounded
 And strength to those who have suffered great loss.
@@ -83,22 +84,39 @@ May much-needed aid of every kind flow now
 from every Corner of our world
 In the realization that we are one human family.
 Sharing in our grief and in our joy.
-Oh God, we thank you for this opportunity to be of Service 
+Oh God. we thank you for this opportunity to be of Service 
 May Thy Will be Done
 ---
 
-The prayer should:
-- Follow a similar multi-verse structure with 4-5 stanzas
-- Address God with reverent titles (Oh Mighty God, Oh Divine Father, Oh Divine Creator, etc.)
-- Be written for a COMMUNITY to pray together (use "we", "us", "our")
-- Include specific references to the issue/person being prayed for
-- Ask for healing, strength, peace, and divine intervention as appropriate
-- Include gratitude and surrender ("May Thy Will be Done")
-- Be heartfelt, poetic, and spiritually uplifting
-- Adapt the content to match the specific prayer need (healing, peace, employment, family, etc.)
-- End with "May Thy Will be Done" or similar closing
+CRITICAL INSTRUCTIONS - Follow these EXACTLY:
 
-Do NOT include the title at the start. Jump straight into the prayer.`;
+1. USE THESE EXACT PHRASES (adapt to context):
+   - "We ask that we may be used as Channels"
+   - "Thy vibrant Healing Power to flow through us"
+   - "In a living stream of radiant loving energy"
+   - "May thy wondrous power flood" 
+   - "Bringing hope wherever it touches"
+   - "May they all be comforted by Thy Presence"
+   - "We pray that Thy Loving power flows to all"
+   - "with clarity, wisdom, love, understanding"
+   - "In the realization that we are one human family"
+   - "Sharing in our grief and in our joy"
+   - "we thank you for this opportunity to be of Service"
+   - "May Thy Will be Done"
+
+2. USE THESE DIVINE ADDRESSES:
+   - "Oh Mighty Brahma, Creator of Life" (first stanza)
+   - "Oh Divine Father of Life" (second stanza)
+   - "Oh Divine Creator" (final stanza)
+   - "Oh God" can be used within stanzas
+
+3. STRUCTURE: Exactly 4 stanzas following the template structure
+
+4. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
+
+5. Always end with "May Thy Will be Done"
+
+Do NOT include a title. Start directly with "Oh Mighty Brahma, Creator of Life"`;
 
       // Run both GPT calls in parallel for speed
       const [summaryResponse, prayerResponse] = await Promise.all([
@@ -411,19 +429,20 @@ Write in first person. Be compassionate, authentic, and inspiring. Use a tone si
         const prayerPrompt = `Write a beautiful, structured prayer for a community to recite together for: ${prayer.title}
 ${prayer.description ? `Context: ${prayer.description}` : ''}
 
-Use this Prayer for Peace as a template for the structure and tone:
+You MUST closely follow this exact prayer template, using similar terminology and phrases:
 
 ---
-Oh Mighty God, Creator of Life
+Oh Mighty Brahma, Creator of Life
 We ask that we may be used as Channels for
 Thy vibrant Healing Power to flow through us
 In a living stream of radiant loving energy
-To bring peace and harmony to [name of issue/area]
+To bring peace and harmony to Ukraine
 And healing and protection to 
-All the people who are injured and suffering 
+All the people who are injured and suffering in this
+War-torn country
 
 Oh Divine Father of Life,
-May thy wondrous power flood this area now
+May thy wondrous power flood this country now
 Bringing hope wherever it touches.
 healing to the sick and wounded
 And strength to those who have suffered great loss.
@@ -439,22 +458,39 @@ May much-needed aid of every kind flow now
 from every Corner of our world
 In the realization that we are one human family.
 Sharing in our grief and in our joy.
-Oh God, we thank you for this opportunity to be of Service 
+Oh God. we thank you for this opportunity to be of Service 
 May Thy Will be Done
 ---
 
-The prayer should:
-- Follow a similar multi-verse structure with 4-5 stanzas
-- Address God with reverent titles (Oh Mighty God, Oh Divine Father, Oh Divine Creator, etc.)
-- Be written for a COMMUNITY to pray together (use "we", "us", "our")
-- Include specific references to the issue/person being prayed for
-- Ask for healing, strength, peace, and divine intervention as appropriate
-- Include gratitude and surrender ("May Thy Will be Done")
-- Be heartfelt, poetic, and spiritually uplifting
-- Adapt the content to match the specific prayer need (healing, peace, employment, family, etc.)
-- End with "May Thy Will be Done" or similar closing
+CRITICAL INSTRUCTIONS - Follow these EXACTLY:
 
-Do NOT include the title at the start. Jump straight into the prayer.`;
+1. USE THESE EXACT PHRASES (adapt to context):
+   - "We ask that we may be used as Channels"
+   - "Thy vibrant Healing Power to flow through us"
+   - "In a living stream of radiant loving energy"
+   - "May thy wondrous power flood" 
+   - "Bringing hope wherever it touches"
+   - "May they all be comforted by Thy Presence"
+   - "We pray that Thy Loving power flows to all"
+   - "with clarity, wisdom, love, understanding"
+   - "In the realization that we are one human family"
+   - "Sharing in our grief and in our joy"
+   - "we thank you for this opportunity to be of Service"
+   - "May Thy Will be Done"
+
+2. USE THESE DIVINE ADDRESSES:
+   - "Oh Mighty Brahma, Creator of Life" (first stanza)
+   - "Oh Divine Father of Life" (second stanza)
+   - "Oh Divine Creator" (final stanza)
+   - "Oh God" can be used within stanzas
+
+3. STRUCTURE: Exactly 4 stanzas following the template structure
+
+4. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
+
+5. Always end with "May Thy Will be Done"
+
+Do NOT include a title. Start directly with "Oh Mighty Brahma, Creator of Life"`;
 
         const prayerResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
