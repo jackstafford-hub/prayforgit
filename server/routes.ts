@@ -196,10 +196,18 @@ Respond with ONLY the image prompt, nothing else.`
   });
 
   // Create new prayer
-  app.post("/api/prayers", async (req, res) => {
+  app.post("/api/prayers", async (req: any, res) => {
     try {
       const validatedData = insertPrayerSchema.parse(req.body);
-      const prayer = await storage.createPrayer(validatedData);
+      
+      // Link prayer to logged-in user if authenticated
+      const userId = req.session?.userId;
+      const prayerData = {
+        ...validatedData,
+        authorId: userId || null,
+      };
+      
+      const prayer = await storage.createPrayer(prayerData);
       res.status(201).json(prayer);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
