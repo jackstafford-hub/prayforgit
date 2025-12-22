@@ -58,34 +58,34 @@ ${description ? `Context: ${description}` : ''}
 You MUST closely follow this exact prayer template, using similar terminology and phrases:
 
 ---
-Oh Mighty Brahma, Creator of Life
+Oh Mighty God, Creator of Life,
 We ask that we may be used as Channels for
 Thy vibrant Healing Power to flow through us
 In a living stream of radiant loving energy
 To bring peace and harmony to Ukraine
-And healing and protection to 
+And healing and protection to
 All the people who are injured and suffering in this
-War-torn country
+War-torn country.
 
 Oh Divine Father of Life,
-May thy wondrous power flood this country now
-Bringing hope wherever it touches.
-healing to the sick and wounded
+May Thy wondrous power flood this country now
+Bringing hope wherever it touches,
+Healing to the sick and wounded,
 And strength to those who have suffered great loss.
-Oh God, May they all be comforted by Thy Presence
+Oh God, May they all be comforted by Thy Presence.
 
-We pray that Thy Loving power flows to all 
-who are helping to bring peace
-To inspire them in their difficult work.
-with clarity, wisdom, love, understanding
+We pray that Thy Loving power flows to all
+Who are helping to bring peace,
+To inspire them in their difficult work
+With clarity, wisdom, love, understanding.
 
 Oh Divine Creator,
-May much-needed aid of every kind flow now 
-from every Corner of our world
-In the realization that we are one human family.
+May much-needed aid of every kind flow now
+From every corner of our world
+In the realization that we are one human family,
 Sharing in our grief and in our joy.
-Oh God. we thank you for this opportunity to be of Service 
-May Thy Will be Done
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.
 ---
 
 CRITICAL INSTRUCTIONS - Follow these EXACTLY:
@@ -94,29 +94,31 @@ CRITICAL INSTRUCTIONS - Follow these EXACTLY:
    - "We ask that we may be used as Channels"
    - "Thy vibrant Healing Power to flow through us"
    - "In a living stream of radiant loving energy"
-   - "May thy wondrous power flood" 
+   - "May Thy wondrous power flood" 
    - "Bringing hope wherever it touches"
    - "May they all be comforted by Thy Presence"
    - "We pray that Thy Loving power flows to all"
-   - "with clarity, wisdom, love, understanding"
+   - "With clarity, wisdom, love, understanding"
    - "In the realization that we are one human family"
    - "Sharing in our grief and in our joy"
    - "we thank you for this opportunity to be of Service"
    - "May Thy Will be Done"
 
 2. USE THESE DIVINE ADDRESSES:
-   - "Oh Mighty Brahma, Creator of Life" (first stanza)
+   - "Oh Mighty God, Creator of Life" (first stanza)
    - "Oh Divine Father of Life" (second stanza)
    - "Oh Divine Creator" (final stanza)
    - "Oh God" can be used within stanzas
 
 3. STRUCTURE: Exactly 4 stanzas following the template structure
 
-4. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
+4. FORMAT: Each new sentence or phrase that starts with a capital letter should be on its own line
 
-5. Always end with "May Thy Will be Done"
+5. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
 
-Do NOT include a title. Start directly with "Oh Mighty Brahma, Creator of Life"`;
+6. Always end with "May Thy Will be Done."
+
+Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
 
       // Run both GPT calls in parallel for speed
       const [summaryResponse, prayerResponse] = await Promise.all([
@@ -432,34 +434,34 @@ ${prayer.description ? `Context: ${prayer.description}` : ''}
 You MUST closely follow this exact prayer template, using similar terminology and phrases:
 
 ---
-Oh Mighty Brahma, Creator of Life
+Oh Mighty God, Creator of Life,
 We ask that we may be used as Channels for
 Thy vibrant Healing Power to flow through us
 In a living stream of radiant loving energy
 To bring peace and harmony to Ukraine
-And healing and protection to 
+And healing and protection to
 All the people who are injured and suffering in this
-War-torn country
+War-torn country.
 
 Oh Divine Father of Life,
-May thy wondrous power flood this country now
-Bringing hope wherever it touches.
-healing to the sick and wounded
+May Thy wondrous power flood this country now
+Bringing hope wherever it touches,
+Healing to the sick and wounded,
 And strength to those who have suffered great loss.
-Oh God, May they all be comforted by Thy Presence
+Oh God, May they all be comforted by Thy Presence.
 
-We pray that Thy Loving power flows to all 
-who are helping to bring peace
-To inspire them in their difficult work.
-with clarity, wisdom, love, understanding
+We pray that Thy Loving power flows to all
+Who are helping to bring peace,
+To inspire them in their difficult work
+With clarity, wisdom, love, understanding.
 
 Oh Divine Creator,
-May much-needed aid of every kind flow now 
-from every Corner of our world
-In the realization that we are one human family.
+May much-needed aid of every kind flow now
+From every corner of our world
+In the realization that we are one human family,
 Sharing in our grief and in our joy.
-Oh God. we thank you for this opportunity to be of Service 
-May Thy Will be Done
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.
 ---
 
 CRITICAL INSTRUCTIONS - Follow these EXACTLY:
@@ -468,29 +470,31 @@ CRITICAL INSTRUCTIONS - Follow these EXACTLY:
    - "We ask that we may be used as Channels"
    - "Thy vibrant Healing Power to flow through us"
    - "In a living stream of radiant loving energy"
-   - "May thy wondrous power flood" 
+   - "May Thy wondrous power flood" 
    - "Bringing hope wherever it touches"
    - "May they all be comforted by Thy Presence"
    - "We pray that Thy Loving power flows to all"
-   - "with clarity, wisdom, love, understanding"
+   - "With clarity, wisdom, love, understanding"
    - "In the realization that we are one human family"
    - "Sharing in our grief and in our joy"
    - "we thank you for this opportunity to be of Service"
    - "May Thy Will be Done"
 
 2. USE THESE DIVINE ADDRESSES:
-   - "Oh Mighty Brahma, Creator of Life" (first stanza)
+   - "Oh Mighty God, Creator of Life" (first stanza)
    - "Oh Divine Father of Life" (second stanza)
    - "Oh Divine Creator" (final stanza)
    - "Oh God" can be used within stanzas
 
 3. STRUCTURE: Exactly 4 stanzas following the template structure
 
-4. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
+4. FORMAT: Each new sentence or phrase that starts with a capital letter should be on its own line
 
-5. Always end with "May Thy Will be Done"
+5. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
 
-Do NOT include a title. Start directly with "Oh Mighty Brahma, Creator of Life"`;
+6. Always end with "May Thy Will be Done."
+
+Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
 
         const prayerResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
