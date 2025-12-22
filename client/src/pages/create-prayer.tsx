@@ -582,6 +582,14 @@ export default function CreatePrayer() {
               <div className="p-4 bg-muted/50 rounded-lg border text-sm text-muted-foreground">
                 It will be shown publicly on PrayForChange after it receives 5 prayers.
               </div>
+              
+              <div className="text-center">
+                <Link href="/personal-prayer">
+                  <span className="text-sm text-muted-foreground hover:text-primary underline cursor-pointer">
+                    Is this a Personal Prayer?
+                  </span>
+                </Link>
+              </div>
             </div>
 
             <div className="flex gap-3 pt-4">
