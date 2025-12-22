@@ -83,8 +83,9 @@ export async function setupAuth(app: Express) {
         console.error("Registration validation error:", error.errors);
         return res.status(400).json({ message: error.errors[0]?.message || "Invalid input" });
       }
-      console.error("Registration error:", error.message, error.stack);
-      res.status(500).json({ message: "Failed to create account: " + error.message });
+      const errorMessage = error?.message || error?.toString() || "Unknown error";
+      console.error("Registration error:", errorMessage, error?.stack);
+      res.status(500).json({ message: "Failed to create account. Please try again." });
     }
   });
 
