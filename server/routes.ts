@@ -47,6 +47,8 @@ Write a compelling 3-4 paragraph story that:
 3. Calls others to join in prayer
 4. Inspires hope and unity
 
+IMPORTANT: Do NOT include a title or heading at the start. Jump straight into the story. Do not use any markdown formatting like ** or ##.
+
 Write in first person. Be compassionate, authentic, and inspiring. Use a tone similar to Change.org petitions but focused on spiritual support.`;
 
       const prayerPrompt = `Write a short, powerful prayer (2-3 sentences) for: ${title}
@@ -352,6 +354,8 @@ Write a compelling 3-4 paragraph story that:
 2. ${prayer.description ? 'Incorporates the personal context provided' : 'Expands on why this prayer matters'}
 3. Calls others to join in prayer
 4. Inspires hope and unity
+
+IMPORTANT: Do NOT include a title or heading at the start. Jump straight into the story. Do not use any markdown formatting like ** or ##.
 
 Write in first person. Be compassionate, authentic, and inspiring. Use a tone similar to Change.org petitions but focused on spiritual support.`;
 
