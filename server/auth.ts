@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
 import { registerSchema, loginSchema } from "@shared/schema";
 import { z } from "zod";
 
-const SALT_ROUNDS = 12;
+const SALT_ROUNDS = 10;
 
 export function getSession() {
   const sessionSecret = process.env.SESSION_SECRET;
