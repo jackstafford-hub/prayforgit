@@ -6,6 +6,7 @@ import { seedDatabase } from "./seed";
 import { runMigrations } from 'stripe-replit-sync';
 import { getStripeSync } from './stripeClient';
 import { WebhookHandlers } from './webhookHandlers';
+import adminRoutes from './routes/admin';
 
 const app = express();
 const httpServer = createServer(app);
@@ -142,6 +143,8 @@ async function initStripe() {
   });
 
   await registerRoutes(httpServer, app);
+
+  app.use("/api/admin", adminRoutes);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

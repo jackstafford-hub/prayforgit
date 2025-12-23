@@ -1,0 +1,130 @@
+Perfect — here’s a stack-specific Replit prompt for Express + Vite React + Postgres (Drizzle) + Tailwind/shadcn + Wouter, where Express serves the API and the built frontend, and you get an owner-only admin dashboard showing registered users + emails.
+
+Copy/paste this whole thing into Replit:
+
+⸻
+
+Replit prompt (Express + Vite + Drizzle + Postgres + Wouter)
+
+You are working in an existing monorepo-style project:
+	•	Backend: Express.js (Node.js)
+	•	Frontend: React (Vite)
+	•	Database: PostgreSQL
+	•	ORM: Drizzle
+	•	Styling: Tailwind + shadcn/ui
+	•	Client routing: Wouter
+	•	Express serves API routes and also serves the built React app (Vite build output)
+
+Goal
+Add an admin-only backend + UI so the site owner can log in and see a list of all registered user accounts and their email addresses.
+
+Key constraints
+	•	This is NOT Next.js/Remix. Use plain Express + React + Vite.
+	•	Implement server-side access control for admin routes and admin API endpoints.
+	•	Use Drizzle + Postgres for persistence.
+	•	The admin dashboard must be inaccessible to non-admins even if they guess URLs.
+
+Assumptions about auth
+	•	The site already has /auth login working (Replit Auth or similar) and the backend can identify the currently logged-in user.
+	•	If there is already session middleware / auth middleware, reuse it.
+	•	If there is no existing “current user” endpoint, create one.
+	•	You must not break the existing login flow.
+
+Deliverables
+	1.	Database + Drizzle schema
+
+	•	Create a Drizzle schema for a users table (or equivalent) with:
+	•	id (uuid primary key, default gen_random_uuid() if available)
+	•	auth_user_id (text unique nullable)  // id from auth provider if available
+	•	email (text unique not null)
+	•	created_at (timestamp default now)
+	•	last_login_at (timestamp nullable)
+	•	provider (text nullable)
+	•	Add any required migration (drizzle-kit) and instructions to apply it.
+
+	2.	Sync users on login
+
+	•	On successful auth / when a request is made by an authenticated user, ensure a user record exists:
+	•	Upsert by auth_user_id if available, otherwise by email
+	•	Update last_login_at = now()
+	•	Store provider if available
+	•	Put this logic in a single reusable function (e.g. syncUserFromAuth(reqUser)).
+
+	3.	Admin gating
+
+	•	Add environment variable:
+	•	ADMIN_EMAILS = comma-separated list of allowed admin emails (case-insensitive)
+	•	Create server middleware requireAdmin that:
+	•	Ensures user is authenticated
+	•	Reads current user email
+	•	Checks it is included in ADMIN_EMAILS
+	•	If not admin: return 403 JSON for API routes, and for page routes either return 403 or redirect to /auth
+	•	IMPORTANT: enforce this on the server for BOTH:
+	•	/api/admin/* endpoints
+	•	/admin route (even though frontend is static, you must prevent data access server-side)
+
+	4.	Admin API endpoints (Express)
+Implement:
+
+	•	GET /api/admin/users
+	•	Admin-only
+	•	Supports pagination:
+	•	query params: page (default 1), pageSize (default 50, max 200)
+	•	Supports search:
+	•	q = substring match on email (case-insensitive)
+	•	Returns:
+	•	users: array of { id, email, created_at, last_login_at, provider }
+	•	total: total matching count
+	•	page, pageSize
+	•	Optional but preferred:
+	•	GET /api/admin/users.csv
+	•	Admin-only
+	•	Streams CSV with headers: email, created_at, last_login_at, provider
+
+Use Drizzle queries (no raw string concatenation). Use parameterised/ORM safe querying.
+	5.	Admin UI route (React + Wouter + shadcn/ui)
+
+	•	Add a Wouter route /admin
+	•	Build an AdminUsersPage using shadcn/ui components:
+	•	Card layout
+	•	Search input
+	•	Table for users
+	•	Pagination controls (Prev/Next + page indicator)
+	•	Total count display
+	•	“Copy email” button per row (uses clipboard API)
+	•	Loading and error states
+	•	The UI calls /api/admin/users and displays results.
+	•	If API returns 401/403, show a friendly message like “You don’t have access” and a button linking to /auth.
+
+	6.	Project structure expectations
+
+	•	Backend: add routes under something like server/routes/admin.ts (or similar)
+	•	DB: server/db/schema.ts (Drizzle schema), server/db/index.ts (db connection)
+	•	Frontend: src/pages/AdminUsersPage.tsx, route registered in your src/App.tsx or router file.
+	•	If the backend currently serves the frontend build, keep that unchanged.
+
+	7.	Setup instructions
+At the end, print clear steps:
+
+	•	What env vars to set (DATABASE_URL, ADMIN_EMAILS, any auth vars)
+	•	How to run migrations (drizzle-kit generate, drizzle-kit migrate or the project’s existing commands)
+	•	How to test:
+	•	Create a normal user, confirm /admin blocks it
+	•	Login as admin email, confirm /admin loads and lists users
+
+Implementation notes
+	•	Do not expose user emails anywhere public besides /admin for admins.
+	•	Keep error messages non-sensitive.
+	•	Use UK spelling in UI copy if needed.
+	•	Keep code clean, minimal, and consistent with existing codebase.
+
+First step
+Inspect the repository to find:
+	•	Where Express is initialised
+	•	How auth user info is attached to req (e.g. req.user)
+	•	Existing Drizzle setup and migration commands
+Then implement accordingly without introducing a new framework.
+
+⸻
+
+If you want, I can also give you a second prompt that specifically says: “do not build a separate admin login — just gate by ADMIN_EMAILS from the same auth session” (which is usually the simplest and safest for a solo admin).
