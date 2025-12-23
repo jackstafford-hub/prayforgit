@@ -1,0 +1,69 @@
+We have an Express app with auth in server/auth.ts. Session stores req.session.userId only. On prayforchange.org, Safari shows only GA cookies and no connect.sid, and /api/auth/user returns {"message":"Unauthorized"}. So the session cookie is not being set/persisted.
+
+
+
+Task: Fix session + auth so that login works on the deployed domain and Safari receives a session cookie.
+
+
+
+Repo facts:
+
+
+Express entry: server/index.ts
+
+Auth setup: server/auth.ts with setupAuth(app)
+
+setupAuth already includes app.set("trust proxy", 1); and app.use(getSession());
+
+Session type declares userId: string on SessionData
+
+Current user endpoint /api/auth/user exists (or should exist) and checks req.session.userId
+
+DB hosted on Neon, env var DATABASE_URL exists in Publishing
+
+
+
+Requirements:
+
+
+Find the implementation of getSession() (in server/auth.ts or imported). Update it to use express-session with connect-pg-simple session store (as the project already does), and configure cookies correctly for production HTTPS + Safari:
+
+
+cookie.httpOnly = true
+
+cookie.sameSite = "lax"
+
+cookie.secure = true in production, but allow false in dev
+
+DO NOT hardcode cookie domain. Let it default to the current host (prayforchange.org)
+
+Ensure the app sets app.set("trust proxy", 1) BEFORE session middleware (it currently does in setupAuth; confirm order).
+
+Ensure registration and login endpoints actually create a session:
+
+
+After creating/verifying the user, set req.session.userId = user.id and await req.session.save(...) (or equivalent) before responding.
+
+Add safe logging (temporary) when running in production to confirm cookie/session works:
+
+
+Log when a session is created (do not log secrets)
+
+Log when /api/auth/user is requested and whether req.session.userId exists
+
+Do NOT change database schema and do NOT add a new auth system.
+
+
+
+Validation steps to print at the end:
+
+
+After deploy, login/register then check Safari Storage → Cookies → prayforchange.org shows connect.sid
+
+/api/auth/user returns 200 with user JSON when logged in
+
+/api/admin/users returns Unauthorized until logged in, then works only for emails in ADMIN_EMAILS
+
+
+
+Implement the minimal code changes needed and point to the exact files modified.
