@@ -2,29 +2,18 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pkg from "pg";
 const { Pool } = pkg;
 import * as schema from "@shared/schema";
-import * as fs from "fs";
 
 const isProduction = process.env.NODE_ENV === "production";
 
 function getDatabaseUrl(): string {
-  if (isProduction) {
-    try {
-      const replitDbUrl = fs.readFileSync("/tmp/replitdb", "utf-8").trim();
-      if (replitDbUrl) {
-        return replitDbUrl;
-      }
-    } catch (e) {
-      console.log("Could not read /tmp/replitdb, falling back to DATABASE_URL");
-    }
-  }
-  
-  if (!process.env.DATABASE_URL) {
+  const url = process.env.DATABASE_URL;
+
+  if (!url) {
     console.error("[DB] DATABASE_URL missing");
-    throw new Error(
-      "DATABASE_URL must be set. Did you forget to provision a database?",
-    );
+    throw new Error("DATABASE_URL must be set");
   }
-  return process.env.DATABASE_URL;
+
+  return url;
 }
 
 export const databaseUrl = getDatabaseUrl();
@@ -45,7 +34,7 @@ if (databaseUrl) {
 export const pool = new Pool({
   connectionString: databaseUrl,
   max: 10,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 15000,
   idleTimeoutMillis: 30000,
   ssl: isProduction ? { rejectUnauthorized: false } : undefined,
 });
