@@ -1,0 +1,36 @@
+Our deployed app on prayforchange.org is failing registration with 500. Publishing logs show Postgres timeouts: AggregateError [ETIMEDOUT] connecting to port 5432. DB is Neon via process.env.DATABASE_URL.
+
+Task: Add safe diagnostics and make startup resilient when DB is unreachable. Do NOT change any environment variables in code and do NOT modify DATABASE_URL.
+
+Requirements (must follow):
+
+Add SAFE DB host logging (no secrets):
+
+Log only new URL(process.env.DATABASE_URL).host (or .hostname) at startup ONLY when LOG_DB_DIAGNOSTICS === "true".
+If DATABASE_URL missing, log "DATABASE_URL missing" (also only when LOG_DB_DIAGNOSTICS is true).
+Never log username/password/querystring.
+Add a non-blocking DB connectivity check:
+
+Run it in the background after server starts (do not prevent the server from listening).
+Execute a simple SELECT 1.
+Use a short timeout (3–5 seconds). No infinite retries.
+If it fails, log one concise line including the error code (ETIMEDOUT/ECONNREFUSED) only when LOG_DB_DIAGNOSTICS is true.
+Prevent startup jobs from crashing the server when DB is down:
+
+Find the code that prints “Seeding database…” and wrap seeding so it runs only when NODE_ENV !== "production" OR when RUN_SEED === "true".
+If seeding fails in production, log and continue (do not crash).
+Auth route logging (minimal):
+
+In server/auth.ts, do not refactor auth.
+Only in existing catch blocks for register/login, add a concise server-side log with error code + operation name (e.g. getUserByEmail, createUser) when LOG_DB_DIAGNOSTICS is true.
+Keep client responses unchanged (still return the same { message: "Failed to create account. Please try again." } etc.)
+Do not change DB schema, routes, or any Stripe logic besides preventing the app from crashing if DB init is down.
+
+Deliverables:
+
+List files changed and show the exact code snippets added.
+Print how I should set Publishing env vars:
+
+LOG_DB_DIAGNOSTICS=true
+RUN_SEED=false (or omit)
+Print how to verify in Publishing logs that the deployment is reading the correct DB host.

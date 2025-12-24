@@ -173,10 +173,22 @@ async function initStripe() {
       
       // Initialize database and Stripe in background after server starts
       (async () => {
-        try {
-          await seedDatabase();
-        } catch (error) {
-          console.error('Database seeding failed:', error);
+        // Non-blocking DB connectivity check
+        const { checkDbConnectivity } = await import('./db');
+        await checkDbConnectivity();
+        
+        // Conditional seeding: only in dev or when RUN_SEED=true
+        const shouldSeed = process.env.NODE_ENV !== 'production' || process.env.RUN_SEED === 'true';
+        if (shouldSeed) {
+          try {
+            await seedDatabase();
+          } catch (error: any) {
+            const code = error?.code || 'UNKNOWN';
+            console.error(`Database seeding failed (${code}):`, error?.message || error);
+            // In production, don't crash - just log and continue
+          }
+        } else {
+          console.log('Skipping database seeding in production (set RUN_SEED=true to override)');
         }
         
         try {

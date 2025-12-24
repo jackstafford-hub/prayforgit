@@ -94,8 +94,12 @@ export async function setupAuth(app: Express) {
         console.error("Registration validation error:", error.errors);
         return res.status(400).json({ message: error.errors[0]?.message || "Invalid input" });
       }
+      const errorCode = error?.code || 'UNKNOWN';
       const errorMessage = error?.message || error?.toString() || "Unknown error";
       console.error("Registration error:", errorMessage, error?.stack);
+      if (process.env.LOG_DB_DIAGNOSTICS === 'true') {
+        console.log(`[DB_DIAG] register failed: code=${errorCode}, op=getUserByEmail|createUser`);
+      }
       res.status(500).json({ message: "Failed to create account. Please try again." });
     }
   });
@@ -141,7 +145,11 @@ export async function setupAuth(app: Express) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: error.errors[0]?.message || "Invalid input" });
       }
+      const errorCode = error?.code || 'UNKNOWN';
       console.error("Login error:", error);
+      if (process.env.LOG_DB_DIAGNOSTICS === 'true') {
+        console.log(`[DB_DIAG] login failed: code=${errorCode}, op=getUserByEmail`);
+      }
       res.status(500).json({ message: "Failed to login" });
     }
   });
