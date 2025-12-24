@@ -2,12 +2,13 @@ import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
-import { databaseUrl } from "./db";
+import { pool } from "./db";
 import bcrypt from "bcrypt";
 import { registerSchema, loginSchema } from "@shared/schema";
 import { z } from "zod";
 
 const SALT_ROUNDS = 10;
+const isProduction = process.env.NODE_ENV === "production";
 
 export function getSession() {
   const sessionSecret = process.env.SESSION_SECRET;
@@ -18,7 +19,7 @@ export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
-    conString: databaseUrl,
+    pool: pool,
     createTableIfMissing: false,
     ttl: sessionTtl,
     tableName: "sessions",
@@ -30,7 +31,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
       sameSite: 'lax',
       maxAge: sessionTtl,
     },
@@ -74,13 +75,11 @@ export async function setupAuth(app: Express) {
       
       req.session.save((saveErr) => {
         if (saveErr) {
-          console.error("Session save error during registration:", saveErr);
+          console.error("[AUTH] Session save error during registration:", saveErr);
           return res.status(500).json({ message: "Failed to create session" });
         }
         
-        if (process.env.NODE_ENV === 'production') {
-          console.log(`[AUTH] Session created for user ${user.id} (register)`);
-        }
+        console.log(`[AUTH] Session created: userId=${user.id}, sessionId=${req.session.id}, op=register`);
         
         res.json({
           id: user.id,
@@ -91,15 +90,12 @@ export async function setupAuth(app: Express) {
       });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        console.error("Registration validation error:", error.errors);
+        console.error("[AUTH] Registration validation error:", error.errors);
         return res.status(400).json({ message: error.errors[0]?.message || "Invalid input" });
       }
       const errorCode = error?.code || 'UNKNOWN';
       const errorMessage = error?.message || error?.toString() || "Unknown error";
-      console.error("Registration error:", errorMessage, error?.stack);
-      if (process.env.LOG_DB_DIAGNOSTICS === 'true') {
-        console.log(`[DB_DIAG] register failed: code=${errorCode}, op=getUserByEmail|createUser`);
-      }
+      console.error(`[AUTH] Registration error: code=${errorCode}, message=${errorMessage}`);
       res.status(500).json({ message: "Failed to create account. Please try again." });
     }
   });
@@ -126,13 +122,11 @@ export async function setupAuth(app: Express) {
 
       req.session.save((saveErr) => {
         if (saveErr) {
-          console.error("Session save error during login:", saveErr);
+          console.error("[AUTH] Session save error during login:", saveErr);
           return res.status(500).json({ message: "Failed to create session" });
         }
         
-        if (process.env.NODE_ENV === 'production') {
-          console.log(`[AUTH] Session created for user ${user.id} (login)`);
-        }
+        console.log(`[AUTH] Session created: userId=${user.id}, sessionId=${req.session.id}, op=login`);
         
         res.json({
           id: user.id,
@@ -146,10 +140,7 @@ export async function setupAuth(app: Express) {
         return res.status(400).json({ message: error.errors[0]?.message || "Invalid input" });
       }
       const errorCode = error?.code || 'UNKNOWN';
-      console.error("Login error:", error);
-      if (process.env.LOG_DB_DIAGNOSTICS === 'true') {
-        console.log(`[DB_DIAG] login failed: code=${errorCode}, op=getUserByEmail`);
-      }
+      console.error(`[AUTH] Login error: code=${errorCode}`, error?.message || error);
       res.status(500).json({ message: "Failed to login" });
     }
   });
@@ -168,9 +159,7 @@ export async function setupAuth(app: Express) {
 
   // Get current user
   app.get("/api/auth/user", async (req, res) => {
-    if (process.env.NODE_ENV === 'production') {
-      console.log(`[AUTH] /api/auth/user requested, session.userId: ${req.session.userId || 'undefined'}`);
-    }
+    console.log(`[AUTH] /api/auth/user requested, sessionId=${req.session.id}, userId=${req.session.userId || 'none'}`);
     
     if (!req.session.userId) {
       return res.status(401).json({ message: "Not authenticated" });

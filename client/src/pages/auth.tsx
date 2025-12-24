@@ -34,6 +34,7 @@ export default function AuthPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(loginForm),
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -72,6 +73,7 @@ export default function AuthPage() {
           firstName: registerForm.firstName,
           lastName: registerForm.lastName,
         }),
+        credentials: "include",
       });
 
       const data = await response.json();
