@@ -177,19 +177,13 @@ async function initStripe() {
         const { checkDbConnectivity } = await import('./db');
         await checkDbConnectivity();
         
-        // Conditional seeding: only when SEED_DB=true
+        // Seeding: only when SEED_DB=true is explicitly set
         if (process.env.SEED_DB === 'true') {
           try {
             await seedDatabase();
           } catch (error: any) {
             const code = error?.code || 'UNKNOWN';
             console.error(`[SEED] Database seeding failed (${code}):`, error?.message || error);
-          }
-        } else if (process.env.NODE_ENV !== 'production') {
-          try {
-            await seedDatabase();
-          } catch (error: any) {
-            console.error(`[SEED] Database seeding failed:`, error?.message || error);
           }
         }
         
