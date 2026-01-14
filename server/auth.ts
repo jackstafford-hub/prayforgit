@@ -48,6 +48,56 @@ export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
   app.use(getSession());
 
+  // Diagnostic endpoint to test auth components
+  app.get("/api/auth/debug", async (req, res) => {
+    const results: Record<string, any> = {
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'unknown',
+    };
+    
+    // Test 1: Check if users table exists and is accessible
+    try {
+      const { pool } = await import('./db');
+      const tableCheck = await pool.query("SELECT COUNT(*) as count FROM users");
+      results.usersTableAccessible = true;
+      results.usersCount = tableCheck.rows[0]?.count;
+    } catch (error: any) {
+      results.usersTableAccessible = false;
+      results.usersTableError = error?.message || error;
+    }
+    
+    // Test 2: Check if users table has correct columns
+    try {
+      const { pool } = await import('./db');
+      const columnCheck = await pool.query("SELECT id, email, password, first_name, last_name FROM users LIMIT 0");
+      results.usersColumnsCorrect = true;
+    } catch (error: any) {
+      results.usersColumnsCorrect = false;
+      results.usersColumnsError = error?.message || error;
+    }
+    
+    // Test 3: Check bcrypt functionality
+    try {
+      const testHash = await bcrypt.hash("testpassword", 10);
+      results.bcryptWorks = true;
+      results.bcryptHashLength = testHash.length;
+    } catch (error: any) {
+      results.bcryptWorks = false;
+      results.bcryptError = error?.message || error;
+    }
+    
+    // Test 4: Check session store
+    try {
+      results.sessionExists = !!req.session;
+      results.sessionId = req.session?.id?.substring(0, 8) + '...';
+    } catch (error: any) {
+      results.sessionError = error?.message || error;
+    }
+    
+    console.log("[AUTH DEBUG]", JSON.stringify(results, null, 2));
+    res.json(results);
+  });
+
   // Register with email/password
   app.post("/api/auth/register", async (req, res) => {
     try {
