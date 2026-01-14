@@ -174,8 +174,17 @@ async function initStripe() {
       // Initialize database and Stripe in background after server starts
       (async () => {
         // Non-blocking DB connectivity check
-        const { checkDbConnectivity } = await import('./db');
-        await checkDbConnectivity();
+        const { checkDbConnectivity, ensureTablesExist } = await import('./db');
+        const connected = await checkDbConnectivity();
+        
+        // Ensure all tables exist (critical for production)
+        if (connected) {
+          try {
+            await ensureTablesExist();
+          } catch (error: any) {
+            console.error("[DB] Table initialization failed:", error?.message || error);
+          }
+        }
         
         // Conditional seeding: only when SEED_DB=true
         if (process.env.SEED_DB === 'true') {
