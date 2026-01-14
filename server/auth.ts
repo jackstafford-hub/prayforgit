@@ -95,7 +95,12 @@ export async function setupAuth(app: Express) {
       }
       const errorCode = error?.code || 'UNKNOWN';
       const errorMessage = error?.message || error?.toString() || "Unknown error";
-      console.error(`[AUTH] Registration error: code=${errorCode}, message=${errorMessage}`);
+      const errorStack = error?.stack || 'No stack trace';
+      console.error(`[AUTH] Registration error details:`);
+      console.error(`  - Code: ${errorCode}`);
+      console.error(`  - Message: ${errorMessage}`);
+      console.error(`  - Stack: ${errorStack}`);
+      console.error(`  - Full error:`, error);
       res.status(500).json({ message: "Failed to create account. Please try again." });
     }
   });
