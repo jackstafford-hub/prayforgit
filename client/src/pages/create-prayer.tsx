@@ -10,7 +10,7 @@ import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { generatePrayerContent, createPrayer, generateImage } from "@/lib/api";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import type { User } from "@shared/schema";
 
 // Import mock generated images

@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Search, Menu, UserCircle, LogOut, Heart } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import type { User } from "@shared/schema";
 import {
   DropdownMenu,
@@ -16,24 +16,16 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 
 export function Navbar() {
   const { user: authUser, isAuthenticated, isLoading } = useAuth();
   const user = authUser as User | null;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, navigate] = useLocation();
-  const queryClient = useQueryClient();
 
-  const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-      queryClient.setQueryData(["/api/auth/user"], null);
-      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      navigate("/");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
+  const handleLogout = () => {
+    // Replit Auth uses a redirect to log out
+    window.location.href = "/api/logout";
   };
 
   return (

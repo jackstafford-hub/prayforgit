@@ -71,12 +71,11 @@ export async function ensureTablesExist(): Promise<void> {
   console.log("[DB] Ensuring all required tables exist...");
   
   // Users table - must be created first since other tables reference it
+  // Note: Using Replit Auth - no password column needed
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
-        username TEXT,
-        password TEXT,
         email VARCHAR UNIQUE,
         first_name VARCHAR,
         last_name VARCHAR,
@@ -87,12 +86,11 @@ export async function ensureTablesExist(): Promise<void> {
     `);
     console.log("[DB] Users table ensured");
     
-    // Verify the table has the required columns by doing a simple test query
-    const testResult = await pool.query("SELECT id, email, password, first_name, last_name FROM users LIMIT 0");
+    // Verify the table has the required columns
+    const testResult = await pool.query("SELECT id, email, first_name, last_name FROM users LIMIT 0");
     console.log("[DB] Users table schema verified");
   } catch (error: any) {
     console.error("[DB] Users table error:", error?.message || error);
-    // If schema is wrong, log the issue but don't drop the table
     console.error("[DB] CRITICAL: Users table may have incorrect schema. Manual intervention may be required.");
   }
   
