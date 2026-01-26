@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/useAuth";
 import { Plus, Loader2, TrendingUp, Users, Eye, Share2, ChevronRight } from "lucide-react";
 import type { Prayer } from "@shared/schema";
 

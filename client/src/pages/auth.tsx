@@ -1,24 +1,94 @@
-import { Link } from "wouter";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, LogIn } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
-import { useEffect } from "react";
-import { useLocation } from "wouter";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function AuthPage() {
-  const { isAuthenticated, isLoading } = useAuth();
   const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<string>("login");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Redirect to home if already logged in
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      navigate("/");
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [registerForm, setRegisterForm] = useState({ 
+    email: "", 
+    password: "", 
+    confirmPassword: "",
+    firstName: "", 
+    lastName: "" 
+  });
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginForm),
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      navigate("/"); // Login goes to home
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  };
 
-  const handleLogin = () => {
-    window.location.href = "/api/login";
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    if (registerForm.password !== registerForm.confirmPassword) {
+      setError("Passwords don't match");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: registerForm.email,
+          password: registerForm.password,
+          firstName: registerForm.firstName,
+          lastName: registerForm.lastName,
+        }),
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed");
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      navigate("/create"); // New accounts go to create prayer page
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -45,32 +115,148 @@ export default function AuthPage() {
             <CardHeader>
               <CardTitle className="text-center">Welcome</CardTitle>
               <CardDescription className="text-center">
-                Sign in to share your prayer requests and join our community
+                Sign in to your account or create a new one
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-center text-sm text-muted-foreground">
-                <p>Sign in with your Google, Apple, or email account</p>
-              </div>
-              
-              <Button 
-                onClick={handleLogin}
-                className="w-full gap-2" 
-                size="lg"
-                data-testid="button-login"
-              >
-                <LogIn className="w-5 h-5" />
-                Sign In / Create Account
-              </Button>
+            <CardContent>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="login" data-testid="tab-login">Sign In</TabsTrigger>
+                  <TabsTrigger value="register" data-testid="tab-register">Create Account</TabsTrigger>
+                </TabsList>
 
-              <div className="text-center space-y-2">
-                <p className="text-xs text-muted-foreground">
-                  Secure login powered by Replit Auth
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Supports Google, Apple, GitHub, and email/password
-                </p>
-              </div>
+                {error && (
+                  <div className="mb-4 p-3 bg-destructive/10 text-destructive text-sm rounded-md" data-testid="text-error">
+                    {error}
+                  </div>
+                )}
+
+                <TabsContent value="login">
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="login-email">Email</Label>
+                      <Input
+                        id="login-email"
+                        type="email"
+                        placeholder="your@email.com"
+                        value={loginForm.email}
+                        onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
+                        required
+                        data-testid="input-login-email"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="login-password">Password</Label>
+                      <Input
+                        id="login-password"
+                        type="password"
+                        placeholder="Your password"
+                        value={loginForm.password}
+                        onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                        required
+                        data-testid="input-login-password"
+                      />
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={isLoading}
+                      data-testid="button-login-submit"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Signing in...
+                        </>
+                      ) : (
+                        "Sign In"
+                      )}
+                    </Button>
+                  </form>
+                </TabsContent>
+
+                <TabsContent value="register">
+                  <form onSubmit={handleRegister} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="register-firstName">First Name</Label>
+                        <Input
+                          id="register-firstName"
+                          type="text"
+                          placeholder="John"
+                          value={registerForm.firstName}
+                          onChange={(e) => setRegisterForm({ ...registerForm, firstName: e.target.value })}
+                          required
+                          data-testid="input-register-firstname"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="register-lastName">Last Name</Label>
+                        <Input
+                          id="register-lastName"
+                          type="text"
+                          placeholder="Doe"
+                          value={registerForm.lastName}
+                          onChange={(e) => setRegisterForm({ ...registerForm, lastName: e.target.value })}
+                          data-testid="input-register-lastname"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="register-email">Email</Label>
+                      <Input
+                        id="register-email"
+                        type="email"
+                        placeholder="your@email.com"
+                        value={registerForm.email}
+                        onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
+                        required
+                        data-testid="input-register-email"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="register-password">Password</Label>
+                      <Input
+                        id="register-password"
+                        type="password"
+                        placeholder="At least 6 characters"
+                        value={registerForm.password}
+                        onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
+                        required
+                        minLength={6}
+                        data-testid="input-register-password"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="register-confirmPassword">Confirm Password</Label>
+                      <Input
+                        id="register-confirmPassword"
+                        type="password"
+                        placeholder="Confirm your password"
+                        value={registerForm.confirmPassword}
+                        onChange={(e) => setRegisterForm({ ...registerForm, confirmPassword: e.target.value })}
+                        required
+                        data-testid="input-register-confirm-password"
+                      />
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={isLoading}
+                      data-testid="button-register-submit"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Creating account...
+                        </>
+                      ) : (
+                        "Create Account"
+                      )}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
 
               <p className="text-xs text-muted-foreground text-center mt-6">
                 By continuing, you agree to our terms of service and privacy policy.

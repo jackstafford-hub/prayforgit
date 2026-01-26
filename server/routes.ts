@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { insertPrayerSchema, insertReportSchema } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
-import { setupAuth, isAuthenticated, registerAuthRoutes } from "./replit_integrations/auth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import express from "express";
 import path from "path";
@@ -23,9 +23,8 @@ export async function registerRoutes(
   const assetsPath = path.resolve(process.cwd(), "attached_assets/generated_images");
   app.use("/assets", express.static(assetsPath));
   
-  // Setup Replit Auth (Google, Apple, email/password)
+  // Setup authentication
   await setupAuth(app);
-  registerAuthRoutes(app);
 
 
   // Generate prayer content using OpenAI (text only - fast)
@@ -224,17 +223,17 @@ Respond with ONLY the image prompt, nothing else.`
   });
 
   // Get prayers by current user (includes non-public prayers)
-  app.get("/api/my-prayers", isAuthenticated, async (req: any, res) => {
+  app.get("/api/my-prayers", async (req: any, res) => {
     try {
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
       
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
+      if (!req.session?.userId) {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
+      const userId = req.session.userId;
       const userPrayers = await storage.getPrayersByAuthor(userId);
       res.json(userPrayers);
     } catch (error: any) {
@@ -257,20 +256,16 @@ Respond with ONLY the image prompt, nothing else.`
     }
   });
 
-  // Create new prayer (requires authentication)
-  app.post("/api/prayers", isAuthenticated, async (req: any, res) => {
+  // Create new prayer
+  app.post("/api/prayers", async (req: any, res) => {
     try {
       const validatedData = insertPrayerSchema.parse(req.body);
       
-      // Link prayer to logged-in user (Replit Auth)
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ error: "Authentication required to create a prayer" });
-      }
-      
+      // Link prayer to logged-in user if authenticated
+      const userId = req.session?.userId;
       const prayerData = {
         ...validatedData,
-        authorId: userId,
+        authorId: userId || null,
       };
       
       const prayer = await storage.createPrayer(prayerData);
@@ -363,7 +358,7 @@ Respond with ONLY the image prompt, nothing else.`
   app.patch("/api/prayers/:id/content", isAuthenticated, async (req: any, res) => {
     try {
       const { aiSummary, recitablePrayer } = req.body;
-      const userId = req.user?.claims?.sub;
+      const userId = req.session?.userId;
       
       if (aiSummary === undefined && recitablePrayer === undefined) {
         return res.status(400).json({ error: "No content to update" });
@@ -390,7 +385,7 @@ Respond with ONLY the image prompt, nothing else.`
   app.post("/api/prayers/:id/regenerate", isAuthenticated, async (req: any, res) => {
     try {
       const { type } = req.body;
-      const userId = req.user?.claims?.sub;
+      const userId = req.session?.userId;
       
       if (!type || !['issue', 'prayer', 'both'].includes(type)) {
         return res.status(400).json({ error: "Type must be 'issue', 'prayer', or 'both'" });
