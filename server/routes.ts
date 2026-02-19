@@ -10,9 +10,12 @@ import express from "express";
 import path from "path";
 import { Resend } from "resend";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai: OpenAI | null = null;
+if (process.env.OPENAI_API_KEY) {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -34,6 +37,10 @@ export async function registerRoutes(
       
       if (!title || typeof title !== 'string') {
         return res.status(400).json({ error: "Title is required" });
+      }
+
+      if (!openai) {
+        return res.status(503).json({ error: "AI service is not configured. Please set OPENAI_API_KEY." });
       }
 
       // Generate AI summary and prayer in parallel
@@ -159,6 +166,10 @@ Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
       
       if (!title) {
         return res.status(400).json({ error: "Title is required" });
+      }
+
+      if (!openai) {
+        return res.status(503).json({ error: "AI service is not configured. Please set OPENAI_API_KEY." });
       }
 
       // Use AI to generate a contextual image prompt based on the prayer content
@@ -391,6 +402,10 @@ Respond with ONLY the image prompt, nothing else.`
         return res.status(400).json({ error: "Type must be 'issue', 'prayer', or 'both'" });
       }
 
+      if (!openai) {
+        return res.status(503).json({ error: "AI service is not configured. Please set OPENAI_API_KEY." });
+      }
+
       const prayer = await storage.getPrayerById(req.params.id);
       if (!prayer) {
         return res.status(404).json({ error: "Prayer not found" });
@@ -516,6 +531,9 @@ Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
   // Regenerate images for all prayers (admin endpoint)
   app.post("/api/admin/regenerate-images", async (req, res) => {
     try {
+      if (!openai) {
+        return res.status(503).json({ error: "AI service is not configured. Please set OPENAI_API_KEY." });
+      }
       const allPrayers = await storage.getPrayers();
       const results = [];
       
