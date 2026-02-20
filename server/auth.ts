@@ -6,6 +6,7 @@ import { pool } from "./db";
 import bcrypt from "bcrypt";
 import { registerSchema, loginSchema } from "@shared/schema";
 import { z } from "zod";
+import { sendWelcomeEmail } from "./emailService";
 
 const SALT_ROUNDS = 10;
 const isProduction = process.env.NODE_ENV === "production";
@@ -122,6 +123,8 @@ export async function setupAuth(app: Express) {
 
       // Set session and save explicitly for Safari compatibility
       req.session.userId = user.id;
+      
+      sendWelcomeEmail(data.email, data.firstName).catch(() => {});
       
       req.session.save((saveErr) => {
         if (saveErr) {

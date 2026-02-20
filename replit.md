@@ -32,6 +32,7 @@ Preferred communication style: Simple, everyday language.
   - `users`: Stores authenticated user profiles
   - `prayers`: Stores prayer requests with AI-generated content
   - `sessions`: Stores user sessions for authentication
+  - `daily_prayer_counts`: Tracks daily prayer counts per prayer for digest emails
 - **Migrations**: Managed via drizzle-kit with `db:push` command
 
 ### Key Features
@@ -40,11 +41,16 @@ Preferred communication style: Simple, everyday language.
 - Goal-based progress tracking for each prayer
 - Browse and search functionality for prayers
 - Custom user authentication with email/password registration
+- Email notifications via SendGrid:
+  - Welcome email on user registration
+  - Prayer saved email with a copy of the prayer when submitted
+  - Daily digest email with prayer count updates (runs at 8am UTC, only sent if someone prayed)
 
 ## External Dependencies
 
 ### Third-Party Services
 - **OpenAI API**: Generates AI summaries and recitable prayers from user submissions (requires `OPENAI_API_KEY`)
+- **SendGrid**: Transactional emails (welcome, prayer saved, daily digest) via Replit connector integration
 
 ### Database
 - **PostgreSQL**: Primary database (requires `DATABASE_URL` environment variable)

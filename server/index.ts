@@ -7,6 +7,7 @@ import { runMigrations } from 'stripe-replit-sync';
 import { getStripeSync } from './stripeClient';
 import { WebhookHandlers } from './webhookHandlers';
 import adminRoutes from './routes/admin';
+import { startDailyDigestJob } from './dailyDigest';
 
 const app = express();
 const httpServer = createServer(app);
@@ -206,6 +207,12 @@ async function initStripe() {
           await initStripe();
         } catch (error) {
           console.error('Stripe initialization failed:', error);
+        }
+
+        try {
+          startDailyDigestJob();
+        } catch (error) {
+          console.error('Daily digest job failed to start:', error);
         }
       })();
     },

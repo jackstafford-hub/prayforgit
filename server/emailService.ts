@@ -1,5 +1,14 @@
 import sgMail from '@sendgrid/mail';
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 async function getCredentials() {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
@@ -48,7 +57,7 @@ export async function sendWelcomeEmail(toEmail: string, firstName: string) {
       html: `
         <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #4a3728; text-align: center;">Welcome to Pray For Change</h1>
-          <p style="font-size: 16px; line-height: 1.6; color: #333;">Dear ${firstName},</p>
+          <p style="font-size: 16px; line-height: 1.6; color: #333;">Dear ${escapeHtml(firstName)},</p>
           <p style="font-size: 16px; line-height: 1.6; color: #333;">
             Thank you for signing up to use Pray For Change. We're glad to have you as part of our community of prayer.
           </p>
@@ -80,13 +89,13 @@ export async function sendPrayerSavedEmail(toEmail: string, firstName: string, p
       html: `
         <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #4a3728; text-align: center;">Your Prayer Has Been Saved</h1>
-          <p style="font-size: 16px; line-height: 1.6; color: #333;">Dear ${firstName},</p>
+          <p style="font-size: 16px; line-height: 1.6; color: #333;">Dear ${escapeHtml(firstName)},</p>
           <p style="font-size: 16px; line-height: 1.6; color: #333;">
             Your prayer request has been saved. Here is a copy for your records:
           </p>
           <div style="background-color: #f9f5f0; border-left: 4px solid #c9a96e; padding: 16px; margin: 20px 0; border-radius: 4px;">
-            <h2 style="color: #4a3728; margin-top: 0;">${prayerTitle}</h2>
-            <p style="font-size: 15px; line-height: 1.6; color: #555; white-space: pre-wrap;">${prayerContent}</p>
+            <h2 style="color: #4a3728; margin-top: 0;">${escapeHtml(prayerTitle)}</h2>
+            <p style="font-size: 15px; line-height: 1.6; color: #555; white-space: pre-wrap;">${escapeHtml(prayerContent || 'Your prayer has been submitted and is being shared with the community.')}</p>
           </div>
           <p style="font-size: 16px; line-height: 1.6; color: #333;">
             Others can now join you in prayer. We'll keep you updated on how many people are praying alongside you.
@@ -111,7 +120,7 @@ export async function sendDailyDigestEmail(toEmail: string, firstName: string, p
 
     const prayerRows = prayerDigests.map(p => `
       <tr>
-        <td style="padding: 12px; border-bottom: 1px solid #eee; color: #333;">${p.title}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee; color: #333;">${escapeHtml(p.title)}</td>
         <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center; color: #c9a96e; font-weight: bold;">+${p.newCount}</td>
         <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center; color: #333;">${p.totalCount}</td>
       </tr>
@@ -126,7 +135,7 @@ export async function sendDailyDigestEmail(toEmail: string, firstName: string, p
       html: `
         <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #4a3728; text-align: center;">Your Daily Prayer Update</h1>
-          <p style="font-size: 16px; line-height: 1.6; color: #333;">Dear ${firstName},</p>
+          <p style="font-size: 16px; line-height: 1.6; color: #333;">Dear ${escapeHtml(firstName)},</p>
           <p style="font-size: 16px; line-height: 1.6; color: #333;">
             Great news! ${totalNewPrayers} ${totalNewPrayers === 1 ? 'person' : 'people'} prayed for your ${prayerDigests.length === 1 ? 'request' : 'requests'} today.
           </p>

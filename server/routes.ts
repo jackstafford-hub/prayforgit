@@ -9,6 +9,7 @@ import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClie
 import express from "express";
 import path from "path";
 import { Resend } from "resend";
+import { sendPrayerSavedEmail } from "./emailService";
 
 let openai: OpenAI | null = null;
 if (process.env.OPENAI_API_KEY) {
@@ -280,6 +281,15 @@ Respond with ONLY the image prompt, nothing else.`
       };
       
       const prayer = await storage.createPrayer(prayerData);
+
+      if (userId) {
+        const user = await storage.getUser(userId);
+        if (user?.email) {
+          const prayerContent = prayer.recitablePrayer || prayer.aiSummary || prayer.description || '';
+          sendPrayerSavedEmail(user.email, user.firstName || 'Friend', prayer.title, prayerContent).catch(() => {});
+        }
+      }
+
       res.status(201).json(prayer);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -297,6 +307,9 @@ Respond with ONLY the image prompt, nothing else.`
       if (!prayer) {
         return res.status(404).json({ error: "Prayer not found" });
       }
+      storage.incrementDailyPrayerCount(req.params.id).catch((err) => {
+        console.error("[DAILY] Failed to track daily prayer count:", err);
+      });
       res.json(prayer);
     } catch (error: any) {
       console.error("Error incrementing prayer count:", error);
