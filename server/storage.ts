@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, users, prayers, reports } from "@shared/schema";
-import { eq, desc, gte } from "drizzle-orm";
+import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, users, prayers, reports, dailyPrayerCounts } from "@shared/schema";
+import { eq, desc, gte, and, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -21,6 +21,11 @@ export interface IStorage {
   
   // Report methods
   createReport(report: InsertReport): Promise<Report>;
+  
+  // Daily prayer count methods
+  incrementDailyPrayerCount(prayerId: string): Promise<void>;
+  getDailyPrayerCountsForDate(date: string): Promise<{ prayerId: string; count: number }[]>;
+  resetDailyPrayerCounts(date: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -126,6 +131,33 @@ export class DatabaseStorage implements IStorage {
   async createReport(report: InsertReport): Promise<Report> {
     const [created] = await db.insert(reports).values(report).returning();
     return created;
+  }
+
+  // Daily prayer count methods
+  async incrementDailyPrayerCount(prayerId: string): Promise<void> {
+    const today = new Date().toISOString().split('T')[0];
+    const existing = await db.select().from(dailyPrayerCounts)
+      .where(and(eq(dailyPrayerCounts.prayerId, prayerId), eq(dailyPrayerCounts.date, today)));
+    
+    if (existing.length > 0) {
+      await db.update(dailyPrayerCounts)
+        .set({ count: existing[0].count + 1 })
+        .where(eq(dailyPrayerCounts.id, existing[0].id));
+    } else {
+      await db.insert(dailyPrayerCounts).values({ prayerId, date: today, count: 1 });
+    }
+  }
+
+  async getDailyPrayerCountsForDate(date: string): Promise<{ prayerId: string; count: number }[]> {
+    const results = await db.select({
+      prayerId: dailyPrayerCounts.prayerId,
+      count: dailyPrayerCounts.count,
+    }).from(dailyPrayerCounts).where(eq(dailyPrayerCounts.date, date));
+    return results;
+  }
+
+  async resetDailyPrayerCounts(date: string): Promise<void> {
+    await db.delete(dailyPrayerCounts).where(eq(dailyPrayerCounts.date, date));
   }
 }
 

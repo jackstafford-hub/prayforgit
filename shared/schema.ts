@@ -86,3 +86,12 @@ export const insertReportSchema = createInsertSchema(reports).omit({
 
 export type InsertReport = z.infer<typeof insertReportSchema>;
 export type Report = typeof reports.$inferSelect;
+
+export const dailyPrayerCounts = pgTable("daily_prayer_counts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  prayerId: varchar("prayer_id").references(() => prayers.id).notNull(),
+  date: varchar("date").notNull(),
+  count: integer("count").notNull().default(0),
+});
+
+export type DailyPrayerCount = typeof dailyPrayerCounts.$inferSelect;
