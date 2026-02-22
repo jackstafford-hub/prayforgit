@@ -73,11 +73,15 @@ async function initStripe() {
   }
 }
 
+let appReady = false;
+
 (async () => {
-  // Start server immediately to avoid crash loop detection
   const port = parseInt(process.env.PORT || "5000", 10);
-  
-  // Register webhook route first (before json middleware)
+
+  app.get("/health", (_req, res) => {
+    res.status(200).json({ status: "ok", ready: appReady });
+  });
+
   app.post(
     '/api/stripe/webhook/:uuid',
     express.raw({ type: 'application/json' }),
@@ -143,18 +147,6 @@ async function initStripe() {
     next();
   });
 
-  await registerRoutes(httpServer, app);
-
-  app.use("/api/admin", adminRoutes);
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
-  });
-
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
   } else {
@@ -162,7 +154,6 @@ async function initStripe() {
     await setupVite(httpServer, app);
   }
 
-  // Start server immediately
   httpServer.listen(
     {
       port,
@@ -171,48 +162,61 @@ async function initStripe() {
     },
     () => {
       log(`serving on port ${port}`);
-      
-      // Initialize database and Stripe in background after server starts
-      (async () => {
-        // Non-blocking DB connectivity check
-        const { checkDbConnectivity, ensureTablesExist } = await import('./db');
-        const connected = await checkDbConnectivity();
-        
-        // Ensure all tables exist (critical for production)
-        if (connected) {
-          try {
-            await ensureTablesExist();
-          } catch (error: any) {
-            console.error("[DB] Table initialization failed:", error?.message || error);
-          }
-        }
-        
-        // Conditional seeding: only when SEED_DB=true
-        if (process.env.SEED_DB === 'true') {
-          try {
-            await seedDatabase();
-          } catch (error: any) {
-            const code = error?.code || 'UNKNOWN';
-            console.error(`[SEED] Database seeding failed (${code}):`, error?.message || error);
-          }
-        } else if (process.env.NODE_ENV !== 'production') {
-          try {
-            await seedDatabase();
-          } catch (error: any) {
-            console.error(`[SEED] Database seeding failed:`, error?.message || error);
-          }
-        }
-        
-        try {
-          await initStripe();
-        } catch (error) {
-          console.error('Stripe initialization failed:', error);
-        }
 
+      (async () => {
         try {
-          startDailyDigestJob();
-        } catch (error) {
-          console.error('Daily digest job failed to start:', error);
+          const { checkDbConnectivity, ensureTablesExist } = await import('./db');
+          const connected = await checkDbConnectivity();
+
+          if (connected) {
+            try {
+              await ensureTablesExist();
+            } catch (error: any) {
+              console.error("[DB] Table initialization failed:", error?.message || error);
+            }
+          }
+
+          await registerRoutes(httpServer, app);
+          app.use("/api/admin", adminRoutes);
+
+          app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+            const status = err.status || err.statusCode || 500;
+            const message = err.message || "Internal Server Error";
+            res.status(status).json({ message });
+            throw err;
+          });
+
+          appReady = true;
+          log("All routes registered and app is fully ready");
+
+          if (process.env.SEED_DB === 'true') {
+            try {
+              await seedDatabase();
+            } catch (error: any) {
+              const code = error?.code || 'UNKNOWN';
+              console.error(`[SEED] Database seeding failed (${code}):`, error?.message || error);
+            }
+          } else if (process.env.NODE_ENV !== 'production') {
+            try {
+              await seedDatabase();
+            } catch (error: any) {
+              console.error(`[SEED] Database seeding failed:`, error?.message || error);
+            }
+          }
+
+          try {
+            await initStripe();
+          } catch (error) {
+            console.error('Stripe initialization failed:', error);
+          }
+
+          try {
+            startDailyDigestJob();
+          } catch (error) {
+            console.error('Daily digest job failed to start:', error);
+          }
+        } catch (error: any) {
+          console.error("[STARTUP] Background initialization failed:", error?.message || error);
         }
       })();
     },

@@ -8,7 +8,6 @@ import { setupAuth, isAuthenticated } from "./auth";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import express from "express";
 import path from "path";
-import { Resend } from "resend";
 import { sendPrayerSavedEmail } from "./emailService";
 
 let openai: OpenAI | null = null;
@@ -600,31 +599,11 @@ Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
       const validatedData = insertReportSchema.parse(req.body);
       const report = await storage.createReport(validatedData);
       
-      // Send email notification
-      const resendApiKey = process.env.RESEND_API_KEY;
-      if (resendApiKey) {
-        try {
-          const resend = new Resend(resendApiKey);
-          const prayer = await storage.getPrayerById(validatedData.prayerId);
-          
-          await resend.emails.send({
-            from: "PrayForChange <notifications@prayforchange.org>",
-            to: "jack.stafford@aetherius.org",
-            subject: `Policy Violation Report: ${prayer?.title || 'Unknown Prayer'}`,
-            html: `
-              <h2>New Policy Violation Report</h2>
-              <p><strong>Prayer:</strong> ${prayer?.title || 'Unknown'}</p>
-              <p><strong>Prayer ID:</strong> ${validatedData.prayerId}</p>
-              <p><strong>Reason:</strong> ${validatedData.reason}</p>
-              <p><strong>Details:</strong> ${validatedData.details || 'No additional details provided'}</p>
-              <p><strong>Reporter Email:</strong> ${validatedData.reporterEmail || 'Anonymous'}</p>
-              <hr>
-              <p><a href="https://prayforchange.org/prayer/${validatedData.prayerId}">View Prayer</a></p>
-            `,
-          });
-        } catch (emailError) {
-          console.error("Failed to send report email:", emailError);
-        }
+      try {
+        const prayer = await storage.getPrayerById(validatedData.prayerId);
+        console.log(`[REPORT] Policy violation reported for prayer: ${prayer?.title || validatedData.prayerId}`);
+      } catch (emailError) {
+        console.error("Failed to log report:", emailError);
       }
       
       res.status(201).json({ message: "Report submitted successfully" });
