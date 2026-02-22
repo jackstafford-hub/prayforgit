@@ -2,22 +2,10 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pkg from "pg";
 const { Pool } = pkg;
 import * as schema from "@shared/schema";
-import * as fs from "fs";
 
 const isProduction = process.env.NODE_ENV === "production";
 
 function getDatabaseUrl(): string {
-  if (isProduction) {
-    try {
-      const replitDbUrl = fs.readFileSync("/tmp/replitdb", "utf-8").trim();
-      if (replitDbUrl) {
-        return replitDbUrl;
-      }
-    } catch (e) {
-      console.log("Could not read /tmp/replitdb, falling back to DATABASE_URL");
-    }
-  }
-  
   if (!process.env.DATABASE_URL) {
     console.error("[DB] DATABASE_URL missing");
     throw new Error(
@@ -149,6 +137,21 @@ export async function ensureTablesExist(): Promise<void> {
     console.log("[DB] Reports table ensured");
   } catch (error: any) {
     console.error("[DB] Reports table error:", error?.message);
+  }
+
+  // Daily prayer counts table
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS daily_prayer_counts (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        prayer_id VARCHAR REFERENCES prayers(id) NOT NULL,
+        date VARCHAR NOT NULL,
+        count INTEGER NOT NULL DEFAULT 0
+      )
+    `);
+    console.log("[DB] Daily prayer counts table ensured");
+  } catch (error: any) {
+    console.error("[DB] Daily prayer counts table error:", error?.message);
   }
   
   console.log("[DB] All required tables verified");
