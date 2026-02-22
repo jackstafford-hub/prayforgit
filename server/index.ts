@@ -147,6 +147,16 @@ let appReady = false;
     next();
   });
 
+  await registerRoutes(httpServer, app);
+  app.use("/api/admin", adminRoutes);
+
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    res.status(status).json({ message });
+    throw err;
+  });
+
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
   } else {
@@ -175,16 +185,6 @@ let appReady = false;
               console.error("[DB] Table initialization failed:", error?.message || error);
             }
           }
-
-          await registerRoutes(httpServer, app);
-          app.use("/api/admin", adminRoutes);
-
-          app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-            const status = err.status || err.statusCode || 500;
-            const message = err.message || "Internal Server Error";
-            res.status(status).json({ message });
-            throw err;
-          });
 
           appReady = true;
           log("All routes registered and app is fully ready");
