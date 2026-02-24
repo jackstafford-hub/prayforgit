@@ -21,7 +21,7 @@ async function getCredentials() {
     throw new Error('X_REPLIT_TOKEN not found for repl/depl');
   }
 
-  const connectionSettings = await fetch(
+  const res = await fetch(
     'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=sendgrid',
     {
       headers: {
@@ -29,7 +29,14 @@ async function getCredentials() {
         'X_REPLIT_TOKEN': xReplitToken
       }
     }
-  ).then(res => res.json()).then(data => data.items?.[0]);
+  );
+
+  if (!res.ok) {
+    throw new Error(`SendGrid connector request failed: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  const connectionSettings = data.items?.[0];
 
   if (!connectionSettings || (!connectionSettings.settings.api_key || !connectionSettings.settings.from_email)) {
     throw new Error('SendGrid not connected');
@@ -74,7 +81,8 @@ export async function sendWelcomeEmail(toEmail: string, firstName: string) {
 
     console.log(`[EMAIL] Welcome email sent to ${toEmail}`);
   } catch (error: any) {
-    console.error(`[EMAIL] Failed to send welcome email to ${toEmail}:`, error?.message || error);
+    const detail = error?.response?.body ? JSON.stringify(error.response.body) : (error?.message || error);
+    console.error(`[EMAIL] Failed to send welcome email to ${toEmail}:`, detail);
   }
 }
 
@@ -110,7 +118,8 @@ export async function sendPrayerSavedEmail(toEmail: string, firstName: string, p
 
     console.log(`[EMAIL] Prayer saved email sent to ${toEmail}`);
   } catch (error: any) {
-    console.error(`[EMAIL] Failed to send prayer saved email to ${toEmail}:`, error?.message || error);
+    const detail = error?.response?.body ? JSON.stringify(error.response.body) : (error?.message || error);
+    console.error(`[EMAIL] Failed to send prayer saved email to ${toEmail}:`, detail);
   }
 }
 
@@ -164,6 +173,7 @@ export async function sendDailyDigestEmail(toEmail: string, firstName: string, p
 
     console.log(`[EMAIL] Daily digest sent to ${toEmail}`);
   } catch (error: any) {
-    console.error(`[EMAIL] Failed to send daily digest to ${toEmail}:`, error?.message || error);
+    const detail = error?.response?.body ? JSON.stringify(error.response.body) : (error?.message || error);
+    console.error(`[EMAIL] Failed to send daily digest to ${toEmail}:`, detail);
   }
 }
