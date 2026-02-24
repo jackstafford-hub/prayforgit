@@ -8,7 +8,7 @@ import { setupAuth, isAuthenticated } from "./auth";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import express from "express";
 import path from "path";
-import { sendPrayerSavedEmail } from "./emailService";
+import { sendPrayerSavedEmail, sendAdminPrayerCopyEmail } from "./emailService";
 
 let openai: OpenAI | null = null;
 if (process.env.OPENAI_API_KEY) {
@@ -281,13 +281,17 @@ Respond with ONLY the image prompt, nothing else.`
       
       const prayer = await storage.createPrayer(prayerData);
 
+      const prayerContent = prayer.recitablePrayer || prayer.aiSummary || prayer.description || '';
+
       if (userId) {
         const user = await storage.getUser(userId);
         if (user?.email) {
-          const prayerContent = prayer.recitablePrayer || prayer.aiSummary || prayer.description || '';
           sendPrayerSavedEmail(user.email, user.firstName || 'Friend', prayer.title, prayerContent).catch(() => {});
         }
       }
+
+      const authorName = prayer.author || 'Anonymous';
+      sendAdminPrayerCopyEmail(prayer.title, prayer.description || '', prayerContent, authorName).catch(() => {});
 
       res.status(201).json(prayer);
     } catch (error: any) {
