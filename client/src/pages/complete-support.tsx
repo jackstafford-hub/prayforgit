@@ -5,14 +5,17 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getPrayerById, getPrayers, incrementPrayerCount } from "@/lib/api";
-import type { Prayer } from "@shared/schema";
+import type { Prayer, User } from "@shared/schema";
 import { Heart, Share2, Copy, MessageCircle, Mail, X, ChevronRight, Check, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function CompleteSupport() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { user: authUser } = useAuth();
+  const user = authUser as User | null;
   
   const [prayer, setPrayer] = useState<Prayer | null>(null);
   const [loading, setLoading] = useState(true);
@@ -139,7 +142,7 @@ export default function CompleteSupport() {
     );
   }
 
-  const firstName = prayer.author?.split(' ')[0] || "Friend";
+  const firstName = user?.firstName || "Friend";
   const progressPercent = Math.min((prayer.count / prayer.goal) * 100, 100);
 
   return (
