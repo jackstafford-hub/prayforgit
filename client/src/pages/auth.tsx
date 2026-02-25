@@ -44,7 +44,9 @@ export default function AuthPage() {
       }
 
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      navigate("/"); // Login goes to home
+      const params = new URLSearchParams(window.location.search);
+      const redirectTo = params.get("redirect");
+      navigate(redirectTo || "/");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -83,7 +85,9 @@ export default function AuthPage() {
       }
 
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      navigate("/create"); // New accounts go to create prayer page
+      const params = new URLSearchParams(window.location.search);
+      const redirectTo = params.get("redirect");
+      navigate(redirectTo || "/create");
     } catch (err: any) {
       setError(err.message);
     } finally {

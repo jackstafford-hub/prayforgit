@@ -185,7 +185,11 @@ export default function PrayerDetail() {
 
   const handlePray = () => {
     if (!hasPrayed) {
-      navigate(`/support/${id}`);
+      if (isAuthenticated) {
+        navigate(`/support/${id}`);
+      } else {
+        navigate(`/auth?redirect=/support/${id}`);
+      }
     }
   };
 
