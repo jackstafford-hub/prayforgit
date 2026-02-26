@@ -278,7 +278,7 @@ export default function AuthPage() {
               </Tabs>
 
               <p className="text-xs text-muted-foreground text-center mt-6">
-                By continuing, you agree to our terms of service and privacy policy.
+                By continuing, you agree to our <Link href="/terms"><a className="underline hover:text-foreground">Terms of Service</a></Link> and <Link href="/privacy"><a className="underline hover:text-foreground">Privacy Policy</a></Link>.
               </p>
             </CardContent>
           </Card>

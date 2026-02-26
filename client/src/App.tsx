@@ -12,6 +12,8 @@ import CompleteSupport from "@/pages/complete-support";
 import AuthPage from "@/pages/auth";
 import Dashboard from "@/pages/dashboard";
 import PersonalPrayer from "@/pages/personal-prayer";
+import Terms from "@/pages/terms";
+import Privacy from "@/pages/privacy";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,6 +28,8 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/personal-prayer" component={PersonalPrayer} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/privacy" component={Privacy} />
       <Route component={NotFound} />
     </Switch>
   );
