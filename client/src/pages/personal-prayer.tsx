@@ -19,172 +19,91 @@ export default function PersonalPrayer() {
         <article className="prose prose-lg max-w-none">
           <h1 className="font-serif text-4xl font-bold mb-4">Restoring Yourself Through Prayer and Inner Practice</h1>
 
-          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">What Does Self-Healing Mean?</h2>
           <p>
-            When the natural flow of energy within us becomes disturbed, we often experience discomfort — physically, emotionally or mentally.
+            At PrayForChange, our central purpose is to hold prayer for the greater good. This platform exists to unite people in focused intention for peace, healing, wisdom and upliftment in the world at large. While personal growth and renewal are deeply important, the heart of this space is outward-facing — directed toward humanity, communities in need and the wellbeing of our shared future. When we gather in selfless intention, we contribute to a collective field of compassion that reaches far beyond ourselves.
           </p>
-          <p>This imbalance may arise from:</p>
-          <ul>
-            <li>Physical strain, injury or nervous system stress</li>
-            <li>Disruption in the body's subtle energy centres</li>
-            <li>Prolonged negative or fearful thinking</li>
-            <li>Emotional tension or exhaustion</li>
-          </ul>
           <p>
-            Our physical body and our energetic field are not separate systems. They influence one another constantly. When harmony is restored in the subtle layers of our being, that renewed balance can gradually express itself as improved wellbeing in the physical body.
-          </p>
-          <p>Self-healing begins with restoring that inner equilibrium.</p>
-
-          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">Practical Ways to Support Your Own Healing</h2>
-          <p>
-            Whether you are facing illness, emotional difficulty or simply feeling depleted, there are constructive steps you can take to strengthen yourself and support recovery.
-          </p>
-          <p>These may include:</p>
-          <ul>
-            <li>Personal prayer or focused intention</li>
-            <li>Positive affirmations</li>
-            <li>Breathwork and visualisation</li>
-            <li>Energy balancing practices</li>
-            <li>Deepening your spiritual understanding</li>
-            <li>Serving and supporting others</li>
-            <li>Making positive physical changes in your daily life</li>
-          </ul>
-          <p className="text-muted-foreground italic">
-            It is essential to seek appropriate medical advice for any health condition. The approaches described here are complementary — they are intended to support and strengthen you alongside conventional care, not replace it.
+            That said, the strength and clarity we bring to the world are shaped by the balance within ourselves. For those who wish to cultivate greater inner harmony, resilience and vitality, the guidance below offers supportive practices for personal wellbeing. These 10 suggestions are intended as complementary tools for self-development, helping you strengthen your own foundation so that you may serve others more effectively.
           </p>
 
-          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">Personal Prayer for Strength and Renewal</h2>
+          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">1) Understanding Self-Healing</h2>
           <p>
-            We often think of prayer as something offered for others — for peace, for healing, for those in difficulty. But it is entirely appropriate to pray for your own clarity, strength and recovery when your intention is sincere and constructive.
+            Self-healing begins with recognising that our physical health and our inner energetic state are deeply interconnected. When the natural harmony within us is disturbed, the effects often appear not only in the body but also in the mind and emotions. Illness, discomfort and fatigue can arise from physical strain or injury, from prolonged stress on the nervous system, from emotional suppression or anxiety, or from persistent patterns of negative thinking that gradually deplete vitality.
           </p>
           <p>
-            Personal prayer is not self-pity. It is a conscious alignment with higher wisdom and inner resilience.
-          </p>
-          <p>You might pray for:</p>
-          <ul>
-            <li>Inner courage</li>
-            <li>Mental clarity</li>
-            <li>Physical vitality</li>
-            <li>Emotional balance</li>
-            <li>The strength to overcome present challenges</li>
-          </ul>
-          <p>
-            When approached with sincerity and consistency, personal prayer can shift your mindset, increase confidence and gradually transform how you respond to life.
+            In many spiritual traditions it is understood that beyond the physical body there exists a more subtle field of energy, and when this field becomes imbalanced or congested, the body may reflect that disharmony in various ways. By restoring balance to this deeper level of ourselves, we create conditions in which the physical system can respond more positively, and over time, greater wellbeing can emerge as a natural expression of renewed internal harmony.
           </p>
 
-          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">The Power of Positive Affirmation</h2>
+          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">2) Supporting Your Own Recovery</h2>
           <p>
-            The subconscious mind responds strongly to repetition.
+            Whether you are facing a specific illness, experiencing emotional difficulty or simply feeling drained by life's pressures, there are constructive steps you can take to strengthen yourself and encourage a return to balance. These steps are not replacements for medical treatment, and it is always important to seek appropriate professional care when necessary, but they can work alongside conventional approaches in a complementary and supportive way.
           </p>
           <p>
-            When you gently and consistently affirm a positive statement, you begin to replace fear and doubt with constructive suggestion.
-          </p>
-          <p>A simple example you might repeat quietly each evening is:</p>
-          <blockquote className="border-l-4 border-primary pl-4 italic my-6 text-xl">
-            Every day, in every way, I am growing stronger and healthier.
-          </blockquote>
-          <p>
-            The key is calm repetition with belief and steadiness. Over time, your inner dialogue changes — and that change influences your wellbeing.
+            Through conscious prayer, focused intention, steady affirmation, breathwork, visualisation and thoughtful lifestyle adjustments, you participate actively in your own restoration rather than feeling entirely at the mercy of circumstance. Self-healing is not a passive hope that something external will fix you; it is an engaged and conscious effort to align your thoughts, emotions and actions with wellbeing.
           </p>
 
-          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">A Simple Self-Balancing Practice</h2>
+          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">3) Personal Prayer for Renewal</h2>
           <p>
-            You can also direct healing energy toward yourself through focused visualisation and breath.
-          </p>
-          <p>A basic approach might include:</p>
-          <ol>
-            <li>Slow, steady breathing to calm the nervous system.</li>
-            <li>Visualising light flowing through the body.</li>
-            <li>Imagining areas of discomfort becoming balanced and harmonised.</li>
-            <li>Seeing excess tension dissolve and vitality return.</li>
-          </ol>
-          <p>
-            This practice is about restoring balance — easing excess strain in one area and redistributing energy more evenly throughout your system.
+            Although prayer is often directed outward toward global concerns or the needs of others, there is nothing misguided about offering sincere prayer for your own strength and clarity, provided the motive is constructive and not rooted in self-pity or avoidance. Personal prayer can become a powerful means of reconnecting with resilience, courage and inner stability, particularly during periods of difficulty.
           </p>
           <p>
-            While receiving support from another practitioner can be powerful, self-practice is valuable and accessible. With patience and consistency, you can strengthen your own energy field.
+            When you consciously align yourself with higher wisdom and ask for the strength to respond to challenges with calmness and determination, you begin to shift your internal state. Over time, consistent and heartfelt prayer can alter your mental patterns, build confidence and deepen your capacity to endure and grow through adversity.
           </p>
 
-          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">Deepening Your Spiritual Foundation</h2>
+          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">4) The Influence of Affirmation</h2>
           <p>
-            Lasting healing is not only physical — it is rooted in perspective.
+            The subconscious mind is profoundly responsive to repetition, and when we consistently introduce constructive and encouraging ideas into our inner dialogue, we gradually reshape the tone of our thinking. Fear and doubt can become habitual if left unchecked, but they can also be replaced with steadier and more supportive patterns of thought.
           </p>
           <p>
-            When we prioritise wisdom, compassion and inner growth over temporary desires, we naturally move toward greater stability and peace.
-          </p>
-          <p>Ways to deepen your spiritual life include:</p>
-          <ul>
-            <li>Establishing a daily contemplative practice</li>
-            <li>Cultivating compassion in thought and action</li>
-            <li>Choosing kindness over reaction</li>
-            <li>Seeking understanding rather than blame</li>
-            <li>Valuing long-term growth over short-term gratification</li>
-          </ul>
-          <p>A spiritually grounded life generates resilience.</p>
-
-          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">Conscious Breathing</h2>
-          <p>
-            Breath is one of the most direct ways to influence both body and mind.
-          </p>
-          <p>Slow, rhythmic breathing can:</p>
-          <ul>
-            <li>Calm the nervous system</li>
-            <li>Improve mental clarity</li>
-            <li>Increase vitality</li>
-            <li>Stabilise emotions</li>
-          </ul>
-          <p>
-            Beyond these practical benefits, conscious breathing develops awareness. That awareness helps prevent impulsive reactions and reduces self-created suffering.
+            By repeating a positive affirmation each day, particularly in a calm state before sleep, you gently nourish the deeper layers of your mind with a new suggestion. Over time this steady reinforcement influences mood, perception and even physical wellbeing, as the body responds to the emotional climate in which it lives.
           </p>
 
-          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">Helping Others Helps You</h2>
+          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">5) Directing Energy Within</h2>
           <p>
-            An often overlooked principle is that service strengthens the one who serves.
+            You can also support yourself through practices that combine breath and visualisation to restore internal balance. By slowing the breath and allowing it to become smooth and rhythmic, the nervous system begins to settle, and mental agitation gradually subsides.
           </p>
-          <p>When you offer healing thoughts, supportive prayer or compassionate action to others:</p>
-          <ul>
-            <li>Your focus shifts away from personal anxiety</li>
-            <li>Your energy centres become more active and balanced</li>
-            <li>Your emotional state often lifts</li>
-          </ul>
           <p>
-            While service should not be performed for personal gain, it naturally generates reciprocal strength. Giving encouragement, love and intention creates a healthier internal atmosphere within you.
+            In this calmer state you may imagine light or warmth flowing through your body, gently filling areas of weakness and dissolving areas of tension. The purpose of such a practice is not to force healing, but to rebalance energy where it has become either excessive or depleted, allowing the system as a whole to stabilise.
           </p>
 
-          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">Physical Foundations Matter</h2>
+          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">6) Deepening Spiritual Perspective</h2>
           <p>
-            Spiritual practice works best when supported by practical care.
+            Lasting wellbeing often depends as much on perspective as on physical condition. When life is approached solely through material concerns, stress and dissatisfaction easily accumulate, but when we consciously prioritise wisdom, compassion and long-term growth, we create a more stable inner foundation.
           </p>
-          <p>Consider:</p>
-          <ul>
-            <li>Improving nutrition</li>
-            <li>Establishing consistent sleep patterns</li>
-            <li>Exercising appropriately</li>
-            <li>Reducing harmful habits</li>
-            <li>Taking proper rest</li>
-          </ul>
           <p>
-            These changes enhance your ability to recover and give you greater capacity to help others.
+            Deepening your spiritual life does not necessarily require dramatic changes; it may begin with establishing a daily reflective practice, cultivating compassion in ordinary interactions, choosing patience over reaction and valuing inner development over fleeting pleasure.
           </p>
 
-          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">A Balanced Path</h2>
+          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">7) The Transformative Role of Breath</h2>
           <p>
-            Self-healing is not about denial of illness or bypassing medical support. It is about participating actively in your own recovery.
+            Conscious breathing is one of the simplest yet most effective ways to influence both body and mind. Slow, deliberate breathing can calm the nervous system, improve mental clarity and gently restore emotional balance.
           </p>
-          <p>By combining:</p>
-          <ul>
-            <li>Proper medical care</li>
-            <li>Constructive thought</li>
-            <li>Prayer and intention</li>
-            <li>Breath and energy practices</li>
-            <li>Compassionate service</li>
-            <li>Healthy lifestyle adjustments</li>
-          </ul>
           <p>
-            You create conditions that support healing at every level — physical, emotional and spiritual.
+            Beyond these practical benefits, breath awareness strengthens presence and reduces impulsive reactions that often contribute to unnecessary stress. Over time, regular breathing practice refines awareness and helps prevent the accumulation of tension that might otherwise manifest as discomfort or illness.
           </p>
-          <p className="text-lg font-semibold">
-            Healing is not merely the absence of symptoms. It is the restoration of harmony within your whole being.
+
+          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">8) The Healing Effect of Serving Others</h2>
+          <p>
+            An important and often overlooked aspect of self-healing is the role of service. When you offer support, compassion or healing intention to others, your focus shifts away from personal anxiety and toward constructive action.
+          </p>
+          <p>
+            Although service should not be undertaken solely for personal benefit, it naturally creates a reciprocal strengthening effect. When you radiate encouragement and goodwill, you cultivate those same qualities within yourself, and this internal atmosphere becomes more conducive to recovery and growth.
+          </p>
+
+          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">9) The Importance of Physical Foundations</h2>
+          <p>
+            Spiritual and energetic practices are most effective when supported by practical physical care. Attention to nutrition, sleep, exercise and restorative rest forms the foundation upon which deeper healing work can build.
+          </p>
+          <p>
+            By making thoughtful adjustments to daily habits and reducing behaviours that drain vitality, you create a more stable platform for both physical and spiritual renewal. Small improvements sustained over time can yield meaningful and lasting results.
+          </p>
+
+          <h2 className="font-serif text-2xl font-bold mt-10 mb-4">10) A Balanced Approach to Healing</h2>
+          <p>
+            Self-healing is not a rejection of medical science, nor is it a denial of difficulty. Rather, it is the conscious decision to participate actively in your own wellbeing by aligning thought, intention and action with health.
+          </p>
+          <p>
+            When appropriate medical care is combined with prayer, constructive thinking, breathwork, compassionate service and practical lifestyle adjustments, you address imbalance at multiple levels simultaneously. Healing then becomes more than the removal of symptoms; it becomes the gradual restoration of harmony throughout your entire being.
           </p>
         </article>
       </div>
