@@ -180,11 +180,10 @@ export default function CompleteSupport() {
 
           <div className="bg-amber-50 rounded-lg p-6 mb-8">
             <h2 className="font-semibold text-lg mb-2 text-center">
-              Can you contribute €1 to help spread this prayer?
+              Help sustain PrayForChange with €1
             </h2>
             <p className="text-sm text-muted-foreground text-center">
-              Your support helps us keep PrayForChange running and allows this intention to reach more people through the platform. 
-              With even a few small contributions, this prayer could be seen — and prayed for — by thousands within the hour.
+              Your contribution supports the platform itself — its hosting, care and continued development — and helps us share this prayer more widely. No obligation. Only if it feels right.
             </p>
           </div>
 
