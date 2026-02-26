@@ -21,7 +21,8 @@ export default function AuthPage() {
     password: "", 
     confirmPassword: "",
     firstName: "", 
-    lastName: "" 
+    lastName: "",
+    emailOptIn: false,
   });
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -74,6 +75,7 @@ export default function AuthPage() {
           password: registerForm.password,
           firstName: registerForm.firstName,
           lastName: registerForm.lastName,
+          emailOptIn: registerForm.emailOptIn,
         }),
         credentials: "include",
       });
@@ -242,6 +244,19 @@ export default function AuthPage() {
                         required
                         data-testid="input-register-confirm-password"
                       />
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <input
+                        type="checkbox"
+                        id="register-emailOptIn"
+                        checked={registerForm.emailOptIn}
+                        onChange={(e) => setRegisterForm({ ...registerForm, emailOptIn: e.target.checked })}
+                        className="mt-1 h-4 w-4 rounded border-gray-300"
+                        data-testid="checkbox-email-optin"
+                      />
+                      <Label htmlFor="register-emailOptIn" className="text-sm font-normal leading-snug cursor-pointer">
+                        I'd like to receive email updates about prayers I've created and community news
+                      </Label>
                     </div>
                     <Button 
                       type="submit" 

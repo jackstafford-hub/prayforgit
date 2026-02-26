@@ -29,7 +29,7 @@ export function startDailyDigestJob() {
         if (!prayer || !prayer.authorId) continue;
 
         const user = await storage.getUser(prayer.authorId);
-        if (!user || !user.email) continue;
+        if (!user || !user.email || !user.emailOptIn) continue;
 
         if (!authorPrayers.has(prayer.authorId)) {
           authorPrayers.set(prayer.authorId, []);

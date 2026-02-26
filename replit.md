@@ -29,7 +29,7 @@ Preferred communication style: Simple, everyday language.
 - **Database**: PostgreSQL with Drizzle ORM
 - **Schema Location**: `shared/schema.ts` contains all table definitions
 - **Key Tables**:
-  - `users`: Stores authenticated user profiles
+  - `users`: Stores authenticated user profiles (includes `emailOptIn` for GDPR-compliant email consent)
   - `prayers`: Stores prayer requests with AI-generated content
   - `sessions`: Stores user sessions for authentication
   - `daily_prayer_counts`: Tracks daily prayer counts per prayer for digest emails

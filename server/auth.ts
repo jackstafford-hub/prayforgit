@@ -119,6 +119,7 @@ export async function setupAuth(app: Express) {
         password: hashedPassword,
         firstName: data.firstName,
         lastName: data.lastName || null,
+        emailOptIn: data.emailOptIn || false,
       });
 
       // Set session and save explicitly for Safari compatibility
