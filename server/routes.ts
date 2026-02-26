@@ -366,7 +366,13 @@ Respond with ONLY the image prompt, nothing else.`
       res.json({ url: session.url });
     } catch (error: any) {
       console.error("Error creating donation session:", error);
-      res.status(500).json({ error: "Failed to create donation session" });
+      const isStripeUnavailable = error?.message?.includes('connection not found')
+        || error?.message?.includes('not found for repl')
+        || error?.message?.includes('STRIPE');
+      const message = isStripeUnavailable
+        ? "Donations are not available at this time. Please try again later."
+        : "Failed to create donation session";
+      res.status(503).json({ error: message });
     }
   });
 

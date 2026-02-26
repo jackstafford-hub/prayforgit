@@ -1,5 +1,6 @@
 import { db } from "./db";
 import { prayers } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 const SEED_PRAYERS = [
   {
@@ -187,14 +188,24 @@ export async function seedDatabase() {
   try {
     console.log('Seeding database...');
     
-    // Check if we already have prayers
     const existing = await db.select().from(prayers).limit(1);
     if (existing.length > 0) {
-      console.log('Database already has data, skipping seed.');
+      console.log('Database already has data, updating seed prayers...');
+      for (const seed of SEED_PRAYERS) {
+        await db
+          .update(prayers)
+          .set({
+            aiSummary: seed.aiSummary,
+            recitablePrayer: seed.recitablePrayer,
+            imageUrl: seed.imageUrl,
+            description: seed.description,
+          })
+          .where(eq(prayers.title, seed.title));
+      }
+      console.log('Seed prayers updated successfully!');
       return;
     }
 
-    // Insert seed data
     await db.insert(prayers).values(SEED_PRAYERS);
     console.log('Database seeded successfully!');
   } catch (error) {

@@ -67,6 +67,13 @@ export default function CompleteSupport() {
         body: JSON.stringify({ prayerId: id, amount: 100 }),
       });
       const data = await response.json();
+      if (!response.ok) {
+        toast({
+          title: "Donations Unavailable",
+          description: data.error || "Donations are not available at this time. Please try again later.",
+        });
+        return;
+      }
       if (data.url) {
         window.location.href = data.url;
       }
