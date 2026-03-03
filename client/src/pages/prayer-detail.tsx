@@ -30,8 +30,9 @@ import {
 
 export default function PrayerDetail() {
   const [, params] = useRoute("/prayer/:id");
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const id = params?.id || "";
+  const donated = new URLSearchParams(location.split('?')[1] || '').get('donated') === 'true';
   const [prayer, setPrayer] = useState<Prayer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -499,50 +500,96 @@ export default function PrayerDetail() {
 
           <div className="lg:sticky lg:top-24 h-fit">
             <div className="bg-white border rounded-xl shadow-sm p-6 space-y-6">
-              <div className="space-y-2">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold font-serif">{prayer.count.toLocaleString()}</span>
-                  <span className="text-muted-foreground font-medium">prayers</span>
-                </div>
-                <Progress value={percentage} className="h-2.5" indicatorClassName="bg-primary" />
-                <div className="flex justify-between text-sm text-muted-foreground font-medium">
-                  <span>{percentage.toFixed(0)}% of goal</span>
-                  <span>{prayer.goal.toLocaleString()} goal</span>
-                </div>
-                <p className="text-sm text-muted-foreground pt-1">
-                  <span className="font-bold text-foreground">{remaining.toLocaleString()}</span> more needed to reach the next milestone!
-                </p>
-              </div>
+              {donated ? (
+                <>
+                  <div className="text-center space-y-4 py-4">
+                    <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                      <Check className="w-8 h-8 text-primary" />
+                    </div>
+                    <h3 className="font-serif text-2xl font-bold text-foreground" data-testid="text-thank-you">
+                      Thank You
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Your generous donation helps sustain PrayForChange and spread this prayer to more people. God bless you.
+                    </p>
+                  </div>
 
-              <div className="space-y-3">
-                <Button 
-                  size="lg" 
-                  onClick={handlePray}
-                  className={`w-full h-12 text-lg font-bold rounded-full shadow-md transition-all ${
-                    hasPrayed 
-                      ? 'bg-secondary text-foreground hover:bg-secondary/80' 
-                      : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20'
-                  }`}
-                >
-                  {hasPrayed ? "You prayed!" : "I prayed for this"}
-                </Button>
-              </div>
+                  <div className="space-y-2">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold font-serif">{prayer.count.toLocaleString()}</span>
+                      <span className="text-muted-foreground font-medium">prayers</span>
+                    </div>
+                    <Progress value={percentage} className="h-2.5" indicatorClassName="bg-primary" />
+                    <div className="flex justify-between text-sm text-muted-foreground font-medium">
+                      <span>{percentage.toFixed(0)}% of goal</span>
+                      <span>{prayer.goal.toLocaleString()} goal</span>
+                    </div>
+                  </div>
 
-              {hasPrayed && (
-                <div className="pt-4 border-t animate-in fade-in slide-in-from-top-2">
-                  <h4 className="font-bold mb-3">Help this prayer reach more people</h4>
-                  <Button variant="outline" className="w-full mb-2">Share on WhatsApp</Button>
-                  <Button variant="outline" className="w-full">Copy Link</Button>
-                </div>
+                  <div className="pt-4 border-t">
+                    <Link href="/browse">
+                      <Button variant="outline" className="w-full" data-testid="button-browse-prayers">
+                        Browse More Prayers
+                      </Button>
+                    </Link>
+                  </div>
+
+                  <div className="pt-4 border-t text-center">
+                    <Link href="/personal-prayer">
+                      <span className="text-sm text-muted-foreground hover:text-primary underline cursor-pointer">
+                        Is this a Personal Prayer?
+                      </span>
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold font-serif">{prayer.count.toLocaleString()}</span>
+                      <span className="text-muted-foreground font-medium">prayers</span>
+                    </div>
+                    <Progress value={percentage} className="h-2.5" indicatorClassName="bg-primary" />
+                    <div className="flex justify-between text-sm text-muted-foreground font-medium">
+                      <span>{percentage.toFixed(0)}% of goal</span>
+                      <span>{prayer.goal.toLocaleString()} goal</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground pt-1">
+                      <span className="font-bold text-foreground">{remaining.toLocaleString()}</span> more needed to reach the next milestone!
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Button 
+                      size="lg" 
+                      onClick={handlePray}
+                      className={`w-full h-12 text-lg font-bold rounded-full shadow-md transition-all ${
+                        hasPrayed 
+                          ? 'bg-secondary text-foreground hover:bg-secondary/80' 
+                          : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20'
+                      }`}
+                    >
+                      {hasPrayed ? "You prayed!" : "I prayed for this"}
+                    </Button>
+                  </div>
+
+                  {hasPrayed && (
+                    <div className="pt-4 border-t animate-in fade-in slide-in-from-top-2">
+                      <h4 className="font-bold mb-3">Help this prayer reach more people</h4>
+                      <Button variant="outline" className="w-full mb-2">Share on WhatsApp</Button>
+                      <Button variant="outline" className="w-full">Copy Link</Button>
+                    </div>
+                  )}
+                  
+                  <div className="pt-4 border-t text-center">
+                    <Link href="/personal-prayer">
+                      <span className="text-sm text-muted-foreground hover:text-primary underline cursor-pointer">
+                        Is this a Personal Prayer?
+                      </span>
+                    </Link>
+                  </div>
+                </>
               )}
-              
-              <div className="pt-4 border-t text-center">
-                <Link href="/personal-prayer">
-                  <span className="text-sm text-muted-foreground hover:text-primary underline cursor-pointer">
-                    Is this a Personal Prayer?
-                  </span>
-                </Link>
-              </div>
             </div>
           </div>
         </div>
