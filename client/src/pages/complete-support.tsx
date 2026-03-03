@@ -11,11 +11,55 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 function getLocalCurrency(): { code: string; symbol: string } {
+  const EUR = { code: 'eur', symbol: '€' };
   try {
+    const timezoneCurrencyMap: Record<string, { code: string; symbol: string }> = {
+      'America/New_York': { code: 'usd', symbol: '$' },
+      'America/Chicago': { code: 'usd', symbol: '$' },
+      'America/Denver': { code: 'usd', symbol: '$' },
+      'America/Los_Angeles': { code: 'usd', symbol: '$' },
+      'America/Anchorage': { code: 'usd', symbol: '$' },
+      'Pacific/Honolulu': { code: 'usd', symbol: '$' },
+      'Europe/London': { code: 'gbp', symbol: '£' },
+      'Australia/Sydney': { code: 'aud', symbol: 'A$' },
+      'Australia/Melbourne': { code: 'aud', symbol: 'A$' },
+      'Australia/Perth': { code: 'aud', symbol: 'A$' },
+      'Australia/Brisbane': { code: 'aud', symbol: 'A$' },
+      'America/Toronto': { code: 'cad', symbol: 'C$' },
+      'America/Vancouver': { code: 'cad', symbol: 'C$' },
+      'Pacific/Auckland': { code: 'nzd', symbol: 'NZ$' },
+      'Asia/Tokyo': { code: 'jpy', symbol: '¥' },
+      'Europe/Zurich': { code: 'chf', symbol: 'CHF ' },
+      'Europe/Stockholm': { code: 'sek', symbol: 'kr' },
+      'Europe/Oslo': { code: 'nok', symbol: 'kr' },
+      'Europe/Copenhagen': { code: 'dkk', symbol: 'kr' },
+      'Europe/Warsaw': { code: 'pln', symbol: 'zł' },
+      'Asia/Kolkata': { code: 'inr', symbol: '₹' },
+      'America/Sao_Paulo': { code: 'brl', symbol: 'R$' },
+      'America/Mexico_City': { code: 'mxn', symbol: 'MX$' },
+      'Africa/Johannesburg': { code: 'zar', symbol: 'R' },
+    };
+
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (timezoneCurrencyMap[tz]) {
+      return timezoneCurrencyMap[tz];
+    }
+
+    const euroTimezones = [
+      'Europe/Rome', 'Europe/Paris', 'Europe/Berlin', 'Europe/Madrid',
+      'Europe/Amsterdam', 'Europe/Brussels', 'Europe/Vienna', 'Europe/Dublin',
+      'Europe/Lisbon', 'Europe/Helsinki', 'Europe/Athens', 'Europe/Tallinn',
+      'Europe/Riga', 'Europe/Vilnius', 'Europe/Ljubljana', 'Europe/Bratislava',
+      'Europe/Luxembourg', 'Europe/Malta', 'Europe/Nicosia',
+    ];
+    if (euroTimezones.includes(tz)) {
+      return EUR;
+    }
+
     const locale = navigator.language || 'en-IE';
     const parts = locale.split('-');
     const region = parts.length > 1 ? parts[1].toUpperCase() : '';
-    const currencyMap: Record<string, { code: string; symbol: string }> = {
+    const regionMap: Record<string, { code: string; symbol: string }> = {
       US: { code: 'usd', symbol: '$' },
       GB: { code: 'gbp', symbol: '£' },
       AU: { code: 'aud', symbol: 'A$' },
@@ -32,9 +76,9 @@ function getLocalCurrency(): { code: string; symbol: string } {
       MX: { code: 'mxn', symbol: 'MX$' },
       ZA: { code: 'zar', symbol: 'R' },
     };
-    return currencyMap[region] || { code: 'eur', symbol: '€' };
+    return regionMap[region] || EUR;
   } catch {
-    return { code: 'eur', symbol: '€' };
+    return EUR;
   }
 }
 
