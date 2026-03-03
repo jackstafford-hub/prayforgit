@@ -323,7 +323,7 @@ Respond with ONLY the image prompt, nothing else.`
   // Create donation checkout session
   app.post("/api/create-donation-session", async (req, res) => {
     try {
-      const { prayerId, amount = 100 } = req.body;
+      const { prayerId, amount = 100, currency = 'eur' } = req.body;
       
       if (!prayerId) {
         return res.status(400).json({ error: "Prayer ID is required" });
@@ -345,7 +345,7 @@ Respond with ONLY the image prompt, nothing else.`
         line_items: [
           {
             price_data: {
-              currency: 'eur',
+              currency: currency.toLowerCase(),
               product_data: {
                 name: 'Support PrayForChange',
                 description: "Help support 'Pray For Change' so more people can pray together",

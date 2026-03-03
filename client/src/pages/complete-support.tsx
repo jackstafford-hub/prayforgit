@@ -10,12 +10,43 @@ import { Heart, Share2, Copy, MessageCircle, Mail, X, ChevronRight, Check, Loade
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
+function getLocalCurrency(): { code: string; symbol: string } {
+  try {
+    const locale = navigator.language || 'en-IE';
+    const parts = locale.split('-');
+    const region = parts.length > 1 ? parts[1].toUpperCase() : '';
+    const currencyMap: Record<string, { code: string; symbol: string }> = {
+      US: { code: 'usd', symbol: '$' },
+      GB: { code: 'gbp', symbol: '£' },
+      AU: { code: 'aud', symbol: 'A$' },
+      CA: { code: 'cad', symbol: 'C$' },
+      NZ: { code: 'nzd', symbol: 'NZ$' },
+      JP: { code: 'jpy', symbol: '¥' },
+      CH: { code: 'chf', symbol: 'CHF ' },
+      SE: { code: 'sek', symbol: 'kr' },
+      NO: { code: 'nok', symbol: 'kr' },
+      DK: { code: 'dkk', symbol: 'kr' },
+      PL: { code: 'pln', symbol: 'zł' },
+      IN: { code: 'inr', symbol: '₹' },
+      BR: { code: 'brl', symbol: 'R$' },
+      MX: { code: 'mxn', symbol: 'MX$' },
+      ZA: { code: 'zar', symbol: 'R' },
+    };
+    return currencyMap[region] || { code: 'eur', symbol: '€' };
+  } catch {
+    return { code: 'eur', symbol: '€' };
+  }
+}
+
+const ZERO_DECIMAL_CURRENCIES = ['jpy'];
+
 export default function CompleteSupport() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { user: authUser } = useAuth();
   const user = authUser as User | null;
+  const localCurrency = getLocalCurrency();
   
   const [prayer, setPrayer] = useState<Prayer | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +95,7 @@ export default function CompleteSupport() {
       const response = await fetch('/api/create-donation-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prayerId: id, amount: 100 }),
+        body: JSON.stringify({ prayerId: id, amount: ZERO_DECIMAL_CURRENCIES.includes(localCurrency.code) ? 1 : 100, currency: localCurrency.code }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -187,7 +218,7 @@ export default function CompleteSupport() {
 
           <div className="bg-amber-50 rounded-lg p-6 mb-8">
             <h2 className="font-semibold text-lg mb-2 text-center">
-              Help sustain PrayForChange with €1
+              Help sustain PrayForChange with {localCurrency.symbol}1
             </h2>
             <p className="text-sm text-muted-foreground text-center">
               Your contribution supports the platform itself — its hosting, care and continued development — and helps us share this prayer more widely. No obligation. Only if it feels right.
