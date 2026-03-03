@@ -66,13 +66,22 @@ export async function sendWelcomeEmail(toEmail: string, firstName: string) {
           <h1 style="color: #4a3728; text-align: center;">Welcome to Pray For Change</h1>
           <p style="font-size: 16px; line-height: 1.6; color: #333;">Dear ${escapeHtml(firstName)},</p>
           <p style="font-size: 16px; line-height: 1.6; color: #333;">
-            Thank you for signing up to use Pray For Change. We're glad to have you as part of our community of prayer.
+            Thank you for joining Pray For Change.
           </p>
           <p style="font-size: 16px; line-height: 1.6; color: #333;">
-            You can now create prayer requests, join others in prayer, and be part of a supportive community that believes in the power of prayer.
+            This platform exists for a single purpose: to bring people together in collective prayer for the greater good.
           </p>
           <p style="font-size: 16px; line-height: 1.6; color: #333;">
-            Blessings,<br/>
+            In a world that often feels divided, even one shared minute of intention has meaning.
+          </p>
+          <p style="font-size: 16px; line-height: 1.6; color: #333;">
+            When you feel moved, you can offer a prayer and join a shared moment held across the world.
+          </p>
+          <p style="font-size: 16px; line-height: 1.6; color: #333;">
+            Welcome.
+          </p>
+          <p style="font-size: 16px; line-height: 1.6; color: #333;">
+            With respect,<br/>
             The Pray For Change Team
           </p>
         </div>
