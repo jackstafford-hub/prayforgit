@@ -348,7 +348,7 @@ Respond with ONLY the image prompt, nothing else.`
               currency: 'eur',
               product_data: {
                 name: 'Support PrayForChange',
-                description: `Help spread the prayer: "${prayer.title}"`,
+                description: "Help support 'Pray For Change' so more people can pray together",
               },
               unit_amount: amount,
             },
