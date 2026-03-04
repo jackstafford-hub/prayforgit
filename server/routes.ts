@@ -8,7 +8,7 @@ import { setupAuth, isAuthenticated } from "./auth";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import express from "express";
 import path from "path";
-import { sendPrayerSavedEmail, sendAdminPrayerCopyEmail } from "./emailService";
+import { sendPrayerSavedEmail, sendAdminPrayerCopyEmail, sendModerationEmail } from "./emailService";
 
 let openai: OpenAI | null = null;
 if (process.env.OPENAI_API_KEY) {
@@ -325,7 +325,8 @@ Respond with ONLY the image prompt, nothing else.`
   // Create new prayer
   app.post("/api/prayers", async (req: any, res) => {
     try {
-      const validatedData = insertPrayerSchema.parse(req.body);
+      const { toneSuggestion, ...bodyData } = req.body;
+      const validatedData = insertPrayerSchema.parse(bodyData);
       
       // Link prayer to logged-in user if authenticated
       const userId = req.session?.userId;
@@ -346,7 +347,12 @@ Respond with ONLY the image prompt, nothing else.`
       }
 
       const authorName = prayer.author || 'Anonymous';
-      sendAdminPrayerCopyEmail(prayer.title, prayer.description || '', prayerContent, authorName).catch(() => {});
+
+      if (prayer.flaggedForReview) {
+        sendModerationEmail(prayer.title, prayer.description || '', prayerContent, authorName, toneSuggestion).catch(() => {});
+      } else {
+        sendAdminPrayerCopyEmail(prayer.title, prayer.description || '', prayerContent, authorName).catch(() => {});
+      }
 
       res.status(201).json(prayer);
     } catch (error: any) {

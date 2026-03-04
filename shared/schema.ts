@@ -40,6 +40,7 @@ export const prayers = pgTable("prayers", {
   count: integer("count").notNull().default(1),
   goal: integer("goal").notNull().default(100),
   topic: text("topic").notNull().default('General'),
+  flaggedForReview: boolean("flagged_for_review").default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

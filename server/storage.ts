@@ -66,7 +66,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPublicPrayers(): Promise<Prayer[]> {
-    return await db.select().from(prayers).where(gte(prayers.count, 5)).orderBy(desc(prayers.count));
+    return await db.select().from(prayers).where(and(gte(prayers.count, 5), eq(prayers.flaggedForReview, false))).orderBy(desc(prayers.count));
   }
 
   async getPrayersByAuthor(authorId: string): Promise<Prayer[]> {

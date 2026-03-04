@@ -189,6 +189,42 @@ export async function sendDailyDigestEmail(toEmail: string, firstName: string, p
 
 const ADMIN_EMAIL = 'support@prayforchange.org';
 
+export async function sendModerationEmail(prayerTitle: string, prayerDescription: string, prayerContent: string, authorName: string, toneSuggestion?: string) {
+  try {
+    const { client, fromEmail } = await getUncachableSendGridClient();
+
+    await client.send({
+      to: ADMIN_EMAIL,
+      from: { email: fromEmail, name: 'Pray For Change' },
+      subject: `[FLAGGED] Prayer Needs Review: ${prayerTitle}`,
+      html: `
+        <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #b45309; text-align: center;">Prayer Flagged for Review</h1>
+          <p style="font-size: 16px; line-height: 1.6; color: #333;">A prayer submitted by <strong>${escapeHtml(authorName)}</strong> was flagged by our tone analysis system as potentially negative. The author chose to continue anyway. Please review before it becomes publicly visible.</p>
+          ${toneSuggestion ? `
+          <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0; border-radius: 4px;">
+            <h3 style="color: #92400e; margin-top: 0;">AI Suggestion Given to User</h3>
+            <p style="font-size: 15px; line-height: 1.6; color: #78350f;">${escapeHtml(toneSuggestion)}</p>
+          </div>` : ''}
+          <div style="background-color: #f9f5f0; border-left: 4px solid #c9a96e; padding: 16px; margin: 20px 0; border-radius: 4px;">
+            <h2 style="color: #4a3728; margin-top: 0;">${escapeHtml(prayerTitle)}</h2>
+            <h3 style="color: #666; margin-top: 12px;">Original Description</h3>
+            <p style="font-size: 15px; line-height: 1.6; color: #555; white-space: pre-wrap;">${escapeHtml(prayerDescription)}</p>
+            <h3 style="color: #666; margin-top: 12px;">AI-Generated Prayer</h3>
+            <p style="font-size: 15px; line-height: 1.6; color: #555; white-space: pre-wrap;">${escapeHtml(prayerContent || 'No AI prayer generated.')}</p>
+          </div>
+          <p style="font-size: 14px; color: #999; text-align: center;">This prayer requires manual review before it can be made publicly visible.</p>
+        </div>
+      `,
+    });
+
+    console.log(`[EMAIL] Moderation email sent to ${ADMIN_EMAIL} for prayer: ${prayerTitle}`);
+  } catch (error: any) {
+    const detail = error?.response?.body ? JSON.stringify(error.response.body) : (error?.message || error);
+    console.error(`[EMAIL] Failed to send moderation email to ${ADMIN_EMAIL}:`, detail);
+  }
+}
+
 export async function sendAdminPrayerCopyEmail(prayerTitle: string, prayerDescription: string, prayerContent: string, authorName: string) {
   try {
     const { client, fromEmail } = await getUncachableSendGridClient();

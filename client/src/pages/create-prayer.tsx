@@ -99,6 +99,8 @@ export default function CreatePrayer() {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isCheckingTone, setIsCheckingTone] = useState(false);
   const [toneWarning, setToneWarning] = useState<{ isNegative: boolean; suggestion?: string } | null>(null);
+  const [isFlaggedForReview, setIsFlaggedForReview] = useState(false);
+  const [toneSuggestion, setToneSuggestion] = useState<string | undefined>(undefined);
   const [originalIssue, setOriginalIssue] = useState("");
   const [originalPrayer, setOriginalPrayer] = useState("");
   
@@ -253,7 +255,7 @@ export default function CreatePrayer() {
     setIsSubmitting(true);
 
     try {
-      const newPrayer = await createPrayer({
+      const prayerData: any = {
         title: formData.title,
         description: formData.description || undefined,
         author: formData.author || "Anonymous",
@@ -262,14 +264,33 @@ export default function CreatePrayer() {
         recitablePrayer: formData.recitablePrayer || undefined,
         count: 1,
         goal: 100,
-        topic: 'General'
+        topic: 'General',
+        flaggedForReview: isFlaggedForReview,
+      };
+
+      if (isFlaggedForReview && toneSuggestion) {
+        prayerData.toneSuggestion = toneSuggestion;
+      }
+
+      const response = await fetch('/api/prayers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(prayerData),
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to create prayer');
+      }
+
+      const newPrayer = await response.json();
       
       setCreatedPrayerId(newPrayer.id);
 
       toast({
-        title: "Prayer Published",
-        description: "Your prayer request has been shared with the community.",
+        title: isFlaggedForReview ? "Prayer Submitted for Review" : "Prayer Published",
+        description: isFlaggedForReview 
+          ? "Your prayer has been submitted and will be reviewed by our team before being shared publicly."
+          : "Your prayer request has been shared with the community.",
       });
 
       setStep('live');
@@ -374,7 +395,7 @@ export default function CreatePrayer() {
                 <div className="space-y-2">
                   <h3 className="font-serif text-lg font-semibold text-amber-900 dark:text-amber-200">A gentle suggestion</h3>
                   <p className="text-amber-800 dark:text-amber-300 text-sm leading-relaxed">
-                    It looks like your prayer might be framed in a negative way. Prayers tend to be more powerful when they focus on what we hope <em>for</em> rather than what we're against.
+                    It looks like your prayer might be framed in a negative way. Prayers tend to be more powerful when they focus on what we hope <em>for</em> rather than what we're against. If you continue without changes, your prayer will be sent to our team for review before being shared publicly.
                   </p>
                 </div>
                 {toneWarning.suggestion && (
@@ -396,7 +417,7 @@ export default function CreatePrayer() {
                   <Button
                     data-testid="button-continue-anyway"
                     type="button"
-                    onClick={() => { setToneWarning(null); generateAIContent(); }}
+                    onClick={() => { setIsFlaggedForReview(true); setToneSuggestion(toneWarning?.suggestion); setToneWarning(null); generateAIContent(); }}
                     className="flex-1 h-10 text-sm"
                   >
                     Continue Anyway
@@ -845,15 +866,32 @@ export default function CreatePrayer() {
             </div>
             
             <div className="space-y-4">
-              <h1 className="font-serif text-4xl font-bold text-balance">Your prayer request is live!</h1>
-              <p className="text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto">
-                Now let’s take a moment to help it flourish. Think of us as your prayer companion — we’ve learned what helps.
-              </p>
-              <div className="p-6 bg-primary/5 rounded-xl border border-primary/10 max-w-lg mx-auto mt-6">
-                 <p className="font-medium text-lg text-primary/90">
-                   Prayers that gather a handful of “amen”s in the first day are far more likely to spread hope and touch hearts.
-                 </p>
-              </div>
+              <h1 className="font-serif text-4xl font-bold text-balance">
+                {isFlaggedForReview ? "Your prayer has been submitted" : "Your prayer request is live!"}
+              </h1>
+              {isFlaggedForReview ? (
+                <>
+                  <p className="text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto">
+                    Thank you for sharing your prayer. Our team will review it before it becomes publicly visible.
+                  </p>
+                  <div data-testid="moderation-notice" className="p-6 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800 max-w-lg mx-auto mt-6">
+                    <p className="font-medium text-lg text-amber-800 dark:text-amber-200">
+                      Your prayer is being reviewed to make sure it aligns with our community guidelines. You'll still be able to share it with your inner circle while we review.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto">
+                    Now let’s take a moment to help it flourish. Think of us as your prayer companion — we’ve learned what helps.
+                  </p>
+                  <div className="p-6 bg-primary/5 rounded-xl border border-primary/10 max-w-lg mx-auto mt-6">
+                    <p className="font-medium text-lg text-primary/90">
+                      Prayers that gather a handful of “amen”s in the first day are far more likely to spread hope and touch hearts.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="pt-8">
