@@ -37,6 +37,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Features
 - Prayer request creation with AI-enhanced content generation
+- Prayer tone check: AI-powered positivity analysis before generating prayer content, with constructive reframing suggestions for negatively-framed prayers
 - Prayer counter that tracks community participation
 - Goal-based progress tracking for each prayer
 - Browse and search functionality for prayers

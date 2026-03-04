@@ -30,6 +30,61 @@ export async function registerRoutes(
   await setupAuth(app);
 
 
+  app.post("/api/check-tone", async (req, res) => {
+    try {
+      const { title, description } = req.body;
+
+      if (!title || typeof title !== 'string') {
+        return res.status(400).json({ error: "Title is required" });
+      }
+
+      if (!openai) {
+        return res.json({ isNegative: false });
+      }
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{
+          role: "system",
+          content: `You are a prayer tone analyzer for a prayer platform. Analyze the user's prayer title and description to determine if it is framed negatively.
+
+A prayer is NEGATIVE if it:
+- Is directed AGAINST a group, religion, ethnicity, nationality, or people
+- Contains hateful, vengeful, or violent language
+- Wishes harm or misfortune on others
+- Is primarily about stopping, defeating, or destroying something rather than building something positive
+
+A prayer is POSITIVE if it:
+- Asks for healing, strength, hope, peace, or growth
+- Is framed around building up rather than tearing down
+- Expresses sadness or concern without directing hostility at others
+
+If the prayer is negative, reframe it into a positive alternative. Turn "against X" into "for Y":
+- "Stop the spread of Islam in America" → "Pray for the strengthening of Christianity in America"
+- "Defeat my enemies" → "Pray for peace and reconciliation in my relationships"
+- "Punish those who wronged me" → "Pray for justice and healing from this pain"
+- "Destroy the corruption" → "Pray for integrity and honest leadership"
+
+Respond with ONLY valid JSON (no markdown):
+{"isNegative": true/false, "suggestion": "Your positive reframing here or null if positive"}`
+        }, {
+          role: "user",
+          content: `Title: ${title}${description ? `\nDescription: ${description}` : ''}`
+        }],
+        temperature: 0.3,
+        max_tokens: 200,
+      });
+
+      let content = response.choices[0]?.message?.content?.trim() || '{"isNegative": false}';
+      content = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+      const result = JSON.parse(content);
+      res.json({ isNegative: !!result.isNegative, suggestion: result.suggestion || undefined });
+    } catch (error) {
+      console.error("Error checking prayer tone:", error);
+      res.json({ isNegative: false });
+    }
+  });
+
   // Generate prayer content using OpenAI (text only - fast)
   app.post("/api/generate-prayer", async (req, res) => {
     try {

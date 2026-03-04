@@ -1,5 +1,30 @@
 import type { Prayer, InsertPrayer } from "@shared/schema";
 
+export async function checkPrayerTone(title: string, description?: string): Promise<{ isNegative: boolean; suggestion?: string }> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch('/api/check-tone', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      return { isNegative: false };
+    }
+
+    return response.json();
+  } catch {
+    clearTimeout(timeoutId);
+    return { isNegative: false };
+  }
+}
+
 export async function generatePrayerContent(title: string, description?: string) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000);

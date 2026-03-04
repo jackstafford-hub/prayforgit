@@ -9,7 +9,7 @@ import { ArrowLeft, Sparkles, Wand2, RefreshCw, Pencil, Check, X, Loader2, Uploa
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { generatePrayerContent, createPrayer, generateImage } from "@/lib/api";
+import { generatePrayerContent, createPrayer, generateImage, checkPrayerTone } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import type { User } from "@shared/schema";
 
@@ -97,6 +97,8 @@ export default function CreatePrayer() {
   const [isRegeneratingIssue, setIsRegeneratingIssue] = useState(false);
   const [isRegeneratingPrayer, setIsRegeneratingPrayer] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isCheckingTone, setIsCheckingTone] = useState(false);
+  const [toneWarning, setToneWarning] = useState<{ isNegative: boolean; suggestion?: string } | null>(null);
   const [originalIssue, setOriginalIssue] = useState("");
   const [originalPrayer, setOriginalPrayer] = useState("");
   
@@ -224,8 +226,19 @@ export default function CreatePrayer() {
     }
   };
 
-  const handleStoryContinue = (e: React.FormEvent) => {
+  const handleStoryContinue = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsCheckingTone(true);
+    try {
+      const toneResult = await checkPrayerTone(formData.title, formData.description);
+      if (toneResult.isNegative) {
+        setToneWarning(toneResult);
+        setIsCheckingTone(false);
+        return;
+      }
+    } catch {
+    }
+    setIsCheckingTone(false);
     generateAIContent();
   };
 
@@ -356,6 +369,42 @@ export default function CreatePrayer() {
               </p>
             </div>
             
+            {toneWarning?.isNegative && (
+              <div data-testid="tone-warning-dialog" className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="space-y-2">
+                  <h3 className="font-serif text-lg font-semibold text-amber-900 dark:text-amber-200">A gentle suggestion</h3>
+                  <p className="text-amber-800 dark:text-amber-300 text-sm leading-relaxed">
+                    It looks like your prayer might be framed in a negative way. Prayers tend to be more powerful when they focus on what we hope <em>for</em> rather than what we're against.
+                  </p>
+                </div>
+                {toneWarning.suggestion && (
+                  <div className="bg-white dark:bg-background rounded-lg p-4 border border-amber-200 dark:border-amber-700">
+                    <p className="text-sm text-muted-foreground mb-1">Instead, you could try:</p>
+                    <p data-testid="text-tone-suggestion" className="text-base font-medium text-foreground">{toneWarning.suggestion}</p>
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <Button
+                    data-testid="button-revise-prayer"
+                    type="button"
+                    variant="outline"
+                    onClick={() => { setToneWarning(null); }}
+                    className="flex-1 h-10 text-sm border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                  >
+                    Revise My Prayer
+                  </Button>
+                  <Button
+                    data-testid="button-continue-anyway"
+                    type="button"
+                    onClick={() => { setToneWarning(null); generateAIContent(); }}
+                    className="flex-1 h-10 text-sm"
+                  >
+                    Continue Anyway
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleStoryContinue} className="space-y-6">
               <div className="space-y-3">
                 <Label htmlFor="description" className="text-base font-medium">
@@ -381,11 +430,22 @@ export default function CreatePrayer() {
                   Back
                 </Button>
                 <Button 
+                  data-testid="button-generate-prayer"
                   type="submit" 
+                  disabled={isCheckingTone}
                   className="flex-1 h-12 text-base font-bold bg-primary hover:bg-primary/90 gap-2"
                 >
-                  <Sparkles className="w-4 h-4" />
-                  Generate Prayer
+                  {isCheckingTone ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      Generate Prayer
+                    </>
+                  )}
                 </Button>
               </div>
               
