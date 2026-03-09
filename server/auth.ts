@@ -228,13 +228,19 @@ export async function setupAuth(app: Express) {
       const token = crypto.randomUUID();
       const expiry = new Date(Date.now() + 60 * 60 * 1000);
 
-      const userFound = await storage.setResetToken(email.toLowerCase().trim(), token, expiry);
+      const normalizedEmail = email.toLowerCase().trim();
+      const userFound = await storage.setResetToken(normalizedEmail, token, expiry);
 
       if (userFound) {
         const baseUrl = process.env.APP_BASE_URL
-          || (isProduction ? 'https://prayforchange.org' : `http://localhost:5000`);
+          || (isProduction ? 'https://prayforchange.org' : `https://${process.env.REPLIT_DEV_DOMAIN}`);
         const resetUrl = `${baseUrl}/reset-password?token=${token}`;
-        sendPasswordResetEmail(email, resetUrl).catch(() => {});
+        console.log(`[AUTH] Password reset requested for ${normalizedEmail}, sending email with base URL: ${baseUrl}`);
+        sendPasswordResetEmail(normalizedEmail, resetUrl).catch((err) => {
+          console.error(`[AUTH] Failed to send password reset email to ${normalizedEmail}:`, err?.message || err);
+        });
+      } else {
+        console.log(`[AUTH] Password reset requested for ${normalizedEmail}, no matching account found`);
       }
 
       res.json({ message: "If an account exists with that email, a reset link has been sent." });
