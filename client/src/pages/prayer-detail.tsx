@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useRoute, Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -63,8 +64,13 @@ export default function PrayerDetail() {
   const [isPostingUpdate, setIsPostingUpdate] = useState(false);
   const [shareCardOpen, setShareCardOpen] = useState(false);
   
-  const canEdit = isAuthenticated && prayer && (!prayer.authorId || prayer.authorId === user?.id);
+  const { data: adminCheck } = useQuery<{ isAdmin: boolean } | null>({
+    queryKey: ["/api/admin/check"],
+    enabled: isAuthenticated,
+  });
+  const isAdmin = !!adminCheck?.isAdmin;
   const isAuthor = isAuthenticated && prayer && prayer.authorId === user?.id;
+  const canEdit = isAuthor || isAdmin;
 
   const handleSubmitReport = async () => {
     if (!prayer || !reportReason) return;

@@ -504,7 +504,12 @@ Respond with ONLY the image prompt, nothing else.`
         return res.status(404).json({ error: "Prayer not found" });
       }
 
-      if (prayer.authorId && prayer.authorId !== userId) {
+      const isAuthor = prayer.authorId && prayer.authorId === userId;
+      const userRecord = userId ? await storage.getUser(userId) : null;
+      const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+      const isAdmin = userRecord?.email ? adminEmails.includes(userRecord.email.toLowerCase()) : false;
+
+      if (!isAuthor && !isAdmin) {
         return res.status(403).json({ error: "Not authorized to edit this prayer" });
       }
 
@@ -535,7 +540,12 @@ Respond with ONLY the image prompt, nothing else.`
         return res.status(404).json({ error: "Prayer not found" });
       }
 
-      if (prayer.authorId && prayer.authorId !== userId) {
+      const isAuthor = prayer.authorId && prayer.authorId === userId;
+      const userRecord = userId ? await storage.getUser(userId) : null;
+      const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+      const isAdmin = userRecord?.email ? adminEmails.includes(userRecord.email.toLowerCase()) : false;
+
+      if (!isAuthor && !isAdmin) {
         return res.status(403).json({ error: "Not authorized to edit this prayer" });
       }
 
