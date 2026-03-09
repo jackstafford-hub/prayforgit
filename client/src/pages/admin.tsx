@@ -101,7 +101,12 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!isAuthenticated || !adminCheck?.isAdmin) {
+  if (!isAuthenticated) {
+    navigate("/auth");
+    return null;
+  }
+
+  if (!adminCheck?.isAdmin) {
     navigate("/");
     return null;
   }
