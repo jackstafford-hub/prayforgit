@@ -178,8 +178,8 @@ Sharing in our grief and in our joy.
 Oh God, we thank you for this opportunity to be of Service.
 May Thy Will be Done.`,
     author: 'Grace Community',
-    count: 15420,
-    goal: 20000,
+    count: 2847,
+    goal: 5000,
     topic: 'World Peace',
   }
 ];
@@ -199,6 +199,8 @@ export async function seedDatabase() {
             recitablePrayer: seed.recitablePrayer,
             imageUrl: seed.imageUrl,
             description: seed.description,
+            count: seed.count,
+            goal: seed.goal,
           })
           .where(eq(prayers.title, seed.title));
       }
