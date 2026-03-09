@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, users, prayers, reports, dailyPrayerCounts } from "@shared/schema";
+import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, users, prayers, reports, dailyPrayerCounts, prayerUpdates } from "@shared/schema";
 import { eq, desc, gte, and, sql, count as countFn } from "drizzle-orm";
 
 export interface IStorage {
@@ -30,6 +30,10 @@ export interface IStorage {
   deletePrayer(id: string): Promise<void>;
   getAdminStats(): Promise<{ totalPrayers: number; flaggedPrayers: number; totalReports: number }>;
   
+  // Prayer update methods
+  getUpdatesByPrayerId(prayerId: string): Promise<PrayerUpdate[]>;
+  createPrayerUpdate(update: InsertPrayerUpdate): Promise<PrayerUpdate>;
+
   // Password reset methods
   setResetToken(email: string, token: string, expiry: Date): Promise<boolean>;
   getUserByResetToken(token: string): Promise<User | undefined>;
@@ -183,6 +187,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deletePrayer(id: string): Promise<void> {
+    await db.delete(prayerUpdates).where(eq(prayerUpdates.prayerId, id));
     await db.delete(reports).where(eq(reports.prayerId, id));
     await db.delete(dailyPrayerCounts).where(eq(dailyPrayerCounts.prayerId, id));
     await db.delete(prayers).where(eq(prayers.id, id));
@@ -197,6 +202,16 @@ export class DatabaseStorage implements IStorage {
       flaggedPrayers: Number(flaggedStats?.total || 0),
       totalReports: Number(reportStats?.total || 0),
     };
+  }
+
+  // Prayer update methods
+  async getUpdatesByPrayerId(prayerId: string): Promise<PrayerUpdate[]> {
+    return await db.select().from(prayerUpdates).where(eq(prayerUpdates.prayerId, prayerId)).orderBy(desc(prayerUpdates.createdAt));
+  }
+
+  async createPrayerUpdate(update: InsertPrayerUpdate): Promise<PrayerUpdate> {
+    const [created] = await db.insert(prayerUpdates).values(update).returning();
+    return created;
   }
 
   // Password reset methods

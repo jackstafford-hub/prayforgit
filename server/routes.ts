@@ -364,6 +364,47 @@ Respond with ONLY the image prompt, nothing else.`
     }
   });
 
+  // Get updates for a prayer
+  app.get("/api/prayers/:id/updates", async (req, res) => {
+    try {
+      const updates = await storage.getUpdatesByPrayerId(req.params.id);
+      res.json(updates);
+    } catch (error: any) {
+      console.error("Error fetching prayer updates:", error);
+      res.status(500).json({ error: "Failed to fetch updates" });
+    }
+  });
+
+  // Post an update to a prayer (author only)
+  app.post("/api/prayers/:id/updates", isAuthenticated, async (req: any, res) => {
+    try {
+      const prayer = await storage.getPrayerById(req.params.id);
+      if (!prayer) {
+        return res.status(404).json({ error: "Prayer not found" });
+      }
+
+      if (prayer.authorId !== req.session.userId) {
+        return res.status(403).json({ error: "Only the prayer author can post updates" });
+      }
+
+      const { content } = req.body;
+      if (!content || typeof content !== "string" || content.trim().length === 0) {
+        return res.status(400).json({ error: "Update content is required" });
+      }
+
+      const update = await storage.createPrayerUpdate({
+        prayerId: req.params.id,
+        authorId: req.session.userId,
+        content: content.trim(),
+      });
+
+      res.json(update);
+    } catch (error: any) {
+      console.error("Error creating prayer update:", error);
+      res.status(500).json({ error: "Failed to create update" });
+    }
+  });
+
   // Increment prayer count
   app.post("/api/prayers/:id/pray", async (req, res) => {
     try {

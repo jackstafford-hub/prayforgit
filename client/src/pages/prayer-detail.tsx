@@ -2,13 +2,13 @@ import { useRoute, Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
-import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2 } from "lucide-react";
+import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import bgTexture from "@assets/generated_images/subtle_warm_paper_texture_background.png";
 import { getPrayerById, updatePrayerContent, regeneratePrayerContent } from "@/lib/api";
-import type { Prayer, User } from "@shared/schema";
+import type { Prayer, PrayerUpdate, User } from "@shared/schema";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,8 +54,14 @@ export default function PrayerDetail() {
   const [reportDetails, setReportDetails] = useState("");
   const [reporterEmail, setReporterEmail] = useState("");
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+
+  const [updates, setUpdates] = useState<PrayerUpdate[]>([]);
+  const [updatesLoading, setUpdatesLoading] = useState(true);
+  const [newUpdateContent, setNewUpdateContent] = useState("");
+  const [isPostingUpdate, setIsPostingUpdate] = useState(false);
   
   const canEdit = isAuthenticated && prayer && (!prayer.authorId || prayer.authorId === user?.id);
+  const isAuthor = isAuthenticated && prayer && prayer.authorId === user?.id;
 
   const handleSubmitReport = async () => {
     if (!prayer || !reportReason) return;
@@ -101,8 +107,47 @@ export default function PrayerDetail() {
     
     if (id) {
       fetchPrayer();
+      fetchUpdates();
     }
   }, [id]);
+
+  const fetchUpdates = async () => {
+    try {
+      const response = await fetch(`/api/prayers/${id}/updates`);
+      if (response.ok) {
+        setUpdates(await response.json());
+      }
+    } catch (error) {
+      console.error("Failed to fetch updates:", error);
+    } finally {
+      setUpdatesLoading(false);
+    }
+  };
+
+  const handlePostUpdate = async () => {
+    if (!newUpdateContent.trim() || !prayer) return;
+    setIsPostingUpdate(true);
+    try {
+      const response = await fetch(`/api/prayers/${prayer.id}/updates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: newUpdateContent.trim() }),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to post update");
+      }
+      const update = await response.json();
+      setUpdates(prev => [update, ...prev]);
+      setNewUpdateContent("");
+      toast({ title: "Update posted", description: "Your update has been shared with the community." });
+    } catch (error: any) {
+      toast({ title: "Failed to post update", description: error.message, variant: "destructive" });
+    } finally {
+      setIsPostingUpdate(false);
+    }
+  };
 
   const handleStartEditIssue = () => {
     if (prayer) {
@@ -411,6 +456,65 @@ export default function PrayerDetail() {
               </div>
             )}
             
+            {/* Updates Section */}
+            <div className="pt-8 border-t space-y-6">
+              <h2 className="font-serif text-2xl font-bold flex items-center gap-2">
+                <MessageSquarePlus className="w-5 h-5 text-primary" />
+                Updates
+                {updates.length > 0 && (
+                  <span className="text-sm font-normal text-muted-foreground">({updates.length})</span>
+                )}
+              </h2>
+
+              {isAuthor && (
+                <div className="bg-muted/30 rounded-lg p-4 space-y-3 border">
+                  <Textarea
+                    placeholder="Share an update with your prayer community..."
+                    value={newUpdateContent}
+                    onChange={(e) => setNewUpdateContent(e.target.value)}
+                    className="min-h-[80px] bg-background"
+                    data-testid="textarea-prayer-update"
+                  />
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handlePostUpdate}
+                      disabled={isPostingUpdate || !newUpdateContent.trim()}
+                      data-testid="button-post-update"
+                    >
+                      {isPostingUpdate ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Posting...
+                        </>
+                      ) : (
+                        "Post Update"
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {updatesLoading ? (
+                <div className="flex justify-center py-6">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : updates.length === 0 ? (
+                <p className="text-muted-foreground text-center py-6">No updates yet.</p>
+              ) : (
+                <div className="space-y-4">
+                  {updates.map((update) => (
+                    <div key={update.id} className="border rounded-lg p-4 bg-background space-y-2" data-testid={`update-${update.id}`}>
+                      <p className="text-foreground whitespace-pre-wrap leading-relaxed">{update.content}</p>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="w-3 h-3" />
+                        {formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="pt-4 flex gap-4 justify-center lg:justify-start">
                <Button 
                  variant="ghost" 

@@ -33,6 +33,7 @@ Preferred communication style: Simple, everyday language.
   - `prayers`: Stores prayer requests with AI-generated content
   - `sessions`: Stores user sessions for authentication
   - `daily_prayer_counts`: Tracks daily prayer counts per prayer for digest emails
+  - `prayer_updates`: Follow-up updates posted by prayer authors (prayerId, authorId, content, createdAt)
 - **Migrations**: Managed via drizzle-kit with `db:push` command
 
 ### Key Features
@@ -51,7 +52,7 @@ Preferred communication style: Simple, everyday language.
 ## To Do
 
 ### Medium Impact
-1. **Prayer Updates / Follow-ups** — Let prayer authors post updates to keep the community engaged
+1. ~~**Prayer Updates / Follow-ups** — Let prayer authors post updates to keep the community engaged~~ ✅ Done
 3. **Search** — Add keyword search to help users find specific prayers
 4. **Notification Preferences** — Add a "follow this prayer" feature so supporters get notified on updates or milestones
 5. **Social Proof on Home Page** — Show recent activity feed for momentum

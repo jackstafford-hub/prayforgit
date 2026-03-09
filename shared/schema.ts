@@ -106,6 +106,22 @@ export const insertReportSchema = createInsertSchema(reports).omit({
 export type InsertReport = z.infer<typeof insertReportSchema>;
 export type Report = typeof reports.$inferSelect;
 
+export const prayerUpdates = pgTable("prayer_updates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  prayerId: varchar("prayer_id").references(() => prayers.id).notNull(),
+  authorId: varchar("author_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertPrayerUpdateSchema = createInsertSchema(prayerUpdates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertPrayerUpdate = z.infer<typeof insertPrayerUpdateSchema>;
+export type PrayerUpdate = typeof prayerUpdates.$inferSelect;
+
 export const dailyPrayerCounts = pgTable("daily_prayer_counts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   prayerId: varchar("prayer_id").references(() => prayers.id).notNull(),
