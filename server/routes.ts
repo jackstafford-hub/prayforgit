@@ -612,7 +612,7 @@ Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
   });
 
   // Regenerate images for all prayers (admin endpoint)
-  app.post("/api/admin/regenerate-images", async (req, res) => {
+  app.post("/api/admin/regenerate-images", isAuthenticated, async (req: any, res) => {
     try {
       if (!openai) {
         return res.status(503).json({ error: "AI service is not configured. Please set OPENAI_API_KEY." });

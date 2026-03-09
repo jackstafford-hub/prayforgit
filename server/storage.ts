@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, users, prayers, reports, dailyPrayerCounts } from "@shared/schema";
-import { eq, desc, gte, and, sql } from "drizzle-orm";
+import { eq, desc, gte, and, sql, count as countFn } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -21,6 +21,14 @@ export interface IStorage {
   
   // Report methods
   createReport(report: InsertReport): Promise<Report>;
+  getReportsWithPrayers(): Promise<(Report & { prayerTitle: string })[]>;
+  deleteReport(id: string): Promise<void>;
+  
+  // Admin methods
+  getFlaggedPrayers(): Promise<Prayer[]>;
+  approvePrayer(id: string): Promise<Prayer | undefined>;
+  deletePrayer(id: string): Promise<void>;
+  getAdminStats(): Promise<{ totalPrayers: number; flaggedPrayers: number; totalReports: number }>;
   
   // Daily prayer count methods
   incrementDailyPrayerCount(prayerId: string): Promise<void>;
@@ -131,6 +139,59 @@ export class DatabaseStorage implements IStorage {
   async createReport(report: InsertReport): Promise<Report> {
     const [created] = await db.insert(reports).values(report).returning();
     return created;
+  }
+
+  // Report query methods
+  async getReportsWithPrayers(): Promise<(Report & { prayerTitle: string })[]> {
+    const results = await db
+      .select({
+        id: reports.id,
+        prayerId: reports.prayerId,
+        reason: reports.reason,
+        details: reports.details,
+        reporterEmail: reports.reporterEmail,
+        createdAt: reports.createdAt,
+        prayerTitle: prayers.title,
+      })
+      .from(reports)
+      .innerJoin(prayers, eq(reports.prayerId, prayers.id))
+      .orderBy(desc(reports.createdAt));
+    return results;
+  }
+
+  async deleteReport(id: string): Promise<void> {
+    await db.delete(reports).where(eq(reports.id, id));
+  }
+
+  // Admin methods
+  async getFlaggedPrayers(): Promise<Prayer[]> {
+    return await db.select().from(prayers).where(eq(prayers.flaggedForReview, true)).orderBy(desc(prayers.createdAt));
+  }
+
+  async approvePrayer(id: string): Promise<Prayer | undefined> {
+    const [updated] = await db
+      .update(prayers)
+      .set({ flaggedForReview: false })
+      .where(eq(prayers.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePrayer(id: string): Promise<void> {
+    await db.delete(reports).where(eq(reports.prayerId, id));
+    await db.delete(dailyPrayerCounts).where(eq(dailyPrayerCounts.prayerId, id));
+    await db.delete(prayers).where(eq(prayers.id, id));
+  }
+
+  async getAdminStats(): Promise<{ totalPrayers: number; flaggedPrayers: number; totalReports: number }> {
+    const [prayerStats] = await db.select({ total: countFn() }).from(prayers);
+    const [flaggedStats] = await db.select({ total: countFn() }).from(prayers).where(eq(prayers.flaggedForReview, true));
+    const [reportStats] = await db.select({ total: countFn() }).from(reports);
+    return {
+      totalPrayers: Number(prayerStats?.total || 0),
+      flaggedPrayers: Number(flaggedStats?.total || 0),
+      totalReports: Number(reportStats?.total || 0),
+    };
   }
 
   // Daily prayer count methods

@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import { db } from "../db";
 import { users } from "@shared/schema";
 import { eq, ilike, sql, count } from "drizzle-orm";
+import { storage } from "../storage";
 
 const router = Router();
 
@@ -83,6 +84,73 @@ router.get("/users", requireAdmin, async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ message: "Failed to fetch users" });
+  }
+});
+
+router.get("/check", requireAdmin, async (_req: Request, res: Response) => {
+  res.json({ isAdmin: true });
+});
+
+router.get("/stats", requireAdmin, async (_req: Request, res: Response) => {
+  try {
+    const stats = await storage.getAdminStats();
+    res.json(stats);
+  } catch (error) {
+    console.error("Error fetching admin stats:", error);
+    res.status(500).json({ message: "Failed to fetch stats" });
+  }
+});
+
+router.get("/flagged-prayers", requireAdmin, async (_req: Request, res: Response) => {
+  try {
+    const flaggedPrayers = await storage.getFlaggedPrayers();
+    res.json(flaggedPrayers);
+  } catch (error) {
+    console.error("Error fetching flagged prayers:", error);
+    res.status(500).json({ message: "Failed to fetch flagged prayers" });
+  }
+});
+
+router.post("/prayers/:id/approve", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const prayer = await storage.approvePrayer(req.params.id);
+    if (!prayer) {
+      return res.status(404).json({ message: "Prayer not found" });
+    }
+    res.json(prayer);
+  } catch (error) {
+    console.error("Error approving prayer:", error);
+    res.status(500).json({ message: "Failed to approve prayer" });
+  }
+});
+
+router.delete("/prayers/:id", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    await storage.deletePrayer(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting prayer:", error);
+    res.status(500).json({ message: "Failed to delete prayer" });
+  }
+});
+
+router.get("/reports", requireAdmin, async (_req: Request, res: Response) => {
+  try {
+    const reportsData = await storage.getReportsWithPrayers();
+    res.json(reportsData);
+  } catch (error) {
+    console.error("Error fetching reports:", error);
+    res.status(500).json({ message: "Failed to fetch reports" });
+  }
+});
+
+router.delete("/reports/:id", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    await storage.deleteReport(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting report:", error);
+    res.status(500).json({ message: "Failed to delete report" });
   }
 });
 

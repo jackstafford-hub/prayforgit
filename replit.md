@@ -38,6 +38,7 @@ Preferred communication style: Simple, everyday language.
 ### Key Features
 - Prayer request creation with AI-enhanced content generation
 - Prayer tone check: AI-powered positivity analysis before generating prayer content, with constructive reframing suggestions for negatively-framed prayers. Prayers that proceed despite warnings are flagged for moderation (`flaggedForReview` column) and emailed to support@prayforchange.org for review before becoming publicly visible
+- Admin Moderation Dashboard (`/admin`): Protected by `ADMIN_EMAILS` env var. Allows admins to view stats, approve/delete flagged prayers, and review/dismiss user reports. Admin link appears in navbar for authorized users only
 - Prayer counter that tracks community participation
 - Goal-based progress tracking for each prayer
 - Browse and search functionality for prayers
@@ -46,6 +47,20 @@ Preferred communication style: Simple, everyday language.
   - Welcome email on user registration
   - Prayer saved email with a copy of the prayer when submitted
   - Daily digest email with prayer count updates (runs at 8am UTC, only sent if someone prayed)
+
+## To Do
+
+### Medium Impact
+1. **Prayer Categories & Filtering** — Add topic filters to the Browse page so users can find prayers by category
+2. **Prayer Updates / Follow-ups** — Let prayer authors post updates to keep the community engaged
+3. **Search** — Add keyword search to help users find specific prayers
+4. **Notification Preferences** — Add a "follow this prayer" feature so supporters get notified on updates or milestones
+5. **Social Proof on Home Page** — Show recent activity feed for momentum
+
+### Nice-to-Have
+6. **Shareable Prayer Cards** — Generate visual image cards for social media sharing
+7. **Dark Mode Toggle** — Add a user-facing toggle to switch between light and dark themes
+8. **Password Reset Flow** — Add a "forgot password" option
 
 ## External Dependencies
 

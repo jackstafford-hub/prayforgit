@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, UserCircle, LogOut, Heart } from "lucide-react";
+import { Search, Menu, UserCircle, LogOut, Heart, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import type { User } from "@shared/schema";
 import {
@@ -16,7 +16,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function Navbar() {
   const { user: authUser, isAuthenticated, isLoading } = useAuth();
@@ -24,6 +24,13 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
+
+  const { data: adminCheck } = useQuery<{ isAdmin: boolean } | null>({
+    queryKey: ["/api/admin/check"],
+    enabled: isAuthenticated,
+    retry: false,
+  });
+  const isAdmin = !!adminCheck?.isAdmin;
 
   const handleLogout = async () => {
     try {
@@ -87,6 +94,12 @@ export function Navbar() {
                   <Heart className="w-4 h-4 mr-2" />
                   My Prayers
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem onClick={() => navigate("/admin")} className="cursor-pointer" data-testid="link-admin-dashboard">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Admin
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                   <LogOut className="w-4 h-4 mr-2" />
                   Log out
@@ -171,6 +184,17 @@ export function Navbar() {
                         )}
                         <span className="font-medium">{user.firstName || user.email || 'User'}</span>
                       </div>
+                      {isAdmin && (
+                        <Button 
+                          variant="ghost" 
+                          className="justify-start text-base cursor-pointer"
+                          onClick={() => { navigate("/admin"); setMobileMenuOpen(false); }}
+                          data-testid="link-mobile-admin"
+                        >
+                          <Shield className="w-4 h-4 mr-2" />
+                          Admin Dashboard
+                        </Button>
+                      )}
                       <Button 
                         variant="ghost" 
                         className="justify-start text-base text-destructive cursor-pointer"

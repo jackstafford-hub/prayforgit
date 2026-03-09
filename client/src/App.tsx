@@ -14,6 +14,7 @@ import Dashboard from "@/pages/dashboard";
 import PersonalPrayer from "@/pages/personal-prayer";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
+import AdminDashboard from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/personal-prayer" component={PersonalPrayer} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
