@@ -302,7 +302,7 @@ export default function CompleteSupport() {
               data-testid="button-share"
             >
               <Share2 className="w-5 h-5 mr-2" />
-              No, I'll invite others to pray instead
+              No, I'll share instead
             </Button>
           </div>
 
