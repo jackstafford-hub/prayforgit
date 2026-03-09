@@ -58,7 +58,7 @@ Preferred communication style: Simple, everyday language.
 5. **Social Proof on Home Page** — Show recent activity feed for momentum
 
 ### Nice-to-Have
-6. **Shareable Prayer Cards** — Generate visual image cards for social media sharing
+6. ~~**Shareable Prayer Cards** — Generate visual image cards for social media sharing~~ ✅ Done
 7. **Dark Mode Toggle** — Add a user-facing toggle to switch between light and dark themes
 
 ## External Dependencies
@@ -81,3 +81,4 @@ Preferred communication style: Simple, everyday language.
 - `bcrypt`: Secure password hashing
 - `@tanstack/react-query`: Server state management
 - `shadcn/ui` components via Radix UI primitives
+- `html2canvas`: Client-side HTML-to-image conversion for shareable prayer cards

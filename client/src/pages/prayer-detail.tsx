@@ -2,13 +2,14 @@ import { useRoute, Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
-import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock } from "lucide-react";
+import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Share2, Copy, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import bgTexture from "@assets/generated_images/subtle_warm_paper_texture_background.png";
 import { getPrayerById, updatePrayerContent, regeneratePrayerContent } from "@/lib/api";
 import type { Prayer, PrayerUpdate, User } from "@shared/schema";
+import { ShareableCardDialog } from "@/components/shareable-card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,6 +60,7 @@ export default function PrayerDetail() {
   const [updatesLoading, setUpdatesLoading] = useState(true);
   const [newUpdateContent, setNewUpdateContent] = useState("");
   const [isPostingUpdate, setIsPostingUpdate] = useState(false);
+  const [shareCardOpen, setShareCardOpen] = useState(false);
   
   const canEdit = isAuthenticated && prayer && (!prayer.authorId || prayer.authorId === user?.id);
   const isAuthor = isAuthenticated && prayer && prayer.authorId === user?.id;
@@ -631,6 +633,16 @@ export default function PrayerDetail() {
                   </div>
 
                   <div className="pt-4 border-t">
+                    <h4 className="font-bold mb-3">Share this prayer</h4>
+                    <Button
+                      variant="outline"
+                      className="w-full mb-2"
+                      onClick={() => setShareCardOpen(true)}
+                      data-testid="button-share-prayer-card-donated"
+                    >
+                      <Image className="w-4 h-4 mr-2" />
+                      Share Prayer Card
+                    </Button>
                     <Link href="/browse">
                       <Button variant="outline" className="w-full" data-testid="button-browse-prayers">
                         Browse More Prayers
@@ -677,13 +689,45 @@ export default function PrayerDetail() {
                     </Button>
                   </div>
 
-                  {hasPrayed && (
-                    <div className="pt-4 border-t animate-in fade-in slide-in-from-top-2">
-                      <h4 className="font-bold mb-3">Help this prayer reach more people</h4>
-                      <Button variant="outline" className="w-full mb-2">Share on WhatsApp</Button>
-                      <Button variant="outline" className="w-full">Copy Link</Button>
-                    </div>
-                  )}
+                  <div className="pt-4 border-t">
+                    <h4 className="font-bold mb-3">Help this prayer reach more people</h4>
+                    <Button
+                      variant="outline"
+                      className="w-full mb-2"
+                      onClick={() => setShareCardOpen(true)}
+                      data-testid="button-share-prayer-card"
+                    >
+                      <Image className="w-4 h-4 mr-2" />
+                      Share Prayer Card
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full mb-2"
+                      onClick={() => {
+                        const url = `https://wa.me/?text=${encodeURIComponent(`Join me in prayer: ${prayer.title}\n${window.location.href}`)}`;
+                        window.open(url, "_blank");
+                      }}
+                      data-testid="button-share-whatsapp"
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Share on WhatsApp
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        navigator.clipboard.writeText(window.location.href).then(() => {
+                          toast({ title: "Link copied", description: "Prayer link copied to clipboard." });
+                        }).catch(() => {
+                          toast({ title: "Could not copy", description: "Please copy the link from your browser's address bar.", variant: "destructive" });
+                        });
+                      }}
+                      data-testid="button-copy-link"
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy Link
+                    </Button>
+                  </div>
                   
                   <div className="pt-4 border-t text-center">
                     <Link href="/personal-prayer">
@@ -698,6 +742,14 @@ export default function PrayerDetail() {
           </div>
         </div>
       </div>
+
+      {prayer && (
+        <ShareableCardDialog
+          prayer={prayer}
+          open={shareCardOpen}
+          onOpenChange={setShareCardOpen}
+        />
+      )}
     </div>
   );
 }
