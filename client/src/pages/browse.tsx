@@ -1,14 +1,18 @@
 import { PrayerCard } from "@/components/prayer-card";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getPrayers } from "@/lib/api";
+import { PRAYER_CATEGORIES } from "@shared/schema";
 import type { Prayer } from "@shared/schema";
+
+const CATEGORIES = ["All", ...PRAYER_CATEGORIES];
 
 export default function Browse() {
   const [prayers, setPrayers] = useState<Prayer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
     const fetchPrayers = async () => {
@@ -27,6 +31,11 @@ export default function Browse() {
     fetchPrayers();
   }, []);
 
+  const filteredPrayers = useMemo(() => {
+    if (activeCategory === "All") return prayers;
+    return prayers.filter(p => p.topic === activeCategory);
+  }, [prayers, activeCategory]);
+
   return (
     <div className="min-h-screen bg-background font-sans">
       <Navbar />
@@ -39,6 +48,28 @@ export default function Browse() {
             Explore prayer requests from our community. Each prayer represents someone's hope for change. 
             Join them in faith and multiply the power of prayer.
           </p>
+        </div>
+      </div>
+
+      {/* Category Filters */}
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-14 z-40">
+        <div className="container mx-auto px-4 md:px-6 py-3">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border cursor-pointer ${
+                  activeCategory === cat
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
+                }`}
+                data-testid={`filter-${cat.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -60,15 +91,31 @@ export default function Browse() {
                 Try again
               </Button>
             </div>
-          ) : prayers.length === 0 ? (
+          ) : filteredPrayers.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-xl text-muted-foreground">No prayers yet. Be the first to start one!</p>
+              {activeCategory === "All" ? (
+                <p className="text-xl text-muted-foreground">No prayers yet. Be the first to start one!</p>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-xl text-muted-foreground">No prayers in "{activeCategory}" yet.</p>
+                  <Button
+                    variant="outline"
+                    onClick={() => setActiveCategory("All")}
+                    data-testid="button-show-all"
+                  >
+                    Show all prayers
+                  </Button>
+                </div>
+              )}
             </div>
           ) : (
             <>
-              <p className="text-muted-foreground mb-8">{prayers.length} prayer requests</p>
+              <p className="text-muted-foreground mb-8" data-testid="text-results-count">
+                {filteredPrayers.length} prayer {filteredPrayers.length === 1 ? 'request' : 'requests'}
+                {activeCategory !== "All" && ` in ${activeCategory}`}
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {prayers.map(prayer => (
+                {filteredPrayers.map(prayer => (
                   <PrayerCard key={prayer.id} prayer={prayer} />
                 ))}
               </div>

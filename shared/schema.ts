@@ -46,6 +46,20 @@ export const prayers = pgTable("prayers", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const PRAYER_CATEGORIES = [
+  "Health",
+  "Family",
+  "Employment",
+  "World Peace",
+  "Community",
+  "Faith",
+  "Education",
+  "Gratitude",
+  "General",
+] as const;
+
+export type PrayerCategory = typeof PRAYER_CATEGORIES[number];
+
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 

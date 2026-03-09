@@ -41,7 +41,7 @@ Preferred communication style: Simple, everyday language.
 - Admin Moderation Dashboard (`/admin`): Protected by `ADMIN_EMAILS` env var. Allows admins to view stats, approve/delete flagged prayers, and review/dismiss user reports. Admin link appears in navbar for authorized users only
 - Prayer counter that tracks community participation
 - Goal-based progress tracking for each prayer
-- Browse and search functionality for prayers
+- Browse page with category filtering (Health, Family, Employment, World Peace, Community, Faith, Education, Gratitude, General)
 - Custom user authentication with email/password registration and password reset flow
 - Email notifications via SendGrid:
   - Welcome email on user registration
@@ -51,8 +51,7 @@ Preferred communication style: Simple, everyday language.
 ## To Do
 
 ### Medium Impact
-1. **Prayer Categories & Filtering** — Add topic filters to the Browse page so users can find prayers by category
-2. **Prayer Updates / Follow-ups** — Let prayer authors post updates to keep the community engaged
+1. **Prayer Updates / Follow-ups** — Let prayer authors post updates to keep the community engaged
 3. **Search** — Add keyword search to help users find specific prayers
 4. **Notification Preferences** — Add a "follow this prayer" feature so supporters get notified on updates or milestones
 5. **Social Proof on Home Page** — Show recent activity feed for momentum
