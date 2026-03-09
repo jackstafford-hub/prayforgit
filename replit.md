@@ -42,7 +42,7 @@ Preferred communication style: Simple, everyday language.
 - Prayer counter that tracks community participation
 - Goal-based progress tracking for each prayer
 - Browse and search functionality for prayers
-- Custom user authentication with email/password registration
+- Custom user authentication with email/password registration and password reset flow
 - Email notifications via SendGrid:
   - Welcome email on user registration
   - Prayer saved email with a copy of the prayer when submitted
@@ -60,7 +60,6 @@ Preferred communication style: Simple, everyday language.
 ### Nice-to-Have
 6. **Shareable Prayer Cards** — Generate visual image cards for social media sharing
 7. **Dark Mode Toggle** — Add a user-facing toggle to switch between light and dark themes
-8. **Password Reset Flow** — Add a "forgot password" option
 
 ## External Dependencies
 

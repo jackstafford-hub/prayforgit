@@ -15,6 +15,8 @@ import PersonalPrayer from "@/pages/personal-prayer";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import AdminDashboard from "@/pages/admin";
+import ForgotPassword from "@/pages/forgot-password";
+import ResetPassword from "@/pages/reset-password";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -32,6 +34,8 @@ function Router() {
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route component={NotFound} />
     </Switch>
   );

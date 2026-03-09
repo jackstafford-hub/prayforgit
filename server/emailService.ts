@@ -187,6 +187,49 @@ export async function sendDailyDigestEmail(toEmail: string, firstName: string, p
   }
 }
 
+export async function sendPasswordResetEmail(toEmail: string, resetUrl: string) {
+  try {
+    const { client, fromEmail } = await getUncachableSendGridClient();
+
+    await client.send({
+      to: toEmail,
+      from: { email: fromEmail, name: 'Pray For Change' },
+      subject: 'Reset Your Password - PrayForChange',
+      html: `
+        <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #4a3728; text-align: center;">Reset Your Password</h1>
+          <p style="font-size: 16px; line-height: 1.6; color: #333;">
+            We received a request to reset your password. Click the button below to choose a new one.
+          </p>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${escapeHtml(resetUrl)}" style="display: inline-block; background-color: #c9a96e; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: bold;">
+              Reset Password
+            </a>
+          </div>
+          <p style="font-size: 14px; line-height: 1.6; color: #666;">
+            This link will expire in 1 hour. If you didn't request a password reset, you can safely ignore this email.
+          </p>
+          <p style="font-size: 14px; line-height: 1.6; color: #666;">
+            If the button above doesn't work, copy and paste this link into your browser:
+          </p>
+          <p style="font-size: 13px; line-height: 1.6; color: #999; word-break: break-all;">
+            ${escapeHtml(resetUrl)}
+          </p>
+          <p style="font-size: 16px; line-height: 1.6; color: #333;">
+            With respect,<br/>
+            The Pray For Change Team
+          </p>
+        </div>
+      `,
+    });
+
+    console.log(`[EMAIL] Password reset email sent to ${toEmail}`);
+  } catch (error: any) {
+    const detail = error?.response?.body ? JSON.stringify(error.response.body) : (error?.message || error);
+    console.error(`[EMAIL] Failed to send password reset email to ${toEmail}:`, detail);
+  }
+}
+
 const ADMIN_EMAIL = 'support@prayforchange.org';
 
 export async function sendModerationEmail(prayerTitle: string, prayerDescription: string, prayerContent: string, authorName: string, toneSuggestion?: string) {

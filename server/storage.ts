@@ -30,6 +30,11 @@ export interface IStorage {
   deletePrayer(id: string): Promise<void>;
   getAdminStats(): Promise<{ totalPrayers: number; flaggedPrayers: number; totalReports: number }>;
   
+  // Password reset methods
+  setResetToken(email: string, token: string, expiry: Date): Promise<boolean>;
+  getUserByResetToken(token: string): Promise<User | undefined>;
+  resetPassword(userId: string, hashedPassword: string): Promise<void>;
+  
   // Daily prayer count methods
   incrementDailyPrayerCount(prayerId: string): Promise<void>;
   getDailyPrayerCountsForDate(date: string): Promise<{ prayerId: string; count: number }[]>;
@@ -192,6 +197,31 @@ export class DatabaseStorage implements IStorage {
       flaggedPrayers: Number(flaggedStats?.total || 0),
       totalReports: Number(reportStats?.total || 0),
     };
+  }
+
+  // Password reset methods
+  async setResetToken(email: string, token: string, expiry: Date): Promise<boolean> {
+    const result = await db
+      .update(users)
+      .set({ resetToken: token, resetTokenExpiry: expiry })
+      .where(eq(users.email, email))
+      .returning();
+    return result.length > 0;
+  }
+
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.resetToken, token), gte(users.resetTokenExpiry, new Date())));
+    return user;
+  }
+
+  async resetPassword(userId: string, hashedPassword: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ password: hashedPassword, resetToken: null, resetTokenExpiry: null })
+      .where(eq(users.id, userId));
   }
 
   // Daily prayer count methods

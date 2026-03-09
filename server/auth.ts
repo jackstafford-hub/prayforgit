@@ -6,7 +6,8 @@ import { pool } from "./db";
 import bcrypt from "bcrypt";
 import { registerSchema, loginSchema } from "@shared/schema";
 import { z } from "zod";
-import { sendWelcomeEmail } from "./emailService";
+import { sendWelcomeEmail, sendPasswordResetEmail } from "./emailService";
+import crypto from "crypto";
 
 const SALT_ROUNDS = 10;
 const isProduction = process.env.NODE_ENV === "production";
@@ -214,6 +215,61 @@ export async function setupAuth(app: Express) {
       res.clearCookie('connect.sid');
       res.json({ message: "Logged out successfully" });
     });
+  });
+
+  // Forgot password - request reset link
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email || typeof email !== "string") {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      const token = crypto.randomUUID();
+      const expiry = new Date(Date.now() + 60 * 60 * 1000);
+
+      const userFound = await storage.setResetToken(email.toLowerCase().trim(), token, expiry);
+
+      if (userFound) {
+        const baseUrl = process.env.APP_BASE_URL
+          || (isProduction ? 'https://prayforchange.org' : `http://localhost:5000`);
+        const resetUrl = `${baseUrl}/reset-password?token=${token}`;
+        sendPasswordResetEmail(email, resetUrl).catch(() => {});
+      }
+
+      res.json({ message: "If an account exists with that email, a reset link has been sent." });
+    } catch (error: any) {
+      console.error("[AUTH] Forgot password error:", error?.message || error);
+      res.json({ message: "If an account exists with that email, a reset link has been sent." });
+    }
+  });
+
+  // Reset password - set new password with token
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      if (!token || !password) {
+        return res.status(400).json({ message: "Token and password are required" });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters" });
+      }
+
+      const user = await storage.getUserByResetToken(token);
+      if (!user) {
+        return res.status(400).json({ message: "This reset link is invalid or has expired. Please request a new one." });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+      await storage.resetPassword(user.id, hashedPassword);
+
+      console.log(`[AUTH] Password reset successful for userId=${user.id}`);
+      res.json({ message: "Your password has been reset successfully. You can now sign in." });
+    } catch (error: any) {
+      console.error("[AUTH] Reset password error:", error?.message || error);
+      res.status(500).json({ message: "Failed to reset password. Please try again." });
+    }
   });
 
   // Get current user
