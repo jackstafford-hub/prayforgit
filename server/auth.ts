@@ -233,7 +233,9 @@ export async function setupAuth(app: Express) {
 
       if (userFound) {
         const baseUrl = process.env.APP_BASE_URL
-          || (isProduction ? 'https://prayforchange.org' : `https://${process.env.REPLIT_DEV_DOMAIN}`);
+          || (isProduction ? 'https://prayforchange.org'
+            : (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+              : `${req.protocol}://${req.get('host')}`));
         const resetUrl = `${baseUrl}/reset-password?token=${token}`;
         console.log(`[AUTH] Password reset requested for ${normalizedEmail}, sending email with base URL: ${baseUrl}`);
         sendPasswordResetEmail(normalizedEmail, resetUrl).catch((err) => {
