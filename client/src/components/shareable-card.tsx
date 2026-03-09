@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import html2canvas from "html2canvas";
 import { Button } from "@/components/ui/button";
-import { Download, Share2, Loader2, X } from "lucide-react";
+import { Download, Share2, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -76,8 +76,10 @@ export function ShareableCardDialog({ prayer, open, onOpenChange }: ShareableCar
   const percentage = Math.min((prayer.count / prayer.goal) * 100, 100);
   const excerpt = truncateText(
     prayer.aiSummary || prayer.description || "",
-    200
+    180
   );
+
+  const imageUrl = prayer.imageUrl;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -93,7 +95,6 @@ export function ShareableCardDialog({ prayer, open, onOpenChange }: ShareableCar
               style={{
                 width: "400px",
                 minWidth: "400px",
-                padding: "40px 32px",
                 background: "linear-gradient(145deg, #fdf6f0 0%, #fff8f2 40%, #fef3ea 100%)",
                 borderRadius: "16px",
                 fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
@@ -101,153 +102,177 @@ export function ShareableCardDialog({ prayer, open, onOpenChange }: ShareableCar
                 overflow: "hidden",
               }}
             >
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  width: "120px",
-                  height: "120px",
-                  background: "radial-gradient(circle at top right, rgba(236, 44, 34, 0.08) 0%, transparent 70%)",
-                  borderRadius: "0 16px 0 0",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  width: "160px",
-                  height: "160px",
-                  background: "radial-gradient(circle at bottom left, rgba(236, 44, 34, 0.05) 0%, transparent 70%)",
-                  borderRadius: "0 0 0 16px",
-                }}
-              />
-
-              {prayer.topic && (
-                <div
-                  style={{
-                    display: "inline-block",
-                    background: "rgba(236, 44, 34, 0.1)",
-                    color: "#c41e16",
-                    fontSize: "11px",
-                    fontWeight: 600,
-                    padding: "4px 12px",
-                    borderRadius: "20px",
-                    letterSpacing: "0.5px",
-                    textTransform: "uppercase",
-                    marginBottom: "16px",
-                  }}
-                >
-                  {prayer.topic}
-                </div>
-              )}
-
-              <h2
-                style={{
-                  fontFamily: "'Playfair Display', Georgia, serif",
-                  fontSize: "22px",
-                  fontWeight: 700,
-                  color: "#1a1a1a",
-                  lineHeight: 1.3,
-                  marginBottom: "14px",
-                  marginTop: 0,
-                }}
-              >
-                {truncateText(prayer.title, 80)}
-              </h2>
-
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#555",
-                  lineHeight: 1.65,
-                  marginBottom: "20px",
-                  marginTop: 0,
-                }}
-              >
-                {excerpt}
-              </p>
-
-              <div
-                style={{
-                  background: "#fff",
-                  borderRadius: "10px",
-                  padding: "14px 16px",
-                  marginBottom: "20px",
-                  border: "1px solid rgba(0,0,0,0.06)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "baseline",
-                    marginBottom: "8px",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "20px",
-                      fontWeight: 700,
-                      fontFamily: "'Playfair Display', Georgia, serif",
-                      color: "#1a1a1a",
-                    }}
-                  >
-                    {prayer.count.toLocaleString()}
-                  </span>
-                  <span style={{ fontSize: "12px", color: "#888" }}>
-                    of {prayer.goal.toLocaleString()} prayers
-                  </span>
-                </div>
+              {imageUrl && (
                 <div
                   style={{
                     width: "100%",
-                    height: "6px",
-                    background: "#f0e8e0",
-                    borderRadius: "3px",
+                    height: "180px",
                     overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
+                  <img
+                    src={imageUrl}
+                    crossOrigin="anonymous"
+                    alt=""
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: "40px",
+                      background: "linear-gradient(to top, #fdf6f0, transparent)",
+                    }}
+                  />
+                </div>
+              )}
+
+              <div style={{ padding: imageUrl ? "16px 32px 40px" : "40px 32px" }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    width: "120px",
+                    height: "120px",
+                    background: "radial-gradient(circle at top right, rgba(236, 44, 34, 0.08) 0%, transparent 70%)",
+                    borderRadius: "0 16px 0 0",
+                    display: imageUrl ? "none" : "block",
+                  }}
+                />
+
+                {prayer.topic && (
+                  <div
+                    style={{
+                      display: "inline-block",
+                      background: "rgba(236, 44, 34, 0.1)",
+                      color: "#c41e16",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      padding: "4px 12px",
+                      borderRadius: "20px",
+                      letterSpacing: "0.5px",
+                      textTransform: "uppercase",
+                      marginBottom: "14px",
+                    }}
+                  >
+                    {prayer.topic}
+                  </div>
+                )}
+
+                <h2
+                  style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: "22px",
+                    fontWeight: 700,
+                    color: "#1a1a1a",
+                    lineHeight: 1.3,
+                    marginBottom: "12px",
+                    marginTop: 0,
+                  }}
+                >
+                  {truncateText(prayer.title, 80)}
+                </h2>
+
+                <p
+                  style={{
+                    fontSize: "13px",
+                    color: "#555",
+                    lineHeight: 1.65,
+                    marginBottom: "18px",
+                    marginTop: 0,
+                  }}
+                >
+                  {excerpt}
+                </p>
+
+                <div
+                  style={{
+                    background: "#fff",
+                    borderRadius: "10px",
+                    padding: "14px 16px",
+                    marginBottom: "18px",
+                    border: "1px solid rgba(0,0,0,0.06)",
                   }}
                 >
                   <div
                     style={{
-                      width: `${percentage}%`,
-                      height: "100%",
-                      background: "linear-gradient(90deg, #ec2c22, #e85d56)",
-                      borderRadius: "3px",
-                      transition: "width 0.3s",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "baseline",
+                      marginBottom: "8px",
                     }}
-                  />
+                  >
+                    <span
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: 700,
+                        fontFamily: "'Playfair Display', Georgia, serif",
+                        color: "#1a1a1a",
+                      }}
+                    >
+                      {prayer.count.toLocaleString()}
+                    </span>
+                    <span style={{ fontSize: "12px", color: "#888" }}>
+                      of {prayer.goal.toLocaleString()} prayers
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "6px",
+                      background: "#f0e8e0",
+                      borderRadius: "3px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${percentage}%`,
+                        height: "100%",
+                        background: "linear-gradient(90deg, #ec2c22, #e85d56)",
+                        borderRadius: "3px",
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "10px 0 0",
-                  borderTop: "1px solid rgba(0,0,0,0.06)",
-                }}
-              >
                 <div
                   style={{
-                    fontSize: "10px",
-                    color: "#999",
-                    letterSpacing: "0.3px",
-                    marginBottom: "2px",
+                    textAlign: "center",
+                    padding: "10px 0 0",
+                    borderTop: "1px solid rgba(0,0,0,0.06)",
                   }}
                 >
-                  Join us in prayer at
-                </div>
-                <div
-                  style={{
-                    fontFamily: "'Playfair Display', Georgia, serif",
-                    fontSize: "15px",
-                    fontWeight: 700,
-                    color: "#ec2c22",
-                    letterSpacing: "0.3px",
-                  }}
-                >
-                  PrayForChange.org
+                  <div
+                    style={{
+                      fontSize: "10px",
+                      color: "#999",
+                      letterSpacing: "0.3px",
+                      marginBottom: "2px",
+                    }}
+                  >
+                    Join us in prayer at
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'Playfair Display', Georgia, serif",
+                      fontSize: "15px",
+                      fontWeight: 700,
+                      color: "#ec2c22",
+                      letterSpacing: "0.3px",
+                    }}
+                  >
+                    PrayForChange.org
+                  </div>
                 </div>
               </div>
             </div>

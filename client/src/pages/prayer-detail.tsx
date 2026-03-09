@@ -2,7 +2,7 @@ import { useRoute, Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
-import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Share2, Copy, MessageCircle } from "lucide-react";
+import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Link2, Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -10,6 +10,7 @@ import bgTexture from "@assets/generated_images/subtle_warm_paper_texture_backgr
 import { getPrayerById, updatePrayerContent, regeneratePrayerContent } from "@/lib/api";
 import type { Prayer, PrayerUpdate, User } from "@shared/schema";
 import { ShareableCardDialog } from "@/components/shareable-card";
+import { SiWhatsapp, SiFacebook, SiX } from "react-icons/si";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -606,9 +607,75 @@ export default function PrayerDetail() {
 
           <div className="lg:sticky lg:top-24 h-fit">
             <div className="bg-white border rounded-xl shadow-sm p-6 space-y-6">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-muted-foreground">Share</span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => {
+                      const url = `https://wa.me/?text=${encodeURIComponent(`Join me in prayer: ${prayer.title}\n${window.location.href}`)}`;
+                      window.open(url, "_blank");
+                    }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
+                    title="Share on WhatsApp"
+                    aria-label="Share on WhatsApp"
+                    data-testid="button-share-whatsapp"
+                  >
+                    <SiWhatsapp className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+                      window.open(url, "_blank", "width=600,height=400");
+                    }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-[#1877F2] hover:bg-[#1877F2]/10 transition-colors"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                    data-testid="button-share-facebook"
+                  >
+                    <SiFacebook className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      const url = `https://x.com/intent/tweet?text=${encodeURIComponent(`Join me in prayer: ${prayer.title}`)}&url=${encodeURIComponent(window.location.href)}`;
+                      window.open(url, "_blank", "width=600,height=400");
+                    }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    title="Share on X"
+                    aria-label="Share on X"
+                    data-testid="button-share-x"
+                  >
+                    <SiX className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href).then(() => {
+                        toast({ title: "Link copied", description: "Prayer link copied to clipboard." });
+                      }).catch(() => {
+                        toast({ title: "Could not copy", description: "Please copy the link from your browser's address bar.", variant: "destructive" });
+                      });
+                    }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                    title="Copy link"
+                    aria-label="Copy prayer link"
+                    data-testid="button-copy-link"
+                  >
+                    <Link2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setShareCardOpen(true)}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                    title="Download prayer card"
+                    aria-label="Download prayer card"
+                    data-testid="button-share-prayer-card"
+                  >
+                    <Image className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
               {donated ? (
                 <>
-                  <div className="text-center space-y-4 py-4">
+                  <div className="text-center space-y-4 py-4 border-t">
                     <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
                       <Check className="w-8 h-8 text-primary" />
                     </div>
@@ -633,16 +700,6 @@ export default function PrayerDetail() {
                   </div>
 
                   <div className="pt-4 border-t">
-                    <h4 className="font-bold mb-3">Share this prayer</h4>
-                    <Button
-                      variant="outline"
-                      className="w-full mb-2"
-                      onClick={() => setShareCardOpen(true)}
-                      data-testid="button-share-prayer-card-donated"
-                    >
-                      <Image className="w-4 h-4 mr-2" />
-                      Share Prayer Card
-                    </Button>
                     <Link href="/browse">
                       <Button variant="outline" className="w-full" data-testid="button-browse-prayers">
                         Browse More Prayers
@@ -660,7 +717,7 @@ export default function PrayerDetail() {
                 </>
               ) : (
                 <>
-                  <div className="space-y-2">
+                  <div className="space-y-2 border-t pt-6">
                     <div className="flex items-baseline gap-2">
                       <span className="text-2xl font-bold font-serif">{prayer.count.toLocaleString()}</span>
                       <span className="text-muted-foreground font-medium">prayers</span>
@@ -686,46 +743,6 @@ export default function PrayerDetail() {
                       }`}
                     >
                       {hasPrayed ? "You prayed!" : "I prayed for this"}
-                    </Button>
-                  </div>
-
-                  <div className="pt-4 border-t">
-                    <h4 className="font-bold mb-3">Help this prayer reach more people</h4>
-                    <Button
-                      variant="outline"
-                      className="w-full mb-2"
-                      onClick={() => setShareCardOpen(true)}
-                      data-testid="button-share-prayer-card"
-                    >
-                      <Image className="w-4 h-4 mr-2" />
-                      Share Prayer Card
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full mb-2"
-                      onClick={() => {
-                        const url = `https://wa.me/?text=${encodeURIComponent(`Join me in prayer: ${prayer.title}\n${window.location.href}`)}`;
-                        window.open(url, "_blank");
-                      }}
-                      data-testid="button-share-whatsapp"
-                    >
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      Share on WhatsApp
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => {
-                        navigator.clipboard.writeText(window.location.href).then(() => {
-                          toast({ title: "Link copied", description: "Prayer link copied to clipboard." });
-                        }).catch(() => {
-                          toast({ title: "Could not copy", description: "Please copy the link from your browser's address bar.", variant: "destructive" });
-                        });
-                      }}
-                      data-testid="button-copy-link"
-                    >
-                      <Copy className="w-4 h-4 mr-2" />
-                      Copy Link
                     </Button>
                   </div>
                   

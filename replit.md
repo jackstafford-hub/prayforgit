@@ -82,3 +82,4 @@ Preferred communication style: Simple, everyday language.
 - `@tanstack/react-query`: Server state management
 - `shadcn/ui` components via Radix UI primitives
 - `html2canvas`: Client-side HTML-to-image conversion for shareable prayer cards
+- `react-icons`: Brand logos (WhatsApp, Facebook, X) for social share icons
