@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { db } from "../db";
-import { users } from "@shared/schema";
-import { eq, ilike, sql, count } from "drizzle-orm";
+import { users, prayers } from "@shared/schema";
+import { eq, ilike, sql, count, or, desc } from "drizzle-orm";
 import { storage } from "../storage";
 
 const router = Router();
@@ -84,6 +84,64 @@ router.get("/users", requireAdmin, async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ message: "Failed to fetch users" });
+  }
+});
+
+router.get("/prayers", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const rawPageSize = parseInt(req.query.pageSize as string) || 25;
+    const pageSize = Math.min(Math.max(1, rawPageSize), 200);
+    const searchQuery = (req.query.q as string) || "";
+
+    const offset = (page - 1) * pageSize;
+
+    let whereClause = undefined;
+    if (searchQuery) {
+      whereClause = or(
+        ilike(prayers.title, `%${searchQuery}%`),
+        ilike(prayers.author, `%${searchQuery}%`),
+        ilike(prayers.topic, `%${searchQuery}%`)
+      );
+    }
+
+    const [prayersResult, totalResult] = await Promise.all([
+      db
+        .select({
+          id: prayers.id,
+          title: prayers.title,
+          author: prayers.author,
+          authorId: prayers.authorId,
+          topic: prayers.topic,
+          count: prayers.count,
+          goal: prayers.goal,
+          flaggedForReview: prayers.flaggedForReview,
+          createdAt: prayers.createdAt,
+          authorEmail: users.email,
+        })
+        .from(prayers)
+        .leftJoin(users, eq(prayers.authorId, users.id))
+        .where(whereClause)
+        .limit(pageSize)
+        .offset(offset)
+        .orderBy(desc(prayers.createdAt)),
+      db
+        .select({ count: count() })
+        .from(prayers)
+        .where(whereClause),
+    ]);
+
+    const total = totalResult[0]?.count || 0;
+
+    res.json({
+      prayers: prayersResult,
+      total,
+      page,
+      pageSize,
+    });
+  } catch (error) {
+    console.error("Error fetching prayers:", error);
+    res.status(500).json({ message: "Failed to fetch prayers" });
   }
 });
 

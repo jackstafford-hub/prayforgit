@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Loader2, Shield, Flag, AlertTriangle, Check, Trash2, Eye, ExternalLink } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Loader2, Shield, Flag, AlertTriangle, Check, Trash2, Eye, ExternalLink, Search, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
 import type { Prayer, Report } from "@shared/schema";
 
 type AdminStats = {
@@ -18,13 +19,36 @@ type AdminStats = {
 
 type ReportWithPrayer = Report & { prayerTitle: string };
 
-type Tab = "flagged" | "reports";
+type AdminPrayer = {
+  id: string;
+  title: string;
+  author: string;
+  authorId: string | null;
+  topic: string;
+  count: number;
+  goal: number;
+  flaggedForReview: boolean | null;
+  createdAt: string;
+  authorEmail: string | null;
+};
+
+type AdminPrayersResponse = {
+  prayers: AdminPrayer[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+type Tab = "prayers" | "flagged" | "reports";
 
 export default function AdminDashboard() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<Tab>("flagged");
+  const [activeTab, setActiveTab] = useState<Tab>("prayers");
+  const [prayersPage, setPrayersPage] = useState(1);
+  const [prayersSearch, setPrayersSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
 
   const { data: adminCheck, isLoading: adminCheckLoading } = useQuery<{ isAdmin: boolean } | null>({
     queryKey: ["/api/admin/check"],
@@ -47,6 +71,18 @@ export default function AdminDashboard() {
     enabled: !!adminCheck?.isAdmin,
   });
 
+  const { data: allPrayersData, isLoading: allPrayersLoading } = useQuery<AdminPrayersResponse>({
+    queryKey: ["/api/admin/prayers", prayersPage, prayersSearch],
+    queryFn: async () => {
+      const params = new URLSearchParams({ page: String(prayersPage), pageSize: "25" });
+      if (prayersSearch) params.set("q", prayersSearch);
+      const res = await fetch(`/api/admin/prayers?${params}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch prayers");
+      return res.json();
+    },
+    enabled: !!adminCheck?.isAdmin,
+  });
+
   const approveMutation = useMutation({
     mutationFn: async (id: string) => {
       await apiRequest("POST", `/api/admin/prayers/${id}/approve`);
@@ -54,6 +90,7 @@ export default function AdminDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/flagged-prayers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/prayers"] });
       toast({ title: "Prayer Approved", description: "The prayer is now visible to the public." });
     },
     onError: () => {
@@ -69,6 +106,7 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/flagged-prayers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/reports"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/prayers"] });
       toast({ title: "Prayer Deleted", description: "The prayer has been permanently removed." });
     },
     onError: () => {
@@ -135,7 +173,11 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3 mb-8">
-          <div className="rounded-xl border bg-card p-6">
+          <button
+            data-testid="button-total-prayers"
+            onClick={() => setActiveTab("prayers")}
+            className="rounded-xl border bg-card p-6 text-left hover:border-primary/50 transition-colors cursor-pointer"
+          >
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <Eye className="w-5 h-5 text-primary" />
@@ -145,7 +187,7 @@ export default function AdminDashboard() {
             <p data-testid="text-total-prayers" className="text-3xl font-bold">
               {statsLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : stats?.totalPrayers || 0}
             </p>
-          </div>
+          </button>
 
           <div className="rounded-xl border bg-card p-6">
             <div className="flex items-center gap-3 mb-2">
@@ -173,6 +215,17 @@ export default function AdminDashboard() {
         </div>
 
         <div className="flex gap-2 mb-6 border-b">
+          <button
+            data-testid="tab-prayers"
+            onClick={() => setActiveTab("prayers")}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "prayers"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            All Prayers
+          </button>
           <button
             data-testid="tab-flagged"
             onClick={() => setActiveTab("flagged")}
@@ -206,6 +259,173 @@ export default function AdminDashboard() {
             ) : null}
           </button>
         </div>
+
+        {activeTab === "prayers" && (
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  data-testid="input-search-prayers"
+                  placeholder="Search by title, author, or topic..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setPrayersSearch(searchInput);
+                      setPrayersPage(1);
+                    }
+                  }}
+                  className="pl-9"
+                />
+              </div>
+              <Button
+                data-testid="button-search-prayers"
+                variant="outline"
+                onClick={() => {
+                  setPrayersSearch(searchInput);
+                  setPrayersPage(1);
+                }}
+              >
+                Search
+              </Button>
+              {prayersSearch && (
+                <Button
+                  data-testid="button-clear-search"
+                  variant="ghost"
+                  onClick={() => {
+                    setSearchInput("");
+                    setPrayersSearch("");
+                    setPrayersPage(1);
+                  }}
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+
+            {allPrayersLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : !allPrayersData?.prayers?.length ? (
+              <div className="text-center py-16 border rounded-xl bg-card">
+                <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-serif text-xl font-semibold mb-2">No prayers found</h3>
+                <p className="text-muted-foreground">
+                  {prayersSearch ? "No prayers match your search." : "No prayers have been created yet."}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="rounded-xl border bg-card overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b bg-muted/50">
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Title</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Author</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Email</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Topic</th>
+                          <th className="text-right px-4 py-3 font-medium text-muted-foreground">Prayers</th>
+                          <th className="text-right px-4 py-3 font-medium text-muted-foreground">Goal</th>
+                          <th className="text-center px-4 py-3 font-medium text-muted-foreground">Status</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
+                          <th className="text-center px-4 py-3 font-medium text-muted-foreground">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {allPrayersData.prayers.map((prayer) => (
+                          <tr
+                            key={prayer.id}
+                            data-testid={`row-prayer-${prayer.id}`}
+                            className="border-b last:border-b-0 hover:bg-muted/30 transition-colors"
+                          >
+                            <td className="px-4 py-3 max-w-[200px]">
+                              <span className="font-medium line-clamp-1" title={prayer.title}>
+                                {prayer.title}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                              {prayer.author}
+                            </td>
+                            <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                              {prayer.authorEmail || "—"}
+                            </td>
+                            <td className="px-4 py-3">
+                              <Badge variant="secondary" className="whitespace-nowrap">
+                                {prayer.topic}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3 text-right tabular-nums">
+                              {prayer.count.toLocaleString()}
+                            </td>
+                            <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
+                              {prayer.goal.toLocaleString()}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              {prayer.flaggedForReview ? (
+                                <Badge variant="outline" className="border-amber-300 text-amber-700 dark:border-amber-600 dark:text-amber-400">
+                                  Flagged
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="border-green-300 text-green-700 dark:border-green-600 dark:text-green-400">
+                                  Active
+                                </Badge>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                              {formatDate(prayer.createdAt)}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <Button
+                                data-testid={`button-view-prayer-${prayer.id}`}
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => window.open(`/prayer/${prayer.id}`, "_blank")}
+                                className="gap-1 text-muted-foreground"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {((allPrayersData.page - 1) * allPrayersData.pageSize) + 1}–{Math.min(allPrayersData.page * allPrayersData.pageSize, allPrayersData.total)} of {allPrayersData.total}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      data-testid="button-prev-page"
+                      variant="outline"
+                      size="sm"
+                      disabled={prayersPage <= 1}
+                      onClick={() => setPrayersPage((p) => Math.max(1, p - 1))}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </Button>
+                    <Button
+                      data-testid="button-next-page"
+                      variant="outline"
+                      size="sm"
+                      disabled={prayersPage * (allPrayersData.pageSize) >= allPrayersData.total}
+                      onClick={() => setPrayersPage((p) => p + 1)}
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         {activeTab === "flagged" && (
           <div className="space-y-4">
