@@ -536,6 +536,818 @@ May Thy Will be Done.`,
     goal: 2500,
     topic: 'Gratitude',
   },
+  {
+    title: 'Prayer for my son returning from deployment',
+    description: 'My son has been deployed overseas for nine months. He comes home in three weeks, and while I am overjoyed, I am also worried about the invisible wounds he may carry. I have heard his voice change over these months.',
+    imageUrl: '/assets/work_boots_new_day.png',
+    aiSummary: `My son has been deployed overseas for nine months. He comes home in three weeks, and while I am overjoyed, I am also worried about the invisible wounds he may carry. I have heard his voice change over these months.
+
+He left as a bright-eyed young man full of purpose. On our video calls now, I see a weariness in his eyes that no amount of reassurance can erase. He tells me he is fine, but a mother knows. There are things he has seen and done that he will never share with me, and I understand that.
+
+I worry about the transition back to civilian life. I have read the statistics about veterans struggling with PTSD, depression, and isolation. I have heard stories of families torn apart by the invisible injuries of war.
+
+All I want is for my son to come home whole — in body and in spirit. I want him to find peace, to sleep without nightmares, to laugh freely again. I want him to know that whatever he has been through, he is not alone.
+
+I am asking for prayers for his safe return, for healing of whatever wounds he carries, for patience and understanding from our family, and for the support systems he will need in the months ahead.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring safe passage and wholeness to this brave soul,
+And healing and protection to
+A heart carrying the weight of service and sacrifice.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood his homecoming now,
+Bringing hope wherever it touches,
+Healing to wounds both seen and unseen,
+And strength to a family learning to be whole again.
+Oh God, May they all be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are helping veterans find their way home,
+To inspire the counselors, doctors, and loved ones in their care
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed peace and restoration flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Linda Martinez',
+    count: 445,
+    goal: 1000,
+    topic: 'Health',
+  },
+  {
+    title: 'Strength for nurses on the front lines',
+    description: 'I am a nurse and I am exhausted. After years of working through crisis after crisis, I feel like I have nothing left to give. But every shift there are patients who need me, and I cannot walk away.',
+    imageUrl: '/assets/poppy_resilience_field.png',
+    aiSummary: `I am a nurse and I am exhausted. After years of working through crisis after crisis, I feel like I have nothing left to give. But every shift there are patients who need me, and I cannot walk away.
+
+I became a nurse because I wanted to help people. I wanted to hold the hand of someone who was scared, to bring comfort in the darkest moments, to be the person who never gave up on a patient. And I have done those things, thousands of times.
+
+But the toll is real. I have lost count of how many patients I have watched take their last breath. I have comforted families in waiting rooms with news that would shatter their world. I have held it together at work only to fall apart in my car in the parking lot.
+
+My colleagues are leaving the profession in droves. Those of us who remain are stretched impossibly thin, working double shifts, skipping meals, carrying the emotional weight of a system that is broken.
+
+I am not asking for prayers for myself alone, but for every healthcare worker who shows up every day despite being depleted. Pray for our strength, our mental health, our families who sacrifice alongside us, and for a system that truly supports the people who care for others.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring renewal and strength to those who heal others,
+And healing and protection to
+The caregivers who pour themselves out each day.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood every hospital and clinic now,
+Bringing hope wherever it touches,
+Rest to the weary,
+And strength to continue this sacred work.
+Oh God, May they all be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are caring for the sick and suffering,
+To sustain the nurses, doctors, and aides in their tireless service
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed support and recognition flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Rachel Thompson, RN',
+    count: 1876,
+    goal: 2500,
+    topic: 'Health',
+  },
+  {
+    title: 'Wisdom for my teenager navigating peer pressure',
+    description: 'My fifteen-year-old daughter is struggling. She has always been a good kid, but the pressures of high school are testing her in ways I never anticipated. I found messages on her phone that broke my heart.',
+    imageUrl: '/assets/bicycles_parent_child.png',
+    aiSummary: `My fifteen-year-old daughter is struggling. She has always been a good kid, but the pressures of high school are testing her in ways I never anticipated. I found messages on her phone that broke my heart.
+
+Her friend group has changed. The girls she grew up with have been replaced by peers who encourage her to skip class, experiment with substances, and post things online that could follow her forever. I see her changing — the way she talks, the way she dresses, the way she rolls her eyes at the values we have always shared.
+
+I have tried talking to her. Sometimes she listens. More often she tells me I do not understand, that the world is different now, that I am overreacting. And maybe she is partly right — I do not fully understand the pressures of growing up in the age of social media and constant comparison.
+
+But I know my daughter. Beneath the bravado is a scared girl trying to figure out who she is. She is smart, creative, and capable of so much good. I refuse to lose her to the wrong crowd.
+
+I am asking for prayers for wisdom — for me as a parent, and for her as she navigates these treacherous years. Pray for the right friends to enter her life. Pray for her to see her own worth without needing the approval of people who do not have her best interests at heart.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring wisdom and protection to this precious teenager,
+And healing and protection to
+A parent watching their child navigate a difficult world.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood this family now,
+Bringing hope wherever it touches,
+Discernment to a young mind facing hard choices,
+And patience to parents who love fiercely.
+Oh God, May they all be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are guiding young people through adolescence,
+To inspire the teachers, counselors, and mentors in their work
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed guidance and true friendship flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Concerned Mother',
+    count: 723,
+    goal: 1000,
+    topic: 'Family',
+  },
+  {
+    title: 'Healing for a family after the loss of a child',
+    description: 'Six months ago we lost our four-year-old son to leukemia. He fought bravely for two years, and in the end, his little body just could not fight anymore. Our family is shattered.',
+    imageUrl: '/assets/birds_building_nest.png',
+    aiSummary: `Six months ago we lost our four-year-old son to leukemia. He fought bravely for two years, and in the end, his little body just could not fight anymore. Our family is shattered.
+
+His name was Ethan, and he loved dinosaurs, pancakes, and jumping in puddles. He had a laugh that could fill a room and a smile that made strangers stop to say hello. He was brave in ways that no four-year-old should ever have to be.
+
+The grief is unlike anything I have ever experienced. It comes in waves that knock me to the ground when I least expect it. I find his toy cars under the couch. I hear a child laugh at the grocery store and my heart stops. His bedroom door stays closed because none of us can bear to open it.
+
+My wife and I are trying to hold each other up, but we grieve differently, and sometimes our pain pushes us apart instead of pulling us together. Our eight-year-old daughter does not understand why her brother is not coming back, and we do not have the words to explain it.
+
+We need prayers for healing — not the kind that erases the pain, because we know that will never fully go away. We need prayers for the strength to carry it, for our marriage to survive it, and for our daughter to grow up knowing that love does not end with death.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring comfort and endurance to this grieving family,
+And healing and protection to
+Hearts broken by the loss of a precious child.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood this home now,
+Bringing hope wherever it touches,
+Comfort in the unbearable moments,
+And strength to carry grief with grace.
+Oh God, May they all be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are helping this family through their loss,
+To inspire the counselors, friends, and loved ones who surround them
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed peace and enduring love flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'The Morrison Family',
+    count: 3456,
+    goal: 5000,
+    topic: 'Family',
+  },
+  {
+    title: 'Prayer for affordable housing in our city',
+    description: 'Rent in our city has doubled in five years. Families who have lived here for generations are being pushed out. Teachers, nurses, and firefighters cannot afford to live in the communities they serve.',
+    imageUrl: '/assets/community_garden_bloom.png',
+    aiSummary: `Rent in our city has doubled in five years. Families who have lived here for generations are being pushed out. Teachers, nurses, and firefighters cannot afford to live in the communities they serve.
+
+I work at a community center and every week I see the devastation firsthand. A single mother of three who works two jobs but still cannot make rent. An elderly couple on fixed income who received an eviction notice after forty years in their apartment. A young teacher who sleeps in her car because she cannot find anything affordable within an hour of her school.
+
+These are not statistics. These are people with names and faces and stories. They are the backbone of our community, and we are losing them one by one to cities and towns where they know no one, far from the support systems that sustained them.
+
+We need systemic change, and we need it urgently. But while we work toward solutions, we also need immediate relief for families on the brink. We need landlords with compassion, developers with conscience, and leaders with courage.
+
+I am asking for prayers for every family facing housing insecurity. Pray for creative solutions, for policy changes, for the hearts of decision-makers to be moved, and for our community to rally around those who are most vulnerable.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring shelter and stability to families in need,
+And healing and protection to
+Communities being torn apart by displacement.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood our cities now,
+Bringing hope wherever it touches,
+Affordable homes where there is scarcity,
+And compassion where there is indifference.
+Oh God, May all who struggle be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are working to solve the housing crisis,
+To inspire the leaders, developers, and advocates in their work
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed justice and shelter flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Harbor Community Center',
+    count: 934,
+    goal: 2000,
+    topic: 'Community',
+  },
+  {
+    title: 'Unity for a divided congregation',
+    description: 'Our church is splitting apart. A disagreement over leadership has turned into a full-blown division that has destroyed friendships, divided families, and poisoned what was once a loving community.',
+    imageUrl: '/assets/patchwork_quilt_community.png',
+    aiSummary: `Our church is splitting apart. A disagreement over leadership has turned into a full-blown division that has destroyed friendships, divided families, and poisoned what was once a loving community.
+
+It started small — a difference of opinion about the direction of our outreach programs. But egos got involved, sides were chosen, and before anyone realized what was happening, the church that had been our family for decades became a battlefield.
+
+Sunday mornings, once filled with joy and fellowship, are now tense and awkward. People who used to share meals together now sit on opposite sides of the sanctuary. The parking lot after service has become a place of whispered conversations and pointed glances.
+
+The children are confused. The elderly members are heartbroken. And the community we serve — the people who depend on us for food programs, counseling, and support — are caught in the crossfire of our inability to resolve our differences.
+
+I am asking for prayers for reconciliation. Not the kind where one side wins and the other loses, but the kind where everyone remembers why we came together in the first place. Pray for humility, for forgiveness, for leaders who put unity above ego, and for the courage to choose love over being right.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring reconciliation and unity to this divided community,
+And healing and protection to
+Hearts hardened by pride and wounded by conflict.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood this congregation now,
+Bringing hope wherever it touches,
+Humility where there is pride,
+And forgiveness where there is bitterness.
+Oh God, May they all be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are working to mend this division,
+To inspire the pastors, elders, and members in their efforts
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed grace and reconciliation flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'A Grieving Church Member',
+    count: 287,
+    goal: 500,
+    topic: 'Community',
+  },
+  {
+    title: 'Peace for the people of Ukraine',
+    description: 'The war in Ukraine continues to devastate millions of lives. Families are separated, cities are in ruins, and an entire generation of children knows nothing but conflict. We must continue to pray for peace.',
+    imageUrl: '/assets/lanterns_peace_rising.png',
+    aiSummary: `The war in Ukraine continues to devastate millions of lives. Families are separated, cities are in ruins, and an entire generation of children knows nothing but conflict. We must continue to pray for peace.
+
+The images from Ukraine haunt us — apartment buildings reduced to rubble, elderly people huddled in basements, children drawing pictures of tanks and explosions because that is the only reality they know. The scale of human suffering is almost impossible to comprehend.
+
+Millions have been displaced. Families torn apart — fathers staying to fight while mothers and children flee to countries where they do not speak the language and have no connections. Grandparents who refuse to leave the homes they have lived in for decades, even as the bombs fall around them.
+
+The bravery of the Ukrainian people is extraordinary. Teachers holding classes in bomb shelters. Doctors performing surgeries by flashlight. Ordinary citizens risking their lives to deliver food and medicine to besieged neighborhoods.
+
+We are asking for prayers for an end to this war, for protection of civilians, for the refugees who have lost everything, for the soldiers on all sides who are someone's child, and for the leaders of the world to find the courage and wisdom to stop the killing.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring peace and restoration to Ukraine,
+And healing and protection to
+Every person caught in the devastation of war.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood this land now,
+Bringing hope wherever it touches,
+Shelter to the displaced,
+And strength to those who endure unimaginable hardship.
+Oh God, May they all be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are working to bring peace,
+To inspire the diplomats, aid workers, and peacemakers in their efforts
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed peace and justice flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Global Prayer Network',
+    count: 4521,
+    goal: 10000,
+    topic: 'World Peace',
+  },
+  {
+    title: 'End to gun violence in our schools',
+    description: 'Another school shooting. Another community shattered. Another group of parents who sent their children to school and never got to hold them again. We cannot become numb to this. We must pray and we must act.',
+    imageUrl: '/assets/olive_branches_unity.png',
+    aiSummary: `Another school shooting. Another community shattered. Another group of parents who sent their children to school and never got to hold them again. We cannot become numb to this. We must pray and we must act.
+
+Every parent in America knows the fear. The moment your phone buzzes with a news alert and your heart stops until you confirm your child is safe. The conversations we have with our kids about lockdown drills — conversations no parent should ever have to have.
+
+The children are not alright. They practice hiding under desks. They learn to barricade doors. They say goodbye to their parents in the morning wondering if it might be the last time. This is not normal, and we must never accept it as normal.
+
+We are not praying for one side of a political debate. We are praying for our children. We are praying for solutions that protect the most innocent among us. We are praying for the courage to have difficult conversations and the wisdom to find common ground.
+
+We ask for prayers for every child who walks into a school with fear, for every teacher who stands ready to shield their students with their own body, for every parent who holds their breath until the final bell rings, and for our nation to find the will to protect its youngest citizens.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring safety and peace to our schools,
+And healing and protection to
+Every child, teacher, and family living in fear.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood our schools now,
+Bringing hope wherever it touches,
+Safety where there is danger,
+And courage to those who seek solutions.
+Oh God, May they all be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are working to protect our children,
+To inspire the leaders, educators, and advocates in their efforts
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed change and protection flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Parents for Safe Schools',
+    count: 6234,
+    goal: 10000,
+    topic: 'World Peace',
+  },
+  {
+    title: 'Prayer for my small business to survive',
+    description: 'I started my bakery three years ago with everything I had. It was my dream since childhood. Now rising costs, supply chain issues, and a changing economy threaten to take it all away.',
+    imageUrl: '/assets/crossroads_career_paths.png',
+    aiSummary: `I started my bakery three years ago with everything I had. It was my dream since childhood. Now rising costs, supply chain issues, and a changing economy threaten to take it all away.
+
+I mortgaged my house to open this shop. I spent a year renovating the space myself — painting walls at midnight, installing equipment on weekends, perfecting recipes until they were just right. When we opened our doors, the community embraced us. Lines around the block. Rave reviews. For a while, it felt like a fairy tale.
+
+Then costs started climbing. Flour, butter, eggs — everything doubled. I could not raise prices fast enough without losing customers. Then my main supplier went out of business. Then the strip mall raised the rent by forty percent.
+
+I have four employees who depend on this job. They are like family — they believed in this dream alongside me. The thought of telling them we are closing keeps me up at night.
+
+I am not giving up. I am exploring every option — online sales, catering, partnerships with local restaurants. But I need a breakthrough, and I need it soon. I am asking for prayers for creative solutions, for favor with lenders, for loyal customers to spread the word, and for the endurance to keep going when every instinct says to quit.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring provision and breakthrough to this small business,
+And healing and protection to
+An entrepreneur fighting to keep a dream alive.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood this business now,
+Bringing hope wherever it touches,
+Creative solutions where there seem to be none,
+And loyal supporters who believe in this vision.
+Oh God, May they be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are fighting to sustain their livelihoods,
+To inspire the customers, advisors, and partners in their support
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed resources and opportunity flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Elena Rossi',
+    count: 312,
+    goal: 500,
+    topic: 'Employment',
+  },
+  {
+    title: 'Guidance for a career change at fifty',
+    description: 'At fifty-two years old, I have been laid off from the only industry I have ever known. The technology that replaced me is not going away, and I must reinvent myself. But starting over at this age terrifies me.',
+    imageUrl: '/assets/compass_open_landscape.png',
+    aiSummary: `At fifty-two years old, I have been laid off from the only industry I have ever known. The technology that replaced me is not going away, and I must reinvent myself. But starting over at this age terrifies me.
+
+I spent twenty-eight years in manufacturing. I worked my way up from the floor to management, earning certifications, learning new processes, leading teams. I was proud of what I built. Then the company automated my entire department and eliminated my position along with forty others.
+
+The job market is brutal for someone my age. Recruiters look at my resume and see decades of experience in a dying field. I see younger candidates with half my work ethic getting hired for positions I am overqualified for. The rejection is humbling in ways I never expected.
+
+My wife is supportive, but I can see the worry in her eyes. Our youngest is in college, we still have a mortgage, and our savings will only last so long. I have started taking online courses in project management and data analysis, trying to bridge the gap between what I know and what the market wants.
+
+I believe there is purpose in this season, even if I cannot see it yet. I am asking for prayers for direction, for opportunities that value experience and character, for the courage to learn new things, and for peace in the waiting.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring new direction and opportunity to this seasoned worker,
+And healing and protection to
+A spirit learning to begin again with courage.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood this transition now,
+Bringing hope wherever it touches,
+New doors where old ones have closed,
+And confidence that experience is a gift, not a liability.
+Oh God, May they be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are navigating career transitions later in life,
+To inspire the employers and mentors who see the value of wisdom
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed opportunity and renewal flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Robert Chen',
+    count: 198,
+    goal: 300,
+    topic: 'Employment',
+  },
+  {
+    title: 'Prayer for teachers shaping the next generation',
+    description: 'I am a public school teacher in an underfunded district. My classroom has thirty-five students, outdated textbooks, and not enough chairs. But these children deserve the best education possible, and I refuse to give them anything less.',
+    imageUrl: '/assets/library_autumn_learning.png',
+    aiSummary: `I am a public school teacher in an underfunded district. My classroom has thirty-five students, outdated textbooks, and not enough chairs. But these children deserve the best education possible, and I refuse to give them anything less.
+
+I spend my own money on supplies — markers, paper, snacks for kids who come to school hungry. I arrive at six in the morning and leave at six in the evening. I tutor during lunch. I write college recommendation letters on weekends. And my salary barely covers my own rent.
+
+But when a struggling student finally grasps a concept and their eyes light up — that moment is worth everything. When a shy child reads aloud for the first time and the whole class cheers — that is why I teach. When a former student writes to tell me I changed their life — I know I am exactly where I am supposed to be.
+
+The system is broken, but the children are not. They are brilliant, curious, resilient, and full of potential. They deserve teachers who believe in them, resources that support them, and a society that values their education.
+
+I am asking for prayers for every teacher who shows up for their students despite impossible odds. Pray for resources, for fair compensation, for public support, and for the stamina to keep going when the system makes it so hard to stay.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring support and recognition to every dedicated teacher,
+And healing and protection to
+Educators pouring their hearts into shaping young minds.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood every classroom now,
+Bringing hope wherever it touches,
+Resources where there is scarcity,
+And energy to those who give everything they have.
+Oh God, May they all be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are investing in education,
+To inspire the leaders, parents, and communities who support our schools
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed funding and appreciation flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Ms. Angela Davis',
+    count: 1245,
+    goal: 2000,
+    topic: 'Education',
+  },
+  {
+    title: 'Scholarship prayers for first-generation students',
+    description: 'I am the advisor for a college-prep program serving first-generation students from low-income families. Twelve of my students have been accepted to universities but cannot afford to attend without scholarships.',
+    imageUrl: '/assets/graduation_cherry_blossoms.png',
+    aiSummary: `I am the advisor for a college-prep program serving first-generation students from low-income families. Twelve of my students have been accepted to universities but cannot afford to attend without scholarships.
+
+These students have overcome obstacles that would have defeated many adults. They have studied in homeless shelters, worked night shifts to support their families, translated at parent-teacher conferences for parents who do not speak English, and still managed to earn grades that got them accepted to excellent schools.
+
+But acceptance letters do not pay tuition. The gap between what financial aid covers and what these families can afford is often tens of thousands of dollars. For families living paycheck to paycheck, even a few hundred dollars can be the difference between attending college and watching a dream die.
+
+Every year I watch brilliant students settle for less — not because they are not good enough, but because the system was not built for them. Some give up on college entirely. Others take on crushing debt that will follow them for decades.
+
+I am asking for prayers for every first-generation student who has been told that people like them do not go to college. Pray for scholarships to appear, for generous donors to step forward, for financial aid offices to find creative solutions, and for these students to know that their dreams are valid and achievable.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring opportunity and provision to these deserving students,
+And healing and protection to
+Young minds whose potential should never be limited by circumstance.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood their applications now,
+Bringing hope wherever it touches,
+Scholarships where there is financial need,
+And doors that open wide for those who have earned their place.
+Oh God, May they all be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are investing in the future of these students,
+To inspire the donors, institutions, and mentors in their generosity
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed funding and encouragement flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'First Steps College Prep',
+    count: 567,
+    goal: 1000,
+    topic: 'Education',
+  },
+  {
+    title: 'Thankfulness for twenty years of marriage',
+    description: 'Today my wife and I celebrate twenty years of marriage. It has not always been easy, but it has always been worth it. I want to pause and give thanks for the gift of a love that has endured.',
+    imageUrl: '/assets/harvest_abundance_gratitude.png',
+    aiSummary: `Today my wife and I celebrate twenty years of marriage. It has not always been easy, but it has always been worth it. I want to pause and give thanks for the gift of a love that has endured.
+
+We married young — too young, everyone said. We had no money, no plan, and no idea how hard marriage would be. But we had each other, and somehow that was enough.
+
+We have weathered things that would have broken weaker bonds. Financial hardship that lasted years. The loss of parents. A miscarriage that nearly destroyed us. Arguments that shook the walls. Silences that lasted too long.
+
+But for every hard season, there have been a hundred beautiful moments. The birth of our three children. Lazy Sunday mornings making pancakes. Dancing in the kitchen to old songs. Road trips where we got lost and did not care. Inside jokes that still make us laugh after two decades.
+
+She is my best friend, my partner, and the person I want beside me when the world falls apart. She has made me a better man simply by believing I could be one.
+
+This prayer is not asking for anything. It is a prayer of gratitude for a love that chose to stay, to fight, to forgive, and to grow. If you are struggling in your marriage, let our story give you hope — it gets better when you refuse to give up on each other.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We lift our hearts in joyful celebration
+For the gift of enduring love,
+For a marriage that has weathered storms and emerged stronger,
+For the daily choice to stay, to forgive, and to grow together.
+
+Oh Divine Father of Life,
+We thank Thee for Thy wondrous power,
+For sustaining this union through twenty years,
+For the children born of this love,
+And for every small moment of grace along the way.
+Oh God, May this love continue to deepen.
+
+We pray that Thy Loving power continues to flow
+Through every marriage that struggles to survive,
+Reminding all couples that love is a choice made new each morning
+And that the best chapters are still being written.
+
+Oh Divine Creator,
+May this testimony of enduring love inspire us all
+To invest in our relationships with patience and grace,
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Daniel and Sarah Moore',
+    count: 1456,
+    goal: 2000,
+    topic: 'Gratitude',
+  },
+  {
+    title: 'Gratitude for a community that saved my life',
+    description: 'Last winter I was homeless, hungry, and ready to give up. A stranger at a soup kitchen looked me in the eye and said, You matter. Those two words changed everything. Today I have a home, a job, and a reason to live.',
+    imageUrl: '/assets/fireflies_summer_gratitude.png',
+    aiSummary: `Last winter I was homeless, hungry, and ready to give up. A stranger at a soup kitchen looked me in the eye and said, You matter. Those two words changed everything. Today I have a home, a job, and a reason to live.
+
+I will not sugarcoat how I got there. Bad decisions, broken relationships, and an unwillingness to ask for help until it was almost too late. By the time I found myself sleeping under a bridge in January, I had burned every bridge with everyone who had ever loved me.
+
+The soup kitchen was my last resort. I went for the food, expecting nothing else. But the volunteer who served me — a woman named Margaret — did something no one had done in months. She looked at me. Not through me, not past me, but directly at me. And she said those words that cracked something open inside me.
+
+She connected me with a transitional housing program. A case worker helped me get my documents in order. A local business owner took a chance and hired me. A church group furnished my apartment with donated furniture.
+
+None of these people owed me anything. I was a stranger, and they chose to help anyway. That is the kind of community I want to spend the rest of my life building and giving back to.
+
+This prayer is my thank you to every person who has ever looked at someone society has discarded and decided they were worth saving.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We lift our hearts in humble gratitude
+For the strangers who become saviors,
+For the communities that wrap around the broken,
+For two simple words — You matter —
+That changed the course of a life.
+
+Oh Divine Father of Life,
+We thank Thee for Thy wondrous power,
+Working through soup kitchen volunteers and case workers,
+Through business owners who take chances on people,
+And through every act of kindness that restores dignity.
+Oh God, May this gratitude overflow into service.
+
+We pray that Thy Loving power continues to flow
+Through every shelter, soup kitchen, and outreach program,
+Reminding those who serve that their work is never wasted
+And those who receive that they are worthy of love.
+
+Oh Divine Creator,
+May this testimony inspire compassion in us all,
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Marcus Williams',
+    count: 2876,
+    goal: 3000,
+    topic: 'Gratitude',
+  },
+  {
+    title: 'Trusting God through chronic illness',
+    description: 'I was diagnosed with multiple sclerosis at age twenty-nine. I am now thirty-five and learning to live with a body that no longer works the way it should. Some days I am angry. Some days I am scared. But most days I choose faith.',
+    imageUrl: '/assets/garden_archway_faith.png',
+    aiSummary: `I was diagnosed with multiple sclerosis at age twenty-nine. I am now thirty-five and learning to live with a body that no longer works the way it should. Some days I am angry. Some days I am scared. But most days I choose faith.
+
+The diagnosis came during what was supposed to be the best year of my life. I had just gotten engaged, received a promotion, and was training for a marathon. Then the numbness started. Then the fatigue. Then the MRI that showed lesions on my brain and spinal cord.
+
+My fiance stayed. We got married six months later. She is my rock, but I see the worry she tries to hide. The fear that one day I will not be able to walk, or see, or remember her name. MS is unpredictable — some days I feel almost normal, other days I cannot get out of bed.
+
+I have had to grieve the future I imagined. The career I planned. The active lifestyle I loved. The certainty of growing old on my own terms. In its place, I am learning to build a different kind of life — one that measures success not by achievement but by presence.
+
+I am not asking for a miracle cure, though I would not turn one down. I am asking for prayers for the strength to live fully within my limitations, for my wife who carries this burden alongside me, and for everyone fighting an invisible illness that others cannot see.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring strength and peace to those living with chronic illness,
+And healing and protection to
+A spirit choosing faith in the face of uncertainty.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood this body and mind now,
+Bringing hope wherever it touches,
+Strength for the difficult days,
+And joy in the moments of grace between them.
+Oh God, May they be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who walk alongside those with chronic conditions,
+To inspire the spouses, caregivers, and researchers in their dedication
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed courage and acceptance flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Nathan Brooks',
+    count: 678,
+    goal: 1000,
+    topic: 'Faith',
+  },
+  {
+    title: 'Finding God after leaving an abusive religious group',
+    description: 'I spent fifteen years in a religious group that I now understand was a cult. When I finally left, I lost my entire community, my sense of identity, and my relationship with God. I am trying to find my way back.',
+    imageUrl: '/assets/lantern_boat_fog_faith.png',
+    aiSummary: `I spent fifteen years in a religious group that I now understand was a cult. When I finally left, I lost my entire community, my sense of identity, and my relationship with God. I am trying to find my way back.
+
+I joined when I was nineteen — young, idealistic, and hungry for meaning. They offered certainty in a confusing world, community in a lonely city, and purpose for a life that felt directionless. For years I believed I had found the truth.
+
+But slowly the control became apparent. We were told who to marry, where to live, how to think. Questioning was punished. Leaving was unthinkable — they said we would lose our salvation. Fear kept us in line.
+
+When I finally left, I lost everything. My friends were instructed not to speak to me. My family within the group cut me off. I walked out with nothing but the clothes on my back and a shattered understanding of God.
+
+The hardest part is not knowing what to believe anymore. The God they taught me about was angry, controlling, and conditional. I know in my head that is not the real God, but my heart has not caught up yet. Prayer feels dangerous. Trust feels impossible. Faith feels like walking blindfolded across a minefield.
+
+I am asking for prayers for every person rebuilding their faith after spiritual abuse. Pray for healing, for patient communities that welcome the wounded, for therapists who understand religious trauma, and for the courage to believe that God is nothing like the people who misused His name.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring restoration to those wounded by spiritual abuse,
+And healing and protection to
+A soul bravely seeking authentic faith after betrayal.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood this healing journey now,
+Bringing hope wherever it touches,
+A true picture of who You are,
+And safe communities for the spiritually wounded.
+Oh God, May they be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are recovering from religious manipulation,
+To inspire the therapists, pastors, and friends who walk with them
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed truth and gentle restoration flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Healing and Free',
+    count: 945,
+    goal: 1500,
+    topic: 'Faith',
+  },
+  {
+    title: 'Prayer for meaning in the midst of grief',
+    description: 'My wife passed away six months ago after a sudden heart attack. She was fifty-one years old, healthy, vibrant, and the center of my universe. One morning she was making coffee. By noon she was gone.',
+    imageUrl: '/assets/boat_twilight_lake.png',
+    aiSummary: `My wife passed away six months ago after a sudden heart attack. She was fifty-one years old, healthy, vibrant, and the center of my universe. One morning she was making coffee. By noon she was gone.
+
+There were no warning signs. No time to prepare. No chance to say the things I always assumed I would have time to say. The doctors told me it was a massive cardiac event — rare in women her age, but not unheard of. That medical explanation does nothing to fill the silence in our house.
+
+I still set two coffee cups on the counter every morning before I catch myself. I still roll over in bed reaching for her. I still hear her laugh in crowded rooms and turn expecting to see her face.
+
+Our adult children are grieving too, each in their own way. Our son has become withdrawn. Our daughter calls me every night, and I can hear her trying to be strong for me while falling apart herself. We are all stumbling through this fog, bumping into each other's pain.
+
+I am not asking why — I have learned that question has no satisfying answer. I am asking for prayers for the strength to keep living in a world that no longer includes her. For the ability to find joy again without feeling guilty. For my children as they grieve the loss of their mother. And for the hope that love somehow persists beyond death.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring comfort and meaning to this grieving husband,
+And healing and protection to
+A family learning to live in the absence of their beloved.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood this home now,
+Bringing hope wherever it touches,
+Comfort in the unbearable silence,
+And permission to find joy again without guilt.
+Oh God, May they all be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are walking through sudden, devastating loss,
+To remind them that grief is the price we pay for love
+And that love does not end with death.
+
+Oh Divine Creator,
+May much-needed peace and gentle healing flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'William Hartley',
+    count: 2345,
+    goal: 3000,
+    topic: 'General',
+  },
+  {
+    title: 'Overcoming anxiety and finding inner peace',
+    description: 'I have struggled with severe anxiety for as long as I can remember. It is not just worrying — it is a constant, paralyzing fear that something terrible is about to happen. I am tired of being held hostage by my own mind.',
+    imageUrl: '/assets/healing_hands_bird_nest.png',
+    aiSummary: `I have struggled with severe anxiety for as long as I can remember. It is not just worrying — it is a constant, paralyzing fear that something terrible is about to happen. I am tired of being held hostage by my own mind.
+
+It affects everything. I have turned down job opportunities because the interviews terrified me. I have missed weddings, birthdays, and graduations because the thought of being in a crowd made me physically ill. I have lain awake at three in the morning with my heart pounding, convinced I am dying, only to be told by the emergency room doctor that it is another panic attack.
+
+I am in therapy. I take medication. I practice breathing exercises and mindfulness and all the things the books tell you to do. Some days they help. Other days the anxiety laughs at my coping mechanisms and takes over anyway.
+
+The loneliest part is that people do not understand. They tell me to just relax, as if I have never thought of that. They tell me to think positive, as if my brain chemistry responds to motivational posters. They mean well, but their words often make me feel more broken, not less.
+
+I am asking for prayers for everyone who fights this invisible battle daily. Pray for peace that surpasses understanding. Pray for effective treatment. Pray for loved ones to have patience. And pray for the day when my mind is finally quiet enough to hear the still small voice that says, Do not be afraid.`,
+    recitablePrayer: `Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels for
+Thy vibrant Healing Power to flow through us
+In a living stream of radiant loving energy
+To bring peace and stillness to anxious minds,
+And healing and protection to
+All who fight the daily battle against fear and panic.
+
+Oh Divine Father of Life,
+May Thy wondrous power flood every racing thought now,
+Bringing hope wherever it touches,
+Calm where there is chaos,
+And rest where there is restlessness.
+Oh God, May they be comforted by Thy Presence.
+
+We pray that Thy Loving power flows to all
+Who are helping those with anxiety find relief,
+To inspire the therapists, doctors, and loved ones in their care
+With clarity, wisdom, love, understanding.
+
+Oh Divine Creator,
+May much-needed peace and freedom flow now
+From every corner of our world
+In the realization that we are one human family,
+Sharing in our grief and in our joy.
+Oh God, we thank you for this opportunity to be of Service.
+May Thy Will be Done.`,
+    author: 'Seeking Stillness',
+    count: 1567,
+    goal: 2000,
+    topic: 'General',
+  },
 ];
 
 export async function seedDatabase() {
