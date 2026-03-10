@@ -227,31 +227,33 @@ Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
         return res.status(503).json({ error: "AI service is not configured. Please set OPENAI_API_KEY." });
       }
 
-      // Use AI to generate a contextual image prompt based on the prayer content
       const promptGenerationResponse = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [{
+          role: "system",
+          content: `You are an expert art director who writes prompts for AI image generation. You create prompts that produce museum-quality, emotionally evocative artwork. Your prompts always specify:
+
+1. ARTISTIC STYLE: Choose a specific style for each prompt (e.g., "soft watercolor illustration", "dramatic oil painting", "impressionist painting", "digital art with painterly textures", "warm gouache illustration"). Vary the style based on the mood.
+2. COMPOSITION: Describe foreground, midground, and background elements. Use depth of field and perspective.
+3. LIGHTING: Be specific — "warm golden hour backlight", "soft diffused morning light filtering through trees", "dramatic sunset with long shadows", "ethereal glow from within".
+4. COLOR PALETTE: Name 3-4 dominant colors (e.g., "warm amber, soft sage green, and dusty rose tones").
+5. MOOD/ATMOSPHERE: Describe the emotional feeling — "peaceful and contemplative", "bittersweet but hopeful", "quietly powerful".
+6. SYMBOLIC IMAGERY: Use metaphorical objects from nature — candles, birds in flight, roots intertwining, paths through forests, seeds sprouting, light breaking through clouds, calm water reflecting sky.
+
+STRICT RULES — always include these in your prompt:
+- NO text, words, letters, or typography of any kind
+- NO human faces or recognizable people (hands and silhouettes from behind are acceptable)
+- NO religious symbols (no crosses, stars of David, crescents, etc.)
+- NO blurry or low-quality elements
+- Focus on nature, light, symbolic objects, and abstract emotional imagery`
+        }, {
           role: "user",
-          content: `Based on this prayer request, create a DALL-E image prompt for a powerful, emotional image that captures the essence of this issue.
+          content: `Create a DALL-E image prompt for this prayer request. Respond with ONLY the prompt, nothing else.
 
 Title: ${title}
-${aiSummary ? `Content: ${aiSummary.substring(0, 500)}` : ''}
-
-Create a detailed image prompt that:
-1. Captures the specific emotional theme and subject matter of this prayer (e.g., if about Sudan, show African landscape; if about a sick mother, show healing imagery)
-2. Uses symbolic and metaphorical imagery that relates directly to the content
-3. Has warm, hopeful lighting with emotional impact
-4. Is artistic and moving without being literal or graphic
-
-IMPORTANT RULES:
-- NO text, words, or letters in the image
-- NO human faces or specific people
-- NO religious symbols (crosses, etc.)
-- Focus on nature, light, symbolic objects, and abstract emotional imagery
-
-Respond with ONLY the image prompt, nothing else.`
+${aiSummary ? `Content: ${aiSummary.substring(0, 500)}` : ''}`
         }],
-        temperature: 0.7,
+        temperature: 0.8,
       });
 
       const imagePrompt = promptGenerationResponse.choices[0].message.content || 
@@ -261,7 +263,7 @@ Respond with ONLY the image prompt, nothing else.`
         model: "dall-e-3",
         prompt: imagePrompt,
         size: "1792x1024",
-        quality: "standard",
+        quality: "hd",
         n: 1,
       });
 
@@ -665,6 +667,13 @@ Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
   // Regenerate images for all prayers (admin endpoint)
   app.post("/api/admin/regenerate-images", isAuthenticated, async (req: any, res) => {
     try {
+      const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+      const userRecord = await storage.getUser(req.session.userId);
+      const isAdmin = userRecord?.email ? adminEmails.includes(userRecord.email.toLowerCase()) : false;
+      if (!isAdmin) {
+        return res.status(403).json({ error: "Forbidden: Admin access required" });
+      }
+
       if (!openai) {
         return res.status(503).json({ error: "AI service is not configured. Please set OPENAI_API_KEY." });
       }
@@ -673,27 +682,34 @@ Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
       
       for (const prayer of allPrayers) {
         try {
-          // Create topic-specific prompts for variety
           let imagePrompt: string;
           const topic = prayer.topic?.toLowerCase() || '';
           
           if (topic.includes('peace') || topic.includes('world')) {
-            imagePrompt = `A hopeful image symbolizing world peace and unity: a beautiful dove flying over a calm ocean at sunrise, olive branches, or diverse hands joining together in silhouette. Style: peaceful, hopeful, golden morning light. Avoid: Any text, faces, violence, weapons, specific locations.`;
+            imagePrompt = `Impressionist oil painting of a vast calm ocean at golden hour, a single white dove in flight silhouetted against a sky painted in warm amber, soft coral, and pale lavender. Gentle waves reflecting the sunset light. Olive branches frame the foreground. Mood: serene, hopeful, quietly powerful. No text, no faces, no religious symbols, no violence.`;
           } else if (topic.includes('health') || topic.includes('healing')) {
-            imagePrompt = `An image symbolizing healing and hope: gentle sunlight streaming through a hospital window onto flowers, a butterfly emerging from a cocoon, or hands gently cradling a glowing light. Style: soft, warm, comforting. Avoid: Any text, faces, medical equipment.`;
+            imagePrompt = `Soft watercolor illustration of morning sunlight streaming through sheer curtains onto a windowsill filled with wildflowers in bloom. A butterfly with translucent wings rests on a petal. Color palette: warm honey gold, soft sage green, gentle lavender. Bokeh light particles float in the air. Mood: tender, comforting, full of quiet hope. No text, no faces, no medical equipment, no religious symbols.`;
           } else if (topic.includes('family') || topic.includes('marriage')) {
-            imagePrompt = `An image symbolizing family reconciliation and love: two trees with intertwined roots, a broken bridge being mended by golden light, or two birds returning to the same nest. Style: warm, emotional, romantic lighting. Avoid: Any text, faces, specific people.`;
+            imagePrompt = `Warm gouache illustration of two ancient oak trees growing side by side with their roots visibly intertwined beneath the earth, their canopies touching and creating a natural archway. A warm golden sunset glows behind them. Small birds nest in the shared branches. Color palette: rich amber, deep forest green, warm sienna. Mood: enduring love, reconciliation, warmth. No text, no faces, no religious symbols.`;
           } else if (topic.includes('employment') || topic.includes('job')) {
-            imagePrompt = `An image symbolizing breakthrough and new opportunities: a door opening to brilliant light, seeds sprouting through concrete, or a path emerging through a dark forest into sunlight. Style: hopeful, triumphant, golden hour lighting. Avoid: Any text, faces, office settings.`;
+            imagePrompt = `Digital art with painterly textures showing a single green seedling pushing through a crack in weathered concrete, bathed in a shaft of brilliant golden sunlight from above. Behind it, a path leads from shadow into warm light. Color palette: deep charcoal, vibrant green, golden yellow, warm amber. Mood: determination, breakthrough, triumph over adversity. No text, no faces, no office settings, no religious symbols.`;
+          } else if (topic.includes('community')) {
+            imagePrompt = `Warm watercolor painting of diverse hands reaching together over a shared table outdoors at golden hour, surrounded by abundant food and wildflowers. Trees with string lights frame the scene. Color palette: warm sunset orange, soft cream, earthy brown, sage green. Mood: togetherness, belonging, communal warmth. No text, no faces, no religious symbols.`;
+          } else if (topic.includes('faith')) {
+            imagePrompt = `Dramatic oil painting of a single candle flame burning brightly in deep darkness, its warm light radiating outward in concentric golden circles. The flame is reflected in a still pool of water below. Tiny sparks float upward like fireflies. Color palette: deep indigo, rich gold, warm amber, soft white. Mood: intimate, reverent, quietly powerful. No text, no faces, no religious symbols.`;
+          } else if (topic.includes('education')) {
+            imagePrompt = `Soft impressionist painting of an open leather-bound book on a weathered wooden desk beside a sunlit window. Morning light streams across the pages, casting warm shadows. A cup of tea steams gently beside a small potted plant. Color palette: warm honey, cream, soft brown, sage green. Mood: curiosity, new beginnings, peaceful learning. No text, no faces, no religious symbols.`;
+          } else if (topic.includes('gratitude')) {
+            imagePrompt = `Luminous impressionist painting of a breathtaking sunrise over a mirror-still mountain lake, wildflowers covering the foreground meadow. Birds take flight into a sky painted in rose gold and soft lavender. Morning mist rises from the water. Color palette: rose gold, soft peach, lavender, warm white. Mood: profound thankfulness, awe, joyful reverence. No text, no faces, no religious symbols.`;
           } else {
-            imagePrompt = `Create a hopeful, peaceful image with warm golden lighting. Include nature elements like sunlight, flowers, or calm water. Style: evocative, emotional, beautiful. Avoid: Any text, faces, religious symbols.`;
+            imagePrompt = `Beautiful digital art with painterly textures of a winding forest path through tall ancient trees, dappled sunlight filtering through a canopy of green and gold leaves. The path leads toward a warm, glowing clearing in the distance. Wildflowers line the edges. Color palette: emerald green, warm gold, soft amber, earthy brown. Mood: contemplative, purposeful, gently hopeful. No text, no faces, no religious symbols.`;
           }
 
           const imageResponse = await openai.images.generate({
             model: "dall-e-3",
             prompt: imagePrompt,
             size: "1792x1024",
-            quality: "standard",
+            quality: "hd",
             n: 1,
           });
 
