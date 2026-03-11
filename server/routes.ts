@@ -182,8 +182,15 @@ CRITICAL INSTRUCTIONS - Follow these EXACTLY:
 
 Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
 
-      // Run both GPT calls in parallel for speed
-      const [summaryResponse, prayerResponse] = await Promise.all([
+      const categoryPrompt = `Classify this prayer request into exactly one of these categories: Health, Family, Employment, World Peace, Community, Faith, Education, Gratitude, General.
+
+Title: ${title}
+${description ? `Description: ${description}` : ''}
+
+Respond with ONLY the category name, nothing else.`;
+
+      // Run all three GPT calls in parallel for speed
+      const [summaryResponse, prayerResponse, categoryResponse] = await Promise.all([
         openai.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [{ role: "user", content: summaryPrompt }],
@@ -193,17 +200,26 @@ Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
           model: "gpt-4o-mini",
           messages: [{ role: "user", content: prayerPrompt }],
           temperature: 0.7,
+        }),
+        openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: categoryPrompt }],
+          temperature: 0.1,
         })
       ]);
 
       const aiSummary = summaryResponse.choices[0].message.content || "";
       const recitablePrayer = prayerResponse.choices[0].message.content || "";
+      const rawCategory = (categoryResponse.choices[0].message.content || "").trim();
+      const validCategories = ["Health", "Family", "Employment", "World Peace", "Community", "Faith", "Education", "Gratitude", "General"];
+      const topic = validCategories.includes(rawCategory) ? rawCategory : "General";
 
       // Return text immediately without waiting for image
       res.json({
         aiSummary,
         recitablePrayer,
         imageUrl: "", // Image will be generated separately
+        topic,
       });
     } catch (error: any) {
       console.error("Error generating prayer:", error);
