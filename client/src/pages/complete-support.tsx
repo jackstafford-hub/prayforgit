@@ -124,7 +124,8 @@ export default function CompleteSupport() {
   const confirmPrayerCounted = async () => {
     if (!id || prayerCounted) return;
     try {
-      await incrementPrayerCount(id);
+      const updatedPrayer = await incrementPrayerCount(id);
+      setPrayer(updatedPrayer);
       setPrayerCounted(true);
     } catch (error) {
       console.error("Error counting prayer:", error);
