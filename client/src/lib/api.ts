@@ -48,6 +48,7 @@ export async function generatePrayerContent(title: string, description?: string)
       aiSummary: string;
       recitablePrayer: string;
       imageUrl: string;
+      topic: string;
     }>;
   } catch (error: any) {
     clearTimeout(timeoutId);

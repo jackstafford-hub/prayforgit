@@ -11,7 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { generatePrayerContent, createPrayer, generateImage, checkPrayerTone } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
-import { PRAYER_CATEGORIES } from "@shared/schema";
 import type { User } from "@shared/schema";
 
 // Import mock generated images
@@ -140,7 +139,8 @@ export default function CreatePrayer() {
         ...prev,
         imageUrl: result.imageUrl,
         aiSummary: result.aiSummary,
-        recitablePrayer: result.recitablePrayer
+        recitablePrayer: result.recitablePrayer,
+        topic: result.topic || prev.topic,
       }));
       
       setStep('review');
@@ -376,26 +376,6 @@ export default function CreatePrayer() {
                   onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   className="h-14 text-lg px-4"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">Category</Label>
-                <div className="flex flex-wrap gap-2">
-                  {PRAYER_CATEGORIES.map(cat => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, topic: cat }))}
-                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border cursor-pointer ${
-                        formData.topic === cat
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
-                      }`}
-                      data-testid={`button-category-${cat.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground">Prayer goal</Label>
