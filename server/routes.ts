@@ -393,6 +393,38 @@ ${aiSummary ? `Content: ${aiSummary.substring(0, 500)}` : ''}`
     }
   });
 
+  // Update user profile
+  app.patch("/api/user/profile", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { firstName, lastName, email, emailOptIn } = req.body;
+
+      if (email && typeof email === 'string') {
+        const existing = await storage.getUserByEmail(email);
+        if (existing && existing.id !== userId) {
+          return res.status(409).json({ error: "This email is already in use by another account." });
+        }
+      }
+
+      const updated = await storage.updateUser(userId, {
+        ...(firstName !== undefined && { firstName }),
+        ...(lastName !== undefined && { lastName }),
+        ...(email !== undefined && { email }),
+        ...(emailOptIn !== undefined && { emailOptIn }),
+      });
+
+      if (!updated) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const { password, resetToken, resetTokenExpiry, ...safeUser } = updated;
+      res.json(safeUser);
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ error: "Failed to update profile" });
+    }
+  });
+
   // Post an update to a prayer (author only)
   app.post("/api/prayers/:id/updates", isAuthenticated, async (req: any, res) => {
     try {

@@ -9,6 +9,8 @@ export interface IStorage {
   createUser(user: UpsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   
+  updateUser(id: string, data: { firstName?: string; lastName?: string; email?: string; emailOptIn?: boolean }): Promise<User | undefined>;
+  
   // Prayer methods
   getPrayers(): Promise<Prayer[]>;
   getPublicPrayers(): Promise<Prayer[]>;
@@ -73,6 +75,15 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date(),
         },
       })
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, data: { firstName?: string; lastName?: string; email?: string; emailOptIn?: boolean }): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(users.id, id))
       .returning();
     return user;
   }

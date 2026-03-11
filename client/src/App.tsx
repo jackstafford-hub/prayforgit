@@ -17,6 +17,7 @@ import Privacy from "@/pages/privacy";
 import AdminDashboard from "@/pages/admin";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
+import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 import { Footer } from "@/components/footer";
 
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
+      <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
   );

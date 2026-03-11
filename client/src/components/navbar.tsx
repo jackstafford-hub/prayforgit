@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, UserCircle, LogOut, Heart, Shield } from "lucide-react";
+import { Search, Menu, UserCircle, LogOut, Heart, Shield, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import type { User } from "@shared/schema";
 import {
@@ -94,6 +94,10 @@ export function Navbar() {
                   <Heart className="w-4 h-4 mr-2" />
                   My Prayers
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer" data-testid="link-settings">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => navigate("/admin")} className="cursor-pointer" data-testid="link-admin-dashboard">
                     <Shield className="w-4 h-4 mr-2" />
@@ -184,6 +188,15 @@ export function Navbar() {
                         )}
                         <span className="font-medium">{user.firstName || user.email || 'User'}</span>
                       </div>
+                      <Button 
+                        variant="ghost" 
+                        className="justify-start text-base cursor-pointer"
+                        onClick={() => { navigate("/settings"); setMobileMenuOpen(false); }}
+                        data-testid="link-mobile-settings"
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Settings
+                      </Button>
                       {isAdmin && (
                         <Button 
                           variant="ghost" 
