@@ -83,3 +83,10 @@ Preferred communication style: Simple, everyday language.
 - `shadcn/ui` components via Radix UI primitives
 - `html2canvas`: Client-side HTML-to-image conversion for shareable prayer cards
 - `react-icons`: Brand logos (WhatsApp, Facebook, X) for social share icons
+
+### Open Graph & Social Sharing
+- **Server-side OG injection**: `server/ogTags.ts` dynamically replaces OG meta tags for `/prayer/:id` URLs, showing prayer title, description, and image in link previews
+- **Dev mode**: `server/vite.ts` injects OG tags before Vite HTML transform
+- **Production mode**: `server/static.ts` reads index.html and injects OG tags before serving
+- **Default OG image**: `attached_assets/generated_images/og_default_prayforchange.png` served at `/assets/og_default_prayforchange.png`
+- **Share text**: "Pray with me: [title]" used across WhatsApp, Facebook, and X share buttons

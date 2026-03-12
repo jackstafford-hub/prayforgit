@@ -183,7 +183,7 @@ export default function CompleteSupport() {
   };
 
   const shareUrl = `${window.location.origin}/prayer/${id}`;
-  const shareText = prayer ? `Please pray for: ${prayer.title}` : "Please pray with me";
+  const shareText = prayer ? `Pray with me: ${prayer.title}` : "Pray with me on PrayForChange.org";
 
   const handleCarouselPray = async (prayerId: string) => {
     try {
@@ -341,7 +341,7 @@ export default function CompleteSupport() {
               Copy Link
             </Button>
             <Button
-              onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank')}
+              onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`, '_blank')}
               variant="outline"
               className="flex flex-col items-center py-6 cursor-pointer"
               data-testid="button-share-facebook"

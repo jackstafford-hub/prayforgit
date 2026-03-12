@@ -618,7 +618,7 @@ export default function PrayerDetail() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => {
-                      const url = `https://wa.me/?text=${encodeURIComponent(`Join me in prayer: ${prayer.title}\n${window.location.href}`)}`;
+                      const url = `https://wa.me/?text=${encodeURIComponent(`Pray with me: ${prayer.title}\n\n${window.location.href}`)}`;
                       window.open(url, "_blank");
                     }}
                     className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
@@ -630,7 +630,7 @@ export default function PrayerDetail() {
                   </button>
                   <button
                     onClick={() => {
-                      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+                      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(`Pray with me: ${prayer.title}`)}`;
                       window.open(url, "_blank", "width=600,height=400");
                     }}
                     className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-[#1877F2] hover:bg-[#1877F2]/10 transition-colors"
@@ -642,7 +642,7 @@ export default function PrayerDetail() {
                   </button>
                   <button
                     onClick={() => {
-                      const url = `https://x.com/intent/tweet?text=${encodeURIComponent(`Join me in prayer: ${prayer.title}`)}&url=${encodeURIComponent(window.location.href)}`;
+                      const url = `https://x.com/intent/tweet?text=${encodeURIComponent(`Pray with me: ${prayer.title}`)}&url=${encodeURIComponent(window.location.href)}`;
                       window.open(url, "_blank", "width=600,height=400");
                     }}
                     className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
