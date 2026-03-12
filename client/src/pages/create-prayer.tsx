@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Sparkles, Wand2, RefreshCw, Pencil, Check, X, Loader2, Upload, ImageIcon } from "lucide-react";
+import { ArrowLeft, Sparkles, Wand2, RefreshCw, Pencil, Check, X, Loader2, ImageIcon } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -218,18 +218,6 @@ export default function CreatePrayer() {
   const cancelPrayerEdit = () => {
     setFormData(prev => ({ ...prev, recitablePrayer: originalPrayer }));
     setIsEditingPrayer(false);
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        setFormData(prev => ({ ...prev, imageUrl: result }));
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const handleStoryContinue = async (e: React.FormEvent) => {
@@ -556,29 +544,15 @@ export default function CreatePrayer() {
                           <Button variant="secondary" size="sm" onClick={regenerateImage} className="gap-2">
                             <Wand2 className="w-4 h-4" /> Generate New
                           </Button>
-                          <label>
-                            <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                            <Button variant="secondary" size="sm" asChild className="gap-2 cursor-pointer">
-                              <span><Upload className="w-4 h-4" /> Upload</span>
-                            </Button>
-                          </label>
                        </div>
                      </>
                    ) : (
                      <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-6">
                        <ImageIcon className="w-12 h-12 text-muted-foreground/50" />
                        <p className="text-sm text-muted-foreground text-center">Add an image to make your prayer stand out</p>
-                       <div className="flex gap-3">
-                         <Button variant="outline" size="sm" onClick={regenerateImage} disabled={isGeneratingImage} className="gap-2">
-                           <Wand2 className="w-4 h-4" /> Generate with AI
-                         </Button>
-                         <label>
-                           <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                           <Button variant="outline" size="sm" asChild className="gap-2 cursor-pointer">
-                             <span><Upload className="w-4 h-4" /> Upload Image</span>
-                           </Button>
-                         </label>
-                       </div>
+                       <Button variant="outline" size="sm" onClick={regenerateImage} disabled={isGeneratingImage} className="gap-2">
+                         <Wand2 className="w-4 h-4" /> Generate with AI
+                       </Button>
                      </div>
                    )}
                 </div>
