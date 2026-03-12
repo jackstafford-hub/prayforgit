@@ -3,7 +3,7 @@ import { useRoute, Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
-import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Link2, Share2 } from "lucide-react";
+import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Link2, Share2, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -618,7 +618,7 @@ export default function PrayerDetail() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => {
-                      const url = `https://wa.me/?text=${encodeURIComponent(`Pray with me: ${prayer.title}\n\n${window.location.href}`)}`;
+                      const url = `https://wa.me/?text=${encodeURIComponent(`Pray for ${prayer.title} on PrayForChange.org\n\n${window.location.href}`)}`;
                       window.open(url, "_blank");
                     }}
                     className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
@@ -630,7 +630,7 @@ export default function PrayerDetail() {
                   </button>
                   <button
                     onClick={() => {
-                      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(`Pray with me: ${prayer.title}`)}`;
+                      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(`Pray for ${prayer.title} on PrayForChange.org`)}`;
                       window.open(url, "_blank", "width=600,height=400");
                     }}
                     className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-[#1877F2] hover:bg-[#1877F2]/10 transition-colors"
@@ -642,7 +642,7 @@ export default function PrayerDetail() {
                   </button>
                   <button
                     onClick={() => {
-                      const url = `https://x.com/intent/tweet?text=${encodeURIComponent(`Pray with me: ${prayer.title}`)}&url=${encodeURIComponent(window.location.href)}`;
+                      const url = `https://x.com/intent/tweet?text=${encodeURIComponent(`Pray for ${prayer.title} on PrayForChange.org`)}&url=${encodeURIComponent(window.location.href)}`;
                       window.open(url, "_blank", "width=600,height=400");
                     }}
                     className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -651,6 +651,19 @@ export default function PrayerDetail() {
                     data-testid="button-share-x"
                   >
                     <SiX className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      const subject = encodeURIComponent(`Pray for ${prayer.title} on PrayForChange.org`);
+                      const body = encodeURIComponent(`I wanted to share this prayer request with you:\n\n${prayer.title}\n\n${window.location.href}`);
+                      window.open(`mailto:?subject=${subject}&body=${body}`);
+                    }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                    title="Share via email"
+                    aria-label="Share via email"
+                    data-testid="button-share-email"
+                  >
+                    <Mail className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => {

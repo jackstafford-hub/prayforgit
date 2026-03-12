@@ -183,7 +183,7 @@ export default function CompleteSupport() {
   };
 
   const shareUrl = `${window.location.origin}/prayer/${id}`;
-  const shareText = prayer ? `Pray with me: ${prayer.title}` : "Pray with me on PrayForChange.org";
+  const shareText = prayer ? `Pray for ${prayer.title} on PrayForChange.org` : "Pray with me on PrayForChange.org";
 
   const handleCarouselPray = async (prayerId: string) => {
     try {
@@ -368,7 +368,7 @@ export default function CompleteSupport() {
               X (Twitter)
             </Button>
             <Button
-              onClick={() => window.open(`mailto:?subject=${encodeURIComponent(shareText)}&body=${encodeURIComponent(shareUrl)}`, '_blank')}
+              onClick={() => window.open(`mailto:?subject=${encodeURIComponent(shareText)}&body=${encodeURIComponent(`I wanted to share this prayer request with you:\n\n${prayer?.title || 'A prayer request'}\n\n${shareUrl}`)}`, '_blank')}
               variant="outline"
               className="flex flex-col items-center py-6 col-span-2 cursor-pointer"
               data-testid="button-share-email"
