@@ -20,6 +20,7 @@ export interface IStorage {
   incrementPrayerCount(id: string): Promise<Prayer | undefined>;
   updatePrayerImage(id: string, imageUrl: string): Promise<Prayer | undefined>;
   updatePrayerContent(id: string, content: { aiSummary?: string; recitablePrayer?: string }): Promise<Prayer | undefined>;
+  updatePrayerTitle(id: string, title: string): Promise<Prayer | undefined>;
   
   // Report methods
   createReport(report: InsertReport): Promise<Report>;
@@ -149,6 +150,16 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db
       .update(prayers)
       .set(updateData)
+      .where(eq(prayers.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async updatePrayerTitle(id: string, title: string): Promise<Prayer | undefined> {
+    const [updated] = await db
+      .update(prayers)
+      .set({ title })
       .where(eq(prayers.id, id))
       .returning();
     

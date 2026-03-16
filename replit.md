@@ -37,7 +37,8 @@ Preferred communication style: Simple, everyday language.
 - **Migrations**: Managed via drizzle-kit with `db:push` command
 
 ### Key Features
-- Prayer request creation with AI-enhanced content generation
+- Prayer request creation with AI-enhanced content generation (includes AI title suggestions)
+- Post-save editing of prayer title, story, prayer text, and image by author/admin
 - Prayer tone check: AI-powered positivity analysis before generating prayer content, with constructive reframing suggestions for negatively-framed prayers. Prayers that proceed despite warnings are flagged for moderation (`flaggedForReview` column) and emailed to support@prayforchange.org for review before becoming publicly visible
 - Admin Moderation Dashboard (`/admin`): Protected by `ADMIN_EMAILS` env var. Allows admins to view stats, approve/delete flagged prayers, and review/dismiss user reports. Admin link appears in navbar for authorized users only
 - Prayer counter that tracks community participation

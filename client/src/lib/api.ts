@@ -150,7 +150,32 @@ export async function incrementPrayerCount(id: string): Promise<Prayer> {
   return response.json();
 }
 
-export async function updatePrayerContent(id: string, content: { aiSummary?: string; recitablePrayer?: string; imageUrl?: string }): Promise<Prayer> {
+export async function suggestTitle(title: string, description?: string): Promise<{ suggestedTitle: string }> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch('/api/suggest-title', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      return { suggestedTitle: title };
+    }
+
+    return response.json();
+  } catch {
+    clearTimeout(timeoutId);
+    return { suggestedTitle: title };
+  }
+}
+
+export async function updatePrayerContent(id: string, content: { title?: string; aiSummary?: string; recitablePrayer?: string; imageUrl?: string }): Promise<Prayer> {
   const response = await fetch(`/api/prayers/${id}/content`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },

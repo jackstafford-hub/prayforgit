@@ -85,6 +85,52 @@ Respond with ONLY valid JSON (no markdown):
     }
   });
 
+  app.post("/api/suggest-title", async (req, res) => {
+    try {
+      const { title, description } = req.body;
+
+      if (!title || typeof title !== 'string') {
+        return res.status(400).json({ error: "Title is required" });
+      }
+
+      if (!openai) {
+        return res.json({ suggestedTitle: title });
+      }
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{
+          role: "system",
+          content: `You improve prayer request titles for a community prayer platform. Given a user's raw title, suggest a more compelling, clear, and heartfelt version.
+
+Rules:
+- Keep it concise (under 12 words)
+- Keep the core meaning and intent identical
+- Make it more evocative and emotionally resonant
+- Use sentence case (capitalize first word and proper nouns only)
+- Do NOT add quotation marks around the title
+- If the title is already excellent, return it unchanged
+
+Respond with ONLY valid JSON (no markdown):
+{"suggestedTitle": "Your improved title here"}`
+        }, {
+          role: "user",
+          content: `Title: ${title}${description ? `\nContext: ${description}` : ''}`
+        }],
+        temperature: 0.7,
+        max_tokens: 100,
+      });
+
+      let content = response.choices[0]?.message?.content?.trim() || `{"suggestedTitle": "${title}"}`;
+      content = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+      const result = JSON.parse(content);
+      res.json({ suggestedTitle: result.suggestedTitle || title });
+    } catch (error) {
+      console.error("Error suggesting title:", error);
+      res.json({ suggestedTitle: req.body.title });
+    }
+  });
+
   // Generate prayer content using OpenAI (text only - fast)
   app.post("/api/generate-prayer", async (req, res) => {
     try {
@@ -543,13 +589,13 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
     }
   });
 
-  // Update prayer content (aiSummary, recitablePrayer, imageUrl)
+  // Update prayer content (aiSummary, recitablePrayer, imageUrl, title)
   app.patch("/api/prayers/:id/content", isAuthenticated, async (req: any, res) => {
     try {
-      const { aiSummary, recitablePrayer, imageUrl } = req.body;
+      const { aiSummary, recitablePrayer, imageUrl, title } = req.body;
       const userId = req.session?.userId;
       
-      if (aiSummary === undefined && recitablePrayer === undefined && imageUrl === undefined) {
+      if (aiSummary === undefined && recitablePrayer === undefined && imageUrl === undefined && title === undefined) {
         return res.status(400).json({ error: "No content to update" });
       }
 
@@ -568,8 +614,15 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
       }
 
       let updated = prayer;
+      if (title !== undefined) {
+        const trimmedTitle = typeof title === 'string' ? title.trim() : '';
+        if (!trimmedTitle || trimmedTitle.length > 200) {
+          return res.status(400).json({ error: "Title must be between 1 and 200 characters" });
+        }
+        updated = (await storage.updatePrayerTitle(req.params.id, trimmedTitle)) || prayer;
+      }
       if (aiSummary !== undefined || recitablePrayer !== undefined) {
-        updated = (await storage.updatePrayerContent(req.params.id, { aiSummary, recitablePrayer })) || prayer;
+        updated = (await storage.updatePrayerContent(req.params.id, { aiSummary, recitablePrayer })) || updated;
       }
       if (imageUrl !== undefined) {
         updated = (await storage.updatePrayerImage(req.params.id, imageUrl)) || updated;

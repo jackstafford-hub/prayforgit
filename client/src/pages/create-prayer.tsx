@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { ArrowLeft, Sparkles, Wand2, RefreshCw, Pencil, Check, X, Loader2, Image
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { generatePrayerContent, createPrayer, generateImage, checkPrayerTone } from "@/lib/api";
+import { generatePrayerContent, createPrayer, generateImage, checkPrayerTone, suggestTitle } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import type { User } from "@shared/schema";
 
@@ -106,6 +106,8 @@ export default function CreatePrayer() {
   const [toneSuggestion, setToneSuggestion] = useState<string | undefined>(undefined);
   const [originalIssue, setOriginalIssue] = useState("");
   const [originalPrayer, setOriginalPrayer] = useState("");
+  const [isSuggestingTitle, setIsSuggestingTitle] = useState(false);
+  const [suggestedTitle, setSuggestedTitle] = useState<string | null>(null);
   
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -257,10 +259,27 @@ export default function CreatePrayer() {
     generateAIContent();
   };
 
-  const handleTitleContinue = (e: React.FormEvent) => {
+  const titleSuggestRef = useRef(0);
+  const handleTitleContinue = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.title.trim()) {
+    const currentTitle = formData.title.trim();
+    if (currentTitle) {
       setStep('story');
+      setSuggestedTitle(null);
+      setIsSuggestingTitle(true);
+      const requestId = ++titleSuggestRef.current;
+      try {
+        const result = await suggestTitle(currentTitle);
+        if (requestId !== titleSuggestRef.current) return;
+        if (result.suggestedTitle && result.suggestedTitle.toLowerCase() !== currentTitle.toLowerCase()) {
+          setSuggestedTitle(result.suggestedTitle);
+        }
+      } catch {
+      } finally {
+        if (requestId === titleSuggestRef.current) {
+          setIsSuggestingTitle(false);
+        }
+      }
     }
   };
 
@@ -446,6 +465,50 @@ export default function CreatePrayer() {
                 Sharing a little of your own story helps deepen the prayer.
               </p>
             </div>
+
+            {isSuggestingTitle && (
+              <div className="rounded-xl border border-border bg-muted/30 p-4 flex items-center gap-3 animate-in fade-in duration-300">
+                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Suggesting a title improvement...</p>
+              </div>
+            )}
+
+            {suggestedTitle && !isSuggestingTitle && (
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" data-testid="title-suggestion-card">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Suggested title</p>
+                  <p className="text-base font-semibold text-foreground" data-testid="text-suggested-title">{suggestedTitle}</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      setFormData(prev => ({ ...prev, title: suggestedTitle! }));
+                      setSuggestedTitle(null);
+                    }}
+                    className="gap-2"
+                    data-testid="button-accept-title"
+                  >
+                    <Check className="w-4 h-4" />
+                    Use this title
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSuggestedTitle(null)}
+                    className="gap-2"
+                    data-testid="button-keep-title"
+                  >
+                    Keep mine
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Your current title: <span className="font-medium">{formData.title}</span>
+                </p>
+              </div>
+            )}
             
             {toneWarning?.isNegative && (
               <div data-testid="tone-warning-dialog" className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">

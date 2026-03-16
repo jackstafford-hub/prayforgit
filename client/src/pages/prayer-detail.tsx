@@ -53,6 +53,9 @@ export default function PrayerDetail() {
   const [isRegeneratingPrayer, setIsRegeneratingPrayer] = useState(false);
   const [isRegeneratingImage, setIsRegeneratingImage] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState("");
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
   
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
@@ -157,6 +160,28 @@ export default function PrayerDetail() {
       toast({ title: "Failed to post update", description: error.message, variant: "destructive" });
     } finally {
       setIsPostingUpdate(false);
+    }
+  };
+
+  const handleStartEditTitle = () => {
+    if (prayer) {
+      setEditedTitle(prayer.title);
+      setIsEditingTitle(true);
+    }
+  };
+
+  const handleSaveTitle = async () => {
+    if (!prayer || !editedTitle.trim()) return;
+    setIsSavingTitle(true);
+    try {
+      const updated = await updatePrayerContent(prayer.id, { title: editedTitle.trim() });
+      setPrayer(updated);
+      setIsEditingTitle(false);
+      toast({ title: "Title updated successfully" });
+    } catch (error) {
+      toast({ title: "Failed to save title", variant: "destructive" });
+    } finally {
+      setIsSavingTitle(false);
     }
   };
 
@@ -302,16 +327,13 @@ export default function PrayerDetail() {
   const percentage = Math.min((prayer.count / prayer.goal) * 100, 100);
   const remaining = prayer.goal - prayer.count;
 
-  // Extract title from AI summary if it starts with "**Title:" pattern
   const getDisplayTitleAndCleanedSummary = () => {
     const content = prayer.aiSummary || prayer.description || "";
     const titleMatch = content.match(/^\*\*Title:\s*(.+?)\*\*/);
-    if (titleMatch) {
-      const extractedTitle = titleMatch[1].trim();
-      const cleanedSummary = content.replace(/^\*\*Title:\s*.+?\*\*\s*/, '').trim();
-      return { displayTitle: extractedTitle, cleanedSummary };
-    }
-    return { displayTitle: prayer.title, cleanedSummary: content };
+    const cleanedSummary = titleMatch 
+      ? content.replace(/^\*\*Title:\s*.+?\*\*\s*/, '').trim() 
+      : content;
+    return { displayTitle: prayer.title, cleanedSummary };
   };
 
   const { displayTitle, cleanedSummary } = getDisplayTitleAndCleanedSummary();
@@ -325,9 +347,53 @@ export default function PrayerDetail() {
           <div className="space-y-8">
             <div className="space-y-4">
               <div className="flex items-start justify-between gap-4">
-                <h1 className="font-serif text-2xl md:text-3xl font-bold leading-tight text-foreground text-balance">
-                  {displayTitle}
-                </h1>
+                {isEditingTitle ? (
+                  <div className="flex-1 space-y-3">
+                    <Input
+                      autoFocus
+                      value={editedTitle}
+                      onChange={(e) => setEditedTitle(e.target.value)}
+                      className="font-serif text-2xl md:text-3xl font-bold h-auto py-2"
+                      data-testid="input-edit-title"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEditingTitle(false)}
+                        disabled={isSavingTitle}
+                        data-testid="button-cancel-title"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleSaveTitle}
+                        disabled={isSavingTitle || !editedTitle.trim()}
+                        className="gap-2"
+                        data-testid="button-save-title"
+                      >
+                        {isSavingTitle ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <h1 className="font-serif text-2xl md:text-3xl font-bold leading-tight text-foreground text-balance">
+                    {displayTitle}
+                  </h1>
+                )}
+                {canEdit && !isEditingTitle && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleStartEditTitle}
+                    className="shrink-0 h-8 px-2"
+                    data-testid="button-edit-title"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
 
