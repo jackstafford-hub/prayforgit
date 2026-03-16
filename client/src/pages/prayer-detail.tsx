@@ -250,6 +250,11 @@ export default function PrayerDetail() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !prayer) return;
+    e.target.value = "";
+    if (file.size > 8 * 1024 * 1024) {
+      toast({ title: "Image must be under 8MB", variant: "destructive" });
+      return;
+    }
     setIsUploadingImage(true);
     try {
       const reader = new FileReader();
