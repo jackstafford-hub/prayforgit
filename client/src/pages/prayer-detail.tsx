@@ -3,12 +3,12 @@ import { useRoute, Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
-import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Link2, Share2, Mail } from "lucide-react";
+import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Link2, Share2, Mail, Upload, Wand2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import bgTexture from "@assets/generated_images/subtle_warm_paper_texture_background.png";
-import { getPrayerById, updatePrayerContent, regeneratePrayerContent } from "@/lib/api";
+import { getPrayerById, updatePrayerContent, regeneratePrayerContent, generateImage } from "@/lib/api";
 import type { Prayer, PrayerUpdate, User } from "@shared/schema";
 import { ShareableCardDialog } from "@/components/shareable-card";
 import { SiWhatsapp, SiFacebook, SiX } from "react-icons/si";
@@ -51,6 +51,8 @@ export default function PrayerDetail() {
   const [isSavingPrayer, setIsSavingPrayer] = useState(false);
   const [isRegeneratingIssue, setIsRegeneratingIssue] = useState(false);
   const [isRegeneratingPrayer, setIsRegeneratingPrayer] = useState(false);
+  const [isRegeneratingImage, setIsRegeneratingImage] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
@@ -230,6 +232,50 @@ export default function PrayerDetail() {
     }
   };
 
+  const handleRegenerateImage = async () => {
+    if (!prayer) return;
+    setIsRegeneratingImage(true);
+    try {
+      const result = await generateImage(prayer.title, prayer.aiSummary || undefined);
+      const updated = await updatePrayerContent(prayer.id, { imageUrl: result.imageUrl });
+      setPrayer(updated);
+      toast({ title: "Image regenerated successfully" });
+    } catch (error) {
+      toast({ title: "Failed to regenerate image", variant: "destructive" });
+    } finally {
+      setIsRegeneratingImage(false);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !prayer) return;
+    setIsUploadingImage(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const dataUrl = event.target?.result as string;
+        try {
+          const updated = await updatePrayerContent(prayer.id, { imageUrl: dataUrl });
+          setPrayer(updated);
+          toast({ title: "Image updated successfully" });
+        } catch (error) {
+          toast({ title: "Failed to update image", variant: "destructive" });
+        } finally {
+          setIsUploadingImage(false);
+        }
+      };
+      reader.onerror = () => {
+        toast({ title: "Failed to read file", variant: "destructive" });
+        setIsUploadingImage(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast({ title: "Failed to upload image", variant: "destructive" });
+      setIsUploadingImage(false);
+    }
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -280,7 +326,7 @@ export default function PrayerDetail() {
               </div>
             </div>
 
-            <div className="aspect-video w-full bg-muted rounded-xl overflow-hidden relative shadow-sm">
+            <div className="aspect-video w-full bg-muted rounded-xl overflow-hidden relative shadow-sm group">
               <div 
                 className="absolute inset-0 transition-transform duration-700 hover:scale-105"
                 style={{ 
@@ -289,6 +335,28 @@ export default function PrayerDetail() {
                   backgroundPosition: 'center'
                 }} 
               />
+              {canEdit && (
+                <div className={`absolute inset-0 bg-black/40 flex items-center justify-center gap-2 transition-opacity ${(isRegeneratingImage || isUploadingImage) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                  {(isRegeneratingImage || isUploadingImage) ? (
+                    <div className="flex items-center gap-2 text-white">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span className="text-sm font-medium">{isRegeneratingImage ? "Generating..." : "Uploading..."}</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Button variant="secondary" size="sm" onClick={handleRegenerateImage} className="gap-2" data-testid="button-regenerate-image">
+                        <Wand2 className="w-4 h-4" /> Generate New
+                      </Button>
+                      <label>
+                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                        <Button variant="secondary" size="sm" asChild className="gap-2 cursor-pointer" data-testid="button-upload-image">
+                          <span><Upload className="w-4 h-4" /> Upload</span>
+                        </Button>
+                      </label>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-3 py-4 border-b">

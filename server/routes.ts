@@ -543,13 +543,13 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
     }
   });
 
-  // Update prayer content (aiSummary, recitablePrayer)
+  // Update prayer content (aiSummary, recitablePrayer, imageUrl)
   app.patch("/api/prayers/:id/content", isAuthenticated, async (req: any, res) => {
     try {
-      const { aiSummary, recitablePrayer } = req.body;
+      const { aiSummary, recitablePrayer, imageUrl } = req.body;
       const userId = req.session?.userId;
       
-      if (aiSummary === undefined && recitablePrayer === undefined) {
+      if (aiSummary === undefined && recitablePrayer === undefined && imageUrl === undefined) {
         return res.status(400).json({ error: "No content to update" });
       }
 
@@ -567,7 +567,13 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
         return res.status(403).json({ error: "Not authorized to edit this prayer" });
       }
 
-      const updated = await storage.updatePrayerContent(req.params.id, { aiSummary, recitablePrayer });
+      let updated = prayer;
+      if (aiSummary !== undefined || recitablePrayer !== undefined) {
+        updated = (await storage.updatePrayerContent(req.params.id, { aiSummary, recitablePrayer })) || prayer;
+      }
+      if (imageUrl !== undefined) {
+        updated = (await storage.updatePrayerImage(req.params.id, imageUrl)) || updated;
+      }
       res.json(updated);
     } catch (error: any) {
       console.error("Error updating prayer content:", error);

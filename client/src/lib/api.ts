@@ -150,7 +150,7 @@ export async function incrementPrayerCount(id: string): Promise<Prayer> {
   return response.json();
 }
 
-export async function updatePrayerContent(id: string, content: { aiSummary?: string; recitablePrayer?: string }): Promise<Prayer> {
+export async function updatePrayerContent(id: string, content: { aiSummary?: string; recitablePrayer?: string; imageUrl?: string }): Promise<Prayer> {
   const response = await fetch(`/api/prayers/${id}/content`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
