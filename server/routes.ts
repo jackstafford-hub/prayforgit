@@ -366,13 +366,16 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
   });
 
   // Get public prayers (only those with 5+ prayer count)
-  app.get("/api/prayers", async (_req, res) => {
+  app.get("/api/prayers", async (req, res) => {
     try {
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
       
-      const publicPrayers = await storage.getPublicPrayers();
+      const q = typeof req.query.q === 'string' && req.query.q.trim() ? req.query.q.trim() : undefined;
+      const topic = typeof req.query.topic === 'string' && req.query.topic.trim() ? req.query.topic.trim() : undefined;
+
+      const publicPrayers = await storage.getPublicPrayers({ q, topic });
       res.json(publicPrayers);
     } catch (error: any) {
       console.error("Error fetching prayers:", error);

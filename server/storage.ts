@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, users, prayers, reports, dailyPrayerCounts, prayerUpdates } from "@shared/schema";
-import { eq, desc, gte, and, sql, count as countFn } from "drizzle-orm";
+import { eq, desc, gte, and, or, ilike, sql, count as countFn } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -13,7 +13,7 @@ export interface IStorage {
   
   // Prayer methods
   getPrayers(): Promise<Prayer[]>;
-  getPublicPrayers(): Promise<Prayer[]>;
+  getPublicPrayers(options?: { q?: string; topic?: string }): Promise<Prayer[]>;
   getPrayersByAuthor(authorId: string): Promise<Prayer[]>;
   getPrayerById(id: string): Promise<Prayer | undefined>;
   createPrayer(prayer: InsertPrayer): Promise<Prayer>;
@@ -94,8 +94,25 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(prayers).orderBy(desc(prayers.count));
   }
 
-  async getPublicPrayers(): Promise<Prayer[]> {
-    return await db.select().from(prayers).where(and(gte(prayers.count, 5), eq(prayers.flaggedForReview, false))).orderBy(desc(prayers.count));
+  async getPublicPrayers(options?: { q?: string; topic?: string }): Promise<Prayer[]> {
+    const conditions = [gte(prayers.count, 5), eq(prayers.flaggedForReview, false)];
+
+    if (options?.q) {
+      const term = `%${options.q}%`;
+      conditions.push(
+        or(
+          ilike(prayers.title, term),
+          ilike(prayers.aiSummary, term),
+          ilike(prayers.author, term)
+        )!
+      );
+    }
+
+    if (options?.topic && options.topic !== "All") {
+      conditions.push(eq(prayers.topic, options.topic));
+    }
+
+    return await db.select().from(prayers).where(and(...conditions)).orderBy(desc(prayers.count));
   }
 
   async getPrayersByAuthor(authorId: string): Promise<Prayer[]> {
