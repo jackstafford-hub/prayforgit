@@ -25,7 +25,11 @@ export async function checkPrayerTone(title: string, description?: string): Prom
   }
 }
 
-export async function generatePrayerContent(title: string, description?: string) {
+export async function generatePrayerContent(
+  title: string,
+  description?: string,
+  options?: { instructions?: string; currentSummary?: string; currentPrayer?: string }
+) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000);
   
@@ -33,7 +37,13 @@ export async function generatePrayerContent(title: string, description?: string)
     const response = await fetch('/api/generate-prayer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, description }),
+      body: JSON.stringify({ 
+        title, 
+        description,
+        instructions: options?.instructions,
+        currentSummary: options?.currentSummary,
+        currentPrayer: options?.currentPrayer,
+      }),
       signal: controller.signal,
     });
 
@@ -189,7 +199,7 @@ export async function updatePrayerContent(id: string, content: { title?: string;
   return response.json();
 }
 
-export async function regeneratePrayerContent(id: string, type: 'issue' | 'prayer' | 'both'): Promise<Prayer> {
+export async function regeneratePrayerContent(id: string, type: 'issue' | 'prayer' | 'both', instructions?: string): Promise<Prayer> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 60000);
 
@@ -197,7 +207,7 @@ export async function regeneratePrayerContent(id: string, type: 'issue' | 'praye
     const response = await fetch(`/api/prayers/${id}/regenerate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type }),
+      body: JSON.stringify({ type, instructions }),
       signal: controller.signal,
     });
 

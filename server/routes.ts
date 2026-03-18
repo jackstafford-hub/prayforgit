@@ -134,7 +134,7 @@ Respond with ONLY valid JSON (no markdown):
   // Generate prayer content using OpenAI (text only - fast)
   app.post("/api/generate-prayer", async (req, res) => {
     try {
-      const { title, description } = req.body;
+      const { title, description, instructions, currentSummary, currentPrayer } = req.body;
       
       if (!title || typeof title !== 'string') {
         return res.status(400).json({ error: "Title is required" });
@@ -145,7 +145,17 @@ Respond with ONLY valid JSON (no markdown):
       }
 
       // Generate AI summary and prayer in parallel
-      const summaryPrompt = `You are writing a heartfelt prayer request story for a platform similar to Change.org but for prayers.
+      const summaryPrompt = instructions && currentSummary
+        ? `You are revising a prayer request story based on user feedback.
+
+Current version:
+${currentSummary}
+
+User's instructions for changes:
+${instructions}
+
+Please revise the story incorporating these changes while maintaining the heartfelt, first-person tone. Keep it under 125 words. Do NOT include a title or heading. Jump straight into the revised story.`
+        : `You are writing a heartfelt prayer request story for a platform similar to Change.org but for prayers.
 
 Title: ${title}
 ${description ? `Personal context: ${description}` : ''}
@@ -162,7 +172,17 @@ Write in first person. Be compassionate, authentic, and inspiring. Use a tone si
 
 WORD LIMIT: Your response must be 125 words or fewer. Be concise and impactful.`;
 
-      const prayerPrompt = `Write a beautiful, structured prayer for a community to recite together for: ${title}
+      const prayerPrompt = instructions && currentPrayer
+        ? `You are revising a community prayer based on user feedback.
+
+Current prayer:
+${currentPrayer}
+
+User's instructions for changes:
+${instructions}
+
+Please revise the prayer incorporating these changes while maintaining the sacred, structured format with four stanzas. Keep it under 100 words. Always end with "May Thy Will be Done." Start directly with "Oh Mighty God, Creator of Life,"`
+        : `Write a beautiful, structured prayer for a community to recite together for: ${title}
 ${description ? `Context: ${description}` : ''}
 
 You MUST closely follow this exact prayer template, using similar terminology and phrases:
@@ -641,7 +661,7 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
   // Regenerate AI content for a specific prayer
   app.post("/api/prayers/:id/regenerate", isAuthenticated, async (req: any, res) => {
     try {
-      const { type } = req.body;
+      const { type, instructions } = req.body;
       const userId = req.session?.userId;
       
       if (!type || !['issue', 'prayer', 'both'].includes(type)) {
@@ -669,7 +689,17 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
       const updates: { aiSummary?: string; recitablePrayer?: string } = {};
 
       if (type === 'issue' || type === 'both') {
-        const summaryPrompt = `You are writing a heartfelt prayer request story for a platform similar to Change.org but for prayers.
+        const summaryPrompt = instructions && prayer.aiSummary
+          ? `You are revising a prayer request story based on user feedback.
+
+Current version:
+${prayer.aiSummary}
+
+User's instructions for changes:
+${instructions}
+
+Please revise the story incorporating these changes while maintaining the heartfelt, first-person tone. Keep it under 125 words. Do NOT include a title or heading. Jump straight into the revised story.`
+          : `You are writing a heartfelt prayer request story for a platform similar to Change.org but for prayers.
 
 Title: ${prayer.title}
 ${prayer.description ? `Personal context: ${prayer.description}` : ''}
@@ -696,7 +726,17 @@ WORD LIMIT: Your response must be 125 words or fewer. Be concise and impactful.`
       }
 
       if (type === 'prayer' || type === 'both') {
-        const prayerPrompt = `Write a beautiful, structured prayer for a community to recite together for: ${prayer.title}
+        const prayerPrompt = instructions && prayer.recitablePrayer
+          ? `You are revising a community prayer based on user feedback.
+
+Current prayer:
+${prayer.recitablePrayer}
+
+User's instructions for changes:
+${instructions}
+
+Please revise the prayer incorporating these changes while maintaining the sacred, structured format with four stanzas. Keep it under 100 words. Always end with "May Thy Will be Done." Start directly with "Oh Mighty God, Creator of Life,"`
+          : `Write a beautiful, structured prayer for a community to recite together for: ${prayer.title}
 ${prayer.description ? `Context: ${prayer.description}` : ''}
 
 You MUST closely follow this exact prayer template, using similar terminology and phrases:

@@ -68,6 +68,8 @@ export default function PrayerDetail() {
   const [newUpdateContent, setNewUpdateContent] = useState("");
   const [isPostingUpdate, setIsPostingUpdate] = useState(false);
   const [shareCardOpen, setShareCardOpen] = useState(false);
+  const [regenerateTarget, setRegenerateTarget] = useState<'issue' | 'prayer' | null>(null);
+  const [regenerateInstructions, setRegenerateInstructions] = useState("");
   
   const { data: adminCheck } = useQuery<{ isAdmin: boolean } | null>({
     queryKey: ["/api/admin/check"],
@@ -229,31 +231,36 @@ export default function PrayerDetail() {
     }
   };
 
-  const handleRegenerateIssue = async () => {
-    if (!prayer) return;
-    setIsRegeneratingIssue(true);
-    try {
-      const updated = await regeneratePrayerContent(prayer.id, 'issue');
-      setPrayer(updated);
-      toast({ title: "Issue regenerated successfully" });
-    } catch (error) {
-      toast({ title: "Failed to regenerate", variant: "destructive" });
-    } finally {
-      setIsRegeneratingIssue(false);
-    }
+  const handleRegenerateIssue = () => {
+    setRegenerateTarget('issue');
+    setRegenerateInstructions("");
   };
 
-  const handleRegeneratePrayer = async () => {
-    if (!prayer) return;
-    setIsRegeneratingPrayer(true);
+  const handleRegeneratePrayer = () => {
+    setRegenerateTarget('prayer');
+    setRegenerateInstructions("");
+  };
+
+  const handleConfirmRegenerate = async () => {
+    if (!prayer || !regenerateTarget) return;
+
+    const isIssue = regenerateTarget === 'issue';
+    isIssue ? setIsRegeneratingIssue(true) : setIsRegeneratingPrayer(true);
+
     try {
-      const updated = await regeneratePrayerContent(prayer.id, 'prayer');
+      const updated = await regeneratePrayerContent(
+        prayer.id,
+        regenerateTarget,
+        regenerateInstructions || undefined
+      );
       setPrayer(updated);
-      toast({ title: "Prayer regenerated successfully" });
+      toast({ title: `${isIssue ? 'Issue' : 'Prayer'} regenerated successfully` });
+      setRegenerateTarget(null);
+      setRegenerateInstructions("");
     } catch (error) {
       toast({ title: "Failed to regenerate", variant: "destructive" });
     } finally {
-      setIsRegeneratingPrayer(false);
+      isIssue ? setIsRegeneratingIssue(false) : setIsRegeneratingPrayer(false);
     }
   };
 
@@ -925,6 +932,48 @@ export default function PrayerDetail() {
           onOpenChange={setShareCardOpen}
         />
       )}
+
+      <Dialog open={regenerateTarget !== null} onOpenChange={(open) => !open && setRegenerateTarget(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Regenerate {regenerateTarget === 'issue' ? 'The Issue' : 'The Prayer'}</DialogTitle>
+            <DialogDescription>
+              Tell the AI what you'd like to change, or leave blank for a completely fresh version.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="regen-instructions">What would you like to change? (Optional)</Label>
+              <Textarea
+                id="regen-instructions"
+                placeholder="e.g., Make it shorter, add more hope, focus on the family aspect..."
+                value={regenerateInstructions}
+                onChange={(e) => setRegenerateInstructions(e.target.value)}
+                className="min-h-[100px] resize-none"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setRegenerateTarget(null)}
+              disabled={isRegeneratingIssue || isRegeneratingPrayer}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmRegenerate}
+              disabled={isRegeneratingIssue || isRegeneratingPrayer}
+              className="gap-2"
+            >
+              {(isRegeneratingIssue || isRegeneratingPrayer) && <Loader2 className="w-4 h-4 animate-spin" />}
+              Regenerate
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ArrowLeft, Sparkles, Wand2, RefreshCw, Pencil, Check, X, Loader2, ImageIcon, Upload } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -108,6 +109,8 @@ export default function CreatePrayer() {
   const [originalPrayer, setOriginalPrayer] = useState("");
   const [isSuggestingTitle, setIsSuggestingTitle] = useState(false);
   const [suggestedTitle, setSuggestedTitle] = useState<string | null>(null);
+  const [regenerateTarget, setRegenerateTarget] = useState<'issue' | 'prayer' | null>(null);
+  const [regenerateInstructions, setRegenerateInstructions] = useState("");
   
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -158,27 +161,49 @@ export default function CreatePrayer() {
     }
   };
 
-  const regenerateIssue = async () => {
-    setIsRegeneratingIssue(true);
-    try {
-      const result = await generatePrayerContent(formData.title, formData.description);
-      setFormData(prev => ({ ...prev, aiSummary: result.aiSummary }));
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to regenerate the story.", variant: "destructive" });
-    } finally {
-      setIsRegeneratingIssue(false);
-    }
+  const regenerateIssue = () => {
+    setRegenerateTarget('issue');
+    setRegenerateInstructions("");
   };
 
-  const regeneratePrayer = async () => {
-    setIsRegeneratingPrayer(true);
+  const regeneratePrayer = () => {
+    setRegenerateTarget('prayer');
+    setRegenerateInstructions("");
+  };
+
+  const handleConfirmRegenerate = async () => {
+    if (!regenerateTarget) return;
+
+    const isIssue = regenerateTarget === 'issue';
+    isIssue ? setIsRegeneratingIssue(true) : setIsRegeneratingPrayer(true);
+
     try {
-      const result = await generatePrayerContent(formData.title, formData.description);
-      setFormData(prev => ({ ...prev, recitablePrayer: result.recitablePrayer }));
+      const result = await generatePrayerContent(
+        formData.title,
+        formData.description,
+        {
+          instructions: regenerateInstructions || undefined,
+          currentSummary: isIssue ? formData.aiSummary : undefined,
+          currentPrayer: !isIssue ? formData.recitablePrayer : undefined,
+        }
+      );
+      
+      if (isIssue) {
+        setFormData(prev => ({ ...prev, aiSummary: result.aiSummary }));
+      } else {
+        setFormData(prev => ({ ...prev, recitablePrayer: result.recitablePrayer }));
+      }
+      
+      setRegenerateTarget(null);
+      setRegenerateInstructions("");
     } catch (error) {
-      toast({ title: "Error", description: "Failed to regenerate the prayer.", variant: "destructive" });
+      toast({ 
+        title: "Error", 
+        description: `Failed to regenerate the ${isIssue ? 'story' : 'prayer'}.`, 
+        variant: "destructive" 
+      });
     } finally {
-      setIsRegeneratingPrayer(false);
+      isIssue ? setIsRegeneratingIssue(false) : setIsRegeneratingPrayer(false);
     }
   };
 
@@ -1193,6 +1218,48 @@ export default function CreatePrayer() {
 
         {renderStep()}
       </div>
+
+      <Dialog open={regenerateTarget !== null} onOpenChange={(open) => !open && setRegenerateTarget(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Regenerate {regenerateTarget === 'issue' ? 'The Issue' : 'The Prayer'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="instructions">What would you like to change? (Optional)</Label>
+              <Textarea
+                id="instructions"
+                placeholder="e.g., Make it shorter, add more hope, focus on the family aspect..."
+                value={regenerateInstructions}
+                onChange={(e) => setRegenerateInstructions(e.target.value)}
+                className="min-h-[100px] resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave blank to generate a completely fresh version.
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setRegenerateTarget(null)}
+              disabled={isRegeneratingIssue || isRegeneratingPrayer}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmRegenerate}
+              disabled={isRegeneratingIssue || isRegeneratingPrayer}
+              className="gap-2"
+            >
+              {(isRegeneratingIssue || isRegeneratingPrayer) && <Loader2 className="w-4 h-4 animate-spin" />}
+              Regenerate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
