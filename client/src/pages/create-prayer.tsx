@@ -52,7 +52,7 @@ const PRAYER_TEMPLATES = [
   (title: string) => `God of all comfort, we stand in agreement today for ${title.toLowerCase()}. We believe that You are able to do immeasurably more than all we ask or imagine. Pour out Your blessing and let Your will be done. We place this in Your hands. Amen.`
 ];
 
-type Step = 'title' | 'story' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details' | 'live' | 'share-inner' | 'share-public' | 'dashboard-intro';
+type Step = 'title' | 'personal-context' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details' | 'live' | 'share-inner' | 'share-public' | 'dashboard-intro';
 
 export default function CreatePrayer() {
   const [location, setLocation] = useLocation();
@@ -67,7 +67,7 @@ export default function CreatePrayer() {
   const searchParams = new URLSearchParams(window.location.search);
   const initialTitle = searchParams.get('title') || "";
 
-  const [step, setStep] = useState<Step>(initialTitle ? 'story' : 'title');
+  const [step, setStep] = useState<Step>(initialTitle ? 'personal-context' : 'title');
 
   // Get user's full name if authenticated
   const getUserFullName = () => {
@@ -114,7 +114,7 @@ export default function CreatePrayer() {
     const titleParam = params.get('title');
     if (titleParam && titleParam !== formData.title) {
        setFormData(prev => ({ ...prev, title: titleParam }));
-       if (step === 'title') setStep('story');
+       if (step === 'title') setStep('personal-context');
     }
     
     // Restore saved prayer data after login redirect
@@ -264,7 +264,7 @@ export default function CreatePrayer() {
     e.preventDefault();
     const currentTitle = formData.title.trim();
     if (currentTitle) {
-      setStep('story');
+      setStep('personal-context');
       setSuggestedTitle(null);
       setIsSuggestingTitle(true);
       const requestId = ++titleSuggestRef.current;
@@ -343,9 +343,9 @@ export default function CreatePrayer() {
     await submitPrayer();
   };
 
-  const handleLooksGood = async () => {
+  const handleLooksGood = () => {
     if (isAuthenticated) {
-      await submitPrayer();
+      setStep('details');
     } else {
       setStep('next-steps');
     }
@@ -456,13 +456,13 @@ export default function CreatePrayer() {
           </div>
         );
 
-      case 'story':
+      case 'personal-context':
         return (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="space-y-2">
-              <h1 className="font-serif text-3xl font-bold">Before you finish</h1>
+              <h1 className="font-serif text-3xl font-bold">Why is this prayer personal to you?</h1>
               <p className="text-muted-foreground text-lg leading-relaxed">
-                Sharing a little of your own story helps deepen the prayer.
+                Sharing a little of your own story helps deepen the prayer. (Optional)
               </p>
             </div>
 
@@ -509,7 +509,18 @@ export default function CreatePrayer() {
                 </p>
               </div>
             )}
-            
+
+            <div className="space-y-3">
+              <Textarea
+                id="description"
+                autoFocus
+                placeholder="Tell us more about the situation..."
+                value={formData.description}
+                onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                className="min-h-[200px] text-base p-4 resize-none bg-background"
+              />
+            </div>
+
             {toneWarning?.isNegative && (
               <div data-testid="tone-warning-dialog" className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                 <div className="space-y-2">
@@ -547,32 +558,18 @@ export default function CreatePrayer() {
             )}
 
             <form onSubmit={handleStoryContinue} className="space-y-6">
-              <div className="space-y-3">
-                <Label htmlFor="description" className="text-base font-medium">
-                  What makes this prayer personal for you? (Optional)
-                </Label>
-                <Textarea
-                  id="description"
-                  autoFocus
-                  placeholder="Tell us more about the situation..."
-                  value={formData.description}
-                  onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="min-h-[200px] text-base p-4 resize-none bg-background"
-                />
-              </div>
-
               <div className="flex gap-3">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setStep('title')}
                   className="flex-1 h-12 text-base"
                 >
                   Back
                 </Button>
-                <Button 
+                <Button
                   data-testid="button-generate-prayer"
-                  type="submit" 
+                  type="submit"
                   disabled={isCheckingTone}
                   className="flex-1 h-12 text-base font-bold bg-primary hover:bg-primary/90 gap-2"
                 >
@@ -589,8 +586,8 @@ export default function CreatePrayer() {
                   )}
                 </Button>
               </div>
-              
-              <div className="text-center pt-4">
+
+              <div className="text-center pt-2">
                 <Link href="/personal-prayer">
                   <span className="text-sm text-muted-foreground hover:text-primary underline cursor-pointer">
                     Is this a Personal Prayer?
@@ -756,7 +753,7 @@ export default function CreatePrayer() {
                <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setStep('story')}
+                  onClick={() => setStep('personal-context')}
                   className="flex-1 h-12 text-base"
                 >
                   Back
@@ -962,7 +959,7 @@ export default function CreatePrayer() {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setStep('notifications')}
+                  onClick={() => setStep(isAuthenticated ? 'review' : 'notifications')}
                   className="flex-1 h-12 text-base uppercase font-bold tracking-wide"
                 >
                   Back
