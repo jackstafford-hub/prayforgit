@@ -150,7 +150,7 @@ Respond with ONLY valid JSON (no markdown):
 Title: ${title}
 ${description ? `Personal context: ${description}` : ''}
 
-Write a compelling 3-4 paragraph story that:
+Write a compelling story that:
 1. Opens with the urgency and importance of this prayer need
 2. ${description ? 'Incorporates the personal context provided' : 'Expands on why this prayer matters'}
 3. Calls others to join in prayer
@@ -158,7 +158,9 @@ Write a compelling 3-4 paragraph story that:
 
 IMPORTANT: Do NOT include a title or heading at the start. Jump straight into the story. Do not use any markdown formatting like ** or ##.
 
-Write in first person. Be compassionate, authentic, and inspiring. Use a tone similar to Change.org petitions but focused on spiritual support.`;
+Write in first person. Be compassionate, authentic, and inspiring. Use a tone similar to Change.org petitions but focused on spiritual support.
+
+WORD LIMIT: Your response must be 125 words or fewer. Be concise and impactful.`;
 
       const prayerPrompt = `Write a beautiful, structured prayer for a community to recite together for: ${title}
 ${description ? `Context: ${description}` : ''}
@@ -225,6 +227,8 @@ CRITICAL INSTRUCTIONS - Follow these EXACTLY:
 5. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
 
 6. Always end with "May Thy Will be Done."
+
+7. WORD LIMIT: Your response must be 100 words or fewer. Keep each stanza tight and focused.
 
 Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
 
@@ -670,7 +674,7 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
 Title: ${prayer.title}
 ${prayer.description ? `Personal context: ${prayer.description}` : ''}
 
-Write a compelling 3-4 paragraph story that:
+Write a compelling story that:
 1. Opens with the urgency and importance of this prayer need
 2. ${prayer.description ? 'Incorporates the personal context provided' : 'Expands on why this prayer matters'}
 3. Calls others to join in prayer
@@ -678,7 +682,9 @@ Write a compelling 3-4 paragraph story that:
 
 IMPORTANT: Do NOT include a title or heading at the start. Jump straight into the story. Do not use any markdown formatting like ** or ##.
 
-Write in first person. Be compassionate, authentic, and inspiring. Use a tone similar to Change.org petitions but focused on spiritual support.`;
+Write in first person. Be compassionate, authentic, and inspiring. Use a tone similar to Change.org petitions but focused on spiritual support.
+
+WORD LIMIT: Your response must be 125 words or fewer. Be concise and impactful.`;
 
         const summaryResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
@@ -755,6 +761,8 @@ CRITICAL INSTRUCTIONS - Follow these EXACTLY:
 5. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
 
 6. Always end with "May Thy Will be Done."
+
+7. WORD LIMIT: Your response must be 100 words or fewer. Keep each stanza tight and focused.
 
 Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
 
