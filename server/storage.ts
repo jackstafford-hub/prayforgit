@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, users, prayers, reports, dailyPrayerCounts, prayerUpdates } from "@shared/schema";
-import { eq, desc, gte, and, or, ilike, sql, count as countFn } from "drizzle-orm";
+import { eq, desc, gte, and, sql, count as countFn } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -98,13 +98,12 @@ export class DatabaseStorage implements IStorage {
     const conditions = [gte(prayers.count, 5), eq(prayers.flaggedForReview, false)];
 
     if (options?.q) {
-      const term = `%${options.q}%`;
       conditions.push(
-        or(
-          ilike(prayers.title, term),
-          ilike(prayers.aiSummary, term),
-          ilike(prayers.author, term)
-        )!
+        sql`to_tsvector('english',
+          COALESCE(${prayers.title}, '') || ' ' ||
+          COALESCE(${prayers.aiSummary}, '') || ' ' ||
+          COALESCE(${prayers.author}, '')
+        ) @@ plainto_tsquery('english', ${options.q})`
       );
     }
 
