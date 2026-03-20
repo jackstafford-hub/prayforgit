@@ -427,6 +427,7 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
       const userId = req.session?.userId;
       const prayerData = {
         ...validatedData,
+        goal: 100,
         authorId: userId || null,
       };
       
@@ -667,7 +668,7 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
       const { goal } = req.body;
       const userId = req.session?.userId;
 
-      const newGoal = parseInt(goal);
+      const newGoal = Number(goal);
       if (!Number.isInteger(newGoal) || newGoal < 1) {
         return res.status(400).json({ error: "Goal must be a positive integer" });
       }

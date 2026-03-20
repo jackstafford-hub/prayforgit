@@ -164,7 +164,6 @@ export default function Dashboard() {
             {prayers.map((prayer) => {
               const progressPercent = Math.min((prayer.count / prayer.goal) * 100, 100);
               const isPublic = prayer.count >= 5;
-              const nearGoal = prayer.count >= prayer.goal * 0.8;
               
               return (
                 <div 
@@ -207,16 +206,14 @@ export default function Dashboard() {
                             <span className="font-medium">{prayer.count.toLocaleString()} prayers</span>
                             <div className="flex items-center gap-2">
                               <span className="text-muted-foreground">{prayer.goal.toLocaleString()} goal</span>
-                              {nearGoal && (
-                                <button
-                                  onClick={(e) => openGoalDialog(prayer, e)}
-                                  className="flex items-center gap-1 text-xs text-primary hover:underline font-medium"
-                                  data-testid={`button-increase-goal-${prayer.id}`}
-                                >
-                                  <Target className="w-3 h-3" />
-                                  Increase
-                                </button>
-                              )}
+                              <button
+                                onClick={(e) => openGoalDialog(prayer, e)}
+                                className="flex items-center gap-1 text-xs text-primary hover:underline font-medium"
+                                data-testid={`button-increase-goal-${prayer.id}`}
+                              >
+                                <Target className="w-3 h-3" />
+                                Increase
+                              </button>
                             </div>
                           </div>
                           <Progress value={progressPercent} className="h-2" />
