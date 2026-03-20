@@ -538,34 +538,36 @@ export default function CreatePrayer() {
             )}
 
             <form onSubmit={handleStoryContinue} className="space-y-6">
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setStep('title')}
-                  className="flex-1 h-12 text-base"
-                >
-                  Back
-                </Button>
-                <Button
-                  data-testid="button-generate-prayer"
-                  type="submit"
-                  disabled={isCheckingTone}
-                  className="flex-1 h-12 text-base font-bold bg-primary hover:bg-primary/90 gap-2"
-                >
-                  {isCheckingTone ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Checking...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4" />
-                      Generate Prayer
-                    </>
-                  )}
-                </Button>
-              </div>
+              {!toneWarning?.isNegative && (
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setStep('title')}
+                    className="flex-1 h-12 text-base"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    data-testid="button-generate-prayer"
+                    type="submit"
+                    disabled={isCheckingTone}
+                    className="flex-1 h-12 text-base font-bold bg-primary hover:bg-primary/90 gap-2"
+                  >
+                    {isCheckingTone ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Checking...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        Generate Prayer
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
 
               <div className="text-center pt-2">
                 <Link href="/personal-prayer">
