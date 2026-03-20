@@ -62,7 +62,6 @@ export default function CreatePrayer() {
   const user = authUser as User | null;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [customGoal, setCustomGoal] = useState(false);
   const [createdPrayerId, setCreatedPrayerId] = useState<string | null>(null);
   
   const searchParams = new URLSearchParams(window.location.search);
@@ -429,50 +428,6 @@ export default function CreatePrayer() {
                   onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   className="h-14 text-lg px-4"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">Prayer goal</Label>
-                <p className="text-xs text-muted-foreground">How many people do you want praying for this?</p>
-                <div className="flex flex-wrap gap-2">
-                  {[50, 100, 500, 1000].map(g => (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() => { setFormData(prev => ({ ...prev, goal: g })); setCustomGoal(false); }}
-                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border cursor-pointer ${
-                        !customGoal && formData.goal === g
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
-                      }`}
-                      data-testid={`button-goal-${g}`}
-                    >
-                      {g.toLocaleString()}
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => setCustomGoal(true)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border cursor-pointer ${
-                      customGoal
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
-                    }`}
-                    data-testid="button-goal-custom"
-                  >
-                    Custom
-                  </button>
-                </div>
-                {customGoal && (
-                  <Input
-                    type="number"
-                    min={10}
-                    max={1000000}
-                    value={formData.goal}
-                    onChange={e => setFormData(prev => ({ ...prev, goal: Math.max(10, parseInt(e.target.value) || 10) }))}
-                    className="w-32 mt-2"
-                    data-testid="input-goal-custom"
-                  />
-                )}
               </div>
               <Button type="submit" className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90">
                 Continue

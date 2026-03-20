@@ -1,20 +1,72 @@
 import { Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Loader2, TrendingUp, Users, Eye, Share2, ChevronRight } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Plus, Loader2, TrendingUp, Users, Eye, Share2, ChevronRight, Target } from "lucide-react";
 import type { Prayer } from "@shared/schema";
+import { useState } from "react";
+import { apiRequest } from "@/lib/queryClient";
+
+const GOAL_PRESETS = [500, 1000, 5000, 10000];
 
 export default function Dashboard() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const [goalDialogPrayer, setGoalDialogPrayer] = useState<Prayer | null>(null);
+  const [customGoalInput, setCustomGoalInput] = useState("");
+  const [selectedGoal, setSelectedGoal] = useState<number | null>(null);
+  const [useCustom, setUseCustom] = useState(false);
 
   const { data: prayers, isLoading } = useQuery<Prayer[]>({
     queryKey: ["/api/my-prayers"],
     enabled: isAuthenticated,
   });
+
+  const updateGoalMutation = useMutation({
+    mutationFn: ({ id, goal }: { id: string; goal: number }) =>
+      apiRequest("PATCH", `/api/prayers/${id}/goal`, { goal }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/my-prayers"] });
+      toast({ title: "Goal updated successfully" });
+      closeGoalDialog();
+    },
+    onError: (err: any) => {
+      toast({ title: err?.message || "Failed to update goal", variant: "destructive" });
+    },
+  });
+
+  const openGoalDialog = (prayer: Prayer, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setGoalDialogPrayer(prayer);
+    setSelectedGoal(null);
+    setCustomGoalInput("");
+    setUseCustom(false);
+  };
+
+  const closeGoalDialog = () => {
+    setGoalDialogPrayer(null);
+    setSelectedGoal(null);
+    setCustomGoalInput("");
+    setUseCustom(false);
+  };
+
+  const handleConfirmGoal = () => {
+    if (!goalDialogPrayer) return;
+    const newGoal = useCustom ? parseInt(customGoalInput) : selectedGoal;
+    if (!newGoal || isNaN(newGoal) || newGoal <= goalDialogPrayer.goal) {
+      toast({ title: `Goal must be greater than ${goalDialogPrayer.goal.toLocaleString()}`, variant: "destructive" });
+      return;
+    }
+    updateGoalMutation.mutate({ id: goalDialogPrayer.id, goal: newGoal });
+  };
 
   const totalPrayers = prayers?.reduce((sum, p) => sum + p.count, 0) || 0;
   const totalGoal = prayers?.reduce((sum, p) => sum + p.goal, 0) || 0;
@@ -112,6 +164,7 @@ export default function Dashboard() {
             {prayers.map((prayer) => {
               const progressPercent = Math.min((prayer.count / prayer.goal) * 100, 100);
               const isPublic = prayer.count >= 5;
+              const nearGoal = prayer.count >= prayer.goal * 0.8;
               
               return (
                 <div 
@@ -152,7 +205,19 @@ export default function Dashboard() {
                         <div className="flex-1">
                           <div className="flex items-center justify-between text-sm mb-1">
                             <span className="font-medium">{prayer.count.toLocaleString()} prayers</span>
-                            <span className="text-muted-foreground">{prayer.goal.toLocaleString()} goal</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground">{prayer.goal.toLocaleString()} goal</span>
+                              {nearGoal && (
+                                <button
+                                  onClick={(e) => openGoalDialog(prayer, e)}
+                                  className="flex items-center gap-1 text-xs text-primary hover:underline font-medium"
+                                  data-testid={`button-increase-goal-${prayer.id}`}
+                                >
+                                  <Target className="w-3 h-3" />
+                                  Increase
+                                </button>
+                              )}
+                            </div>
                           </div>
                           <Progress value={progressPercent} className="h-2" />
                         </div>
@@ -191,6 +256,74 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      <Dialog open={!!goalDialogPrayer} onOpenChange={(open) => !open && closeGoalDialog()}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Increase Prayer Goal</DialogTitle>
+            <DialogDescription>
+              Current goal: <strong>{goalDialogPrayer?.goal.toLocaleString()}</strong>. Choose a new, higher goal.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex flex-wrap gap-2">
+              {GOAL_PRESETS.filter(g => g > (goalDialogPrayer?.goal ?? 0)).map(g => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => { setSelectedGoal(g); setUseCustom(false); }}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border cursor-pointer ${
+                    !useCustom && selectedGoal === g
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
+                  }`}
+                  data-testid={`button-goal-preset-${g}`}
+                >
+                  {g.toLocaleString()}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => { setUseCustom(true); setSelectedGoal(null); }}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border cursor-pointer ${
+                  useCustom
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
+                }`}
+                data-testid="button-goal-custom"
+              >
+                Custom
+              </button>
+            </div>
+            {useCustom && (
+              <Input
+                type="number"
+                min={(goalDialogPrayer?.goal ?? 0) + 1}
+                placeholder={`More than ${goalDialogPrayer?.goal.toLocaleString()}`}
+                value={customGoalInput}
+                onChange={e => setCustomGoalInput(e.target.value)}
+                className="w-40"
+                autoFocus
+                data-testid="input-goal-custom"
+              />
+            )}
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={closeGoalDialog} disabled={updateGoalMutation.isPending}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmGoal}
+              disabled={updateGoalMutation.isPending || (!selectedGoal && !customGoalInput)}
+              className="gap-2"
+              data-testid="button-confirm-goal"
+            >
+              {updateGoalMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              Set Goal
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

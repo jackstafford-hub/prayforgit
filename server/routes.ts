@@ -661,6 +661,43 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
     }
   });
 
+  // Update prayer goal (author or admin only, must be higher than current)
+  app.patch("/api/prayers/:id/goal", isAuthenticated, async (req: any, res) => {
+    try {
+      const { goal } = req.body;
+      const userId = req.session?.userId;
+
+      const newGoal = parseInt(goal);
+      if (!Number.isInteger(newGoal) || newGoal < 1) {
+        return res.status(400).json({ error: "Goal must be a positive integer" });
+      }
+
+      const prayer = await storage.getPrayerById(req.params.id);
+      if (!prayer) {
+        return res.status(404).json({ error: "Prayer not found" });
+      }
+
+      if (newGoal <= prayer.goal) {
+        return res.status(400).json({ error: "New goal must be greater than the current goal" });
+      }
+
+      const isAuthor = prayer.authorId && prayer.authorId === userId;
+      const userRecord = userId ? await storage.getUser(userId) : null;
+      const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+      const isAdmin = userRecord?.email ? adminEmails.includes(userRecord.email.toLowerCase()) : false;
+
+      if (!isAuthor && !isAdmin) {
+        return res.status(403).json({ error: "Not authorized to update this prayer's goal" });
+      }
+
+      const updated = await storage.updatePrayerGoal(req.params.id, newGoal);
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error updating prayer goal:", error);
+      res.status(500).json({ error: "Failed to update prayer goal" });
+    }
+  });
+
   // Regenerate AI content for a specific prayer
   app.post("/api/prayers/:id/regenerate", isAuthenticated, async (req: any, res) => {
     try {
