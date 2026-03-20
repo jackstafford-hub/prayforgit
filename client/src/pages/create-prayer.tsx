@@ -53,7 +53,7 @@ const PRAYER_TEMPLATES = [
   (title: string) => `God of all comfort, we stand in agreement today for ${title.toLowerCase()}. We believe that You are able to do immeasurably more than all we ask or imagine. Pour out Your blessing and let Your will be done. We place this in Your hands. Amen.`
 ];
 
-type Step = 'title' | 'personal-context' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details' | 'live' | 'share-inner' | 'share-public' | 'dashboard-intro';
+type Step = 'title' | 'tone-warning' | 'personal-context' | 'review' | 'next-steps' | 'auth' | 'notifications' | 'details' | 'live' | 'share-inner' | 'share-public' | 'dashboard-intro';
 
 export default function CreatePrayer() {
   const [location, setLocation] = useLocation();
@@ -137,7 +137,8 @@ export default function CreatePrayer() {
     setIsGenerating(true);
     
     try {
-      const result = await generatePrayerContent(formData.title, formData.description);
+      const generationTitle = (isFlaggedForReview && toneSuggestion) ? toneSuggestion : formData.title;
+      const result = await generatePrayerContent(generationTitle, formData.description);
       
       setFormData(prev => ({
         ...prev,
@@ -267,19 +268,8 @@ export default function CreatePrayer() {
     e.target.value = "";
   };
 
-  const handleStoryContinue = async (e: React.FormEvent) => {
+  const handleStoryContinue = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsCheckingTone(true);
-    try {
-      const toneResult = await checkPrayerTone(formData.title, formData.description);
-      if (toneResult.isNegative) {
-        setToneWarning(toneResult);
-        setIsCheckingTone(false);
-        return;
-      }
-    } catch {
-    }
-    setIsCheckingTone(false);
     generateAIContent();
   };
 
@@ -287,22 +277,35 @@ export default function CreatePrayer() {
   const handleTitleContinue = async (e: React.FormEvent) => {
     e.preventDefault();
     const currentTitle = formData.title.trim();
-    if (currentTitle) {
-      setStep('personal-context');
-      setSuggestedTitle(null);
-      setIsSuggestingTitle(true);
-      const requestId = ++titleSuggestRef.current;
-      try {
-        const result = await suggestTitle(currentTitle);
-        if (requestId !== titleSuggestRef.current) return;
-        if (result.suggestedTitle && result.suggestedTitle.toLowerCase() !== currentTitle.toLowerCase()) {
-          setSuggestedTitle(result.suggestedTitle);
-        }
-      } catch {
-      } finally {
-        if (requestId === titleSuggestRef.current) {
-          setIsSuggestingTitle(false);
-        }
+    if (!currentTitle) return;
+
+    setIsCheckingTone(true);
+    try {
+      const toneResult = await checkPrayerTone(currentTitle, "");
+      if (toneResult.isNegative) {
+        setToneWarning(toneResult);
+        setStep('tone-warning');
+        setIsCheckingTone(false);
+        return;
+      }
+    } catch {
+    }
+    setIsCheckingTone(false);
+
+    setStep('personal-context');
+    setSuggestedTitle(null);
+    setIsSuggestingTitle(true);
+    const requestId = ++titleSuggestRef.current;
+    try {
+      const result = await suggestTitle(currentTitle);
+      if (requestId !== titleSuggestRef.current) return;
+      if (result.suggestedTitle && result.suggestedTitle.toLowerCase() !== currentTitle.toLowerCase()) {
+        setSuggestedTitle(result.suggestedTitle);
+      }
+    } catch {
+    } finally {
+      if (requestId === titleSuggestRef.current) {
+        setIsSuggestingTitle(false);
       }
     }
   };
@@ -429,10 +432,93 @@ export default function CreatePrayer() {
                   className="h-14 text-lg px-4"
                 />
               </div>
-              <Button type="submit" className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90">
-                Continue
+              <Button type="submit" disabled={isCheckingTone} className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 gap-2">
+                {isCheckingTone ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Checking...
+                  </>
+                ) : (
+                  'Continue'
+                )}
               </Button>
             </form>
+          </div>
+        );
+
+      case 'tone-warning':
+        return (
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="space-y-2">
+              <h1 className="font-serif text-3xl font-bold">A gentle suggestion</h1>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                It looks like your title might be framed in a negative way. Prayers tend to be more powerful when they focus on what we hope <em>for</em> rather than what we're against.
+              </p>
+            </div>
+
+            {toneWarning?.suggestion && (
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-2 animate-in fade-in duration-300">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Suggested reframing</p>
+                <p data-testid="text-tone-suggestion" className="text-base font-semibold text-foreground">{toneWarning.suggestion}</p>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3">
+              <Button
+                data-testid="button-use-suggestion"
+                type="button"
+                className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90"
+                onClick={() => {
+                  if (toneWarning?.suggestion) {
+                    setFormData(prev => ({ ...prev, title: toneWarning.suggestion! }));
+                  }
+                  setToneWarning(null);
+                  setIsFlaggedForReview(false);
+                  setToneSuggestion(undefined);
+                  setStep('personal-context');
+                  setSuggestedTitle(null);
+                  setIsSuggestingTitle(true);
+                  const currentTitle = toneWarning?.suggestion || formData.title;
+                  const requestId = ++titleSuggestRef.current;
+                  suggestTitle(currentTitle).then(result => {
+                    if (requestId !== titleSuggestRef.current) return;
+                    if (result.suggestedTitle && result.suggestedTitle.toLowerCase() !== currentTitle.toLowerCase()) {
+                      setSuggestedTitle(result.suggestedTitle);
+                    }
+                  }).catch(() => {}).finally(() => {
+                    if (requestId === titleSuggestRef.current) setIsSuggestingTitle(false);
+                  });
+                }}
+              >
+                Use this title instead
+              </Button>
+              <Button
+                data-testid="button-continue-anyway"
+                type="button"
+                variant="outline"
+                className="w-full h-12 text-base"
+                onClick={() => {
+                  setIsFlaggedForReview(true);
+                  setToneSuggestion(toneWarning?.suggestion);
+                  setToneWarning(null);
+                  setStep('personal-context');
+                  setSuggestedTitle(null);
+                  setIsSuggestingTitle(true);
+                  const currentTitle = formData.title;
+                  const requestId = ++titleSuggestRef.current;
+                  suggestTitle(currentTitle).then(result => {
+                    if (requestId !== titleSuggestRef.current) return;
+                    if (result.suggestedTitle && result.suggestedTitle.toLowerCase() !== currentTitle.toLowerCase()) {
+                      setSuggestedTitle(result.suggestedTitle);
+                    }
+                  }).catch(() => {}).finally(() => {
+                    if (requestId === titleSuggestRef.current) setIsSuggestingTitle(false);
+                  });
+                }}
+              >
+                Continue Anyway
+              </Button>
+            </div>
           </div>
         );
 
@@ -501,73 +587,25 @@ export default function CreatePrayer() {
               />
             </div>
 
-            {toneWarning?.isNegative && (
-              <div data-testid="tone-warning-dialog" className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="space-y-2">
-                  <h3 className="font-serif text-lg font-semibold text-amber-900 dark:text-amber-200">A gentle suggestion</h3>
-                  <p className="text-amber-800 dark:text-amber-300 text-sm leading-relaxed">
-                    It looks like your prayer might be framed in a negative way. Prayers tend to be more powerful when they focus on what we hope <em>for</em> rather than what we're against. If you continue without changes, your prayer will be sent to our team for review before being shared publicly.
-                  </p>
-                </div>
-                {toneWarning.suggestion && (
-                  <div className="bg-white dark:bg-background rounded-lg p-4 border border-amber-200 dark:border-amber-700">
-                    <p className="text-sm text-muted-foreground mb-1">Instead, you could try:</p>
-                    <p data-testid="text-tone-suggestion" className="text-base font-medium text-foreground">{toneWarning.suggestion}</p>
-                  </div>
-                )}
-                <div className="flex gap-3">
-                  <Button
-                    data-testid="button-revise-prayer"
-                    type="button"
-                    variant="outline"
-                    onClick={() => { setToneWarning(null); }}
-                    className="flex-1 h-10 text-sm border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
-                  >
-                    Revise My Prayer
-                  </Button>
-                  <Button
-                    data-testid="button-continue-anyway"
-                    type="button"
-                    onClick={() => { setIsFlaggedForReview(true); setToneSuggestion(toneWarning?.suggestion); setToneWarning(null); generateAIContent(); }}
-                    className="flex-1 h-10 text-sm"
-                  >
-                    Continue Anyway
-                  </Button>
-                </div>
-              </div>
-            )}
-
             <form onSubmit={handleStoryContinue} className="space-y-6">
-              {!toneWarning?.isNegative && (
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setStep('title')}
-                    className="flex-1 h-12 text-base"
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    data-testid="button-generate-prayer"
-                    type="submit"
-                    disabled={isCheckingTone}
-                    className="flex-1 h-12 text-base font-bold bg-primary hover:bg-primary/90 gap-2"
-                  >
-                    {isCheckingTone ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Checking...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        Generate Prayer
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )}
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep('title')}
+                  className="flex-1 h-12 text-base"
+                >
+                  Back
+                </Button>
+                <Button
+                  data-testid="button-generate-prayer"
+                  type="submit"
+                  className="flex-1 h-12 text-base font-bold bg-primary hover:bg-primary/90 gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Generate Prayer
+                </Button>
+              </div>
 
               <div className="text-center pt-2">
                 <Link href="/personal-prayer">

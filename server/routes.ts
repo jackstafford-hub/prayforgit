@@ -50,8 +50,9 @@ export async function registerRoutes(
 
 A prayer is NEGATIVE if it:
 - Is directed AGAINST a group, religion, ethnicity, nationality, or people
-- Contains hateful, vengeful, or violent language
-- Wishes harm or misfortune on others
+- Contains hateful, vengeful, violent, or threatening language (e.g., "kill", "destroy", "hurt", "punish", "attack")
+- Wishes harm, death, or misfortune on others
+- Contains threats against specific individuals or groups
 - Is primarily about stopping, defeating, or destroying something rather than building something positive
 
 A prayer is POSITIVE if it:
@@ -64,6 +65,9 @@ If the prayer is negative, reframe it into a positive alternative. Turn "against
 - "Defeat my enemies" → "Pray for peace and reconciliation in my relationships"
 - "Punish those who wronged me" → "Pray for justice and healing from this pain"
 - "Destroy the corruption" → "Pray for integrity and honest leadership"
+- "I want to kill all world leaders" → "Pray for wisdom and compassion for world leaders"
+
+IMPORTANT: Any input containing threats, violence, or wishes of death MUST be classified as NEGATIVE. Always respond with valid JSON even for extreme content.
 
 Respond with ONLY valid JSON (no markdown):
 {"isNegative": true/false, "suggestion": "Your positive reframing here or null if positive"}`
@@ -76,9 +80,20 @@ Respond with ONLY valid JSON (no markdown):
       });
 
       let content = response.choices[0]?.message?.content?.trim() || '{"isNegative": false}';
+      const refusal = response.choices[0]?.message?.refusal;
+      if (refusal) {
+        return res.json({ isNegative: true, suggestion: "Pray for peace and compassion in our world" });
+      }
       content = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
-      const result = JSON.parse(content);
-      res.json({ isNegative: !!result.isNegative, suggestion: result.suggestion || undefined });
+      try {
+        const result = JSON.parse(content);
+        res.json({ isNegative: !!result.isNegative, suggestion: result.suggestion || undefined });
+      } catch {
+        if (/sorry|can't assist|cannot assist|unable to|not able to/i.test(content)) {
+          return res.json({ isNegative: true, suggestion: "Pray for peace and compassion in our world" });
+        }
+        res.json({ isNegative: true, suggestion: "Pray for peace and compassion in our world" });
+      }
     } catch (error) {
       console.error("Error checking prayer tone:", error);
       res.json({ isNegative: false });
@@ -280,15 +295,22 @@ Respond with ONLY the category name, nothing else.`;
 
       const aiSummary = summaryResponse.choices[0].message.content || "";
       const recitablePrayer = prayerResponse.choices[0].message.content || "";
+
+      const refusalPattern = /^I'?m sorry|^I can'?t assist|^I cannot assist|^I'?m unable to|^I'?m not able to|^Sorry,? but/i;
+      if (refusalPattern.test(aiSummary.trim()) || refusalPattern.test(recitablePrayer.trim())) {
+        return res.status(422).json({
+          error: "We couldn't generate a prayer for this request. Please try rephrasing your title to focus on something positive and hopeful.",
+        });
+      }
+
       const rawCategory = (categoryResponse.choices[0].message.content || "").trim();
       const validCategories = ["Health", "Family", "Employment", "World Peace", "Community", "Faith", "Education", "Gratitude", "General"];
       const topic = validCategories.includes(rawCategory) ? rawCategory : "General";
 
-      // Return text immediately without waiting for image
       res.json({
         aiSummary,
         recitablePrayer,
-        imageUrl: "", // Image will be generated separately
+        imageUrl: "",
         topic,
       });
     } catch (error: any) {
