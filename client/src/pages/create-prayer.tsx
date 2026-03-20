@@ -848,7 +848,7 @@ export default function CreatePrayer() {
                <p className="text-center text-muted-foreground">You need an account to share your prayer with the community.</p>
                
                <Link 
-                  href="/auth"
+                  href="/auth?redirect=/create"
                   onClick={() => {
                     const { imageUrl: _img, ...safeFormData } = formData;
                     localStorage.setItem('pendingPrayer', JSON.stringify({ formData: safeFormData, step: 'details' }));
