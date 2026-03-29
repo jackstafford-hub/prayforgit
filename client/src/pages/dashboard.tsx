@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Loader2, TrendingUp, Users, Eye, Share2, ChevronRight, Target } from "lucide-react";
+import { Plus, Loader2, TrendingUp, Users, Eye, Share2, ChevronRight, Target, Pencil } from "lucide-react";
 import type { Prayer } from "@shared/schema";
 import { useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
@@ -24,6 +24,9 @@ export default function Dashboard() {
   const [customGoalInput, setCustomGoalInput] = useState("");
   const [selectedGoal, setSelectedGoal] = useState<number | null>(null);
   const [useCustom, setUseCustom] = useState(false);
+
+  const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
+  const [editingTitleValue, setEditingTitleValue] = useState("");
 
   const { data: prayers, isLoading } = useQuery<Prayer[]>({
     queryKey: ["/api/my-prayers"],
@@ -42,6 +45,25 @@ export default function Dashboard() {
       toast({ title: err?.message || "Failed to update goal", variant: "destructive" });
     },
   });
+
+  const updateTitleMutation = useMutation({
+    mutationFn: ({ id, title }: { id: string; title: string }) =>
+      apiRequest("PATCH", `/api/prayers/${id}/content`, { title }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/my-prayers"] });
+    },
+    onError: () => {
+      toast({ title: "Failed to update title", variant: "destructive" });
+    },
+  });
+
+  const saveTitle = (id: string) => {
+    const trimmed = editingTitleValue.trim();
+    if (trimmed && trimmed.length <= 200) {
+      updateTitleMutation.mutate({ id, title: trimmed });
+    }
+    setEditingTitleId(null);
+  };
 
   const openGoalDialog = (prayer: Prayer, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -184,7 +206,37 @@ export default function Dashboard() {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-4 mb-2">
-                        <h3 className="font-serif font-bold text-lg line-clamp-1">{prayer.title}</h3>
+                        {editingTitleId === prayer.id ? (
+                          <Input
+                            autoFocus
+                            value={editingTitleValue}
+                            onChange={e => setEditingTitleValue(e.target.value)}
+                            onBlur={() => saveTitle(prayer.id)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') { e.preventDefault(); saveTitle(prayer.id); }
+                              if (e.key === 'Escape') setEditingTitleId(null);
+                            }}
+                            onClick={e => e.stopPropagation()}
+                            className="font-serif font-bold text-lg h-8 py-0 flex-1"
+                            maxLength={200}
+                            data-testid={`input-title-${prayer.id}`}
+                          />
+                        ) : (
+                          <div className="flex items-center gap-1 min-w-0 flex-1 group/title">
+                            <h3 className="font-serif font-bold text-lg line-clamp-1">{prayer.title}</h3>
+                            <button
+                              onClick={e => {
+                                e.stopPropagation();
+                                setEditingTitleId(prayer.id);
+                                setEditingTitleValue(prayer.title);
+                              }}
+                              className="opacity-0 group-hover/title:opacity-100 transition-opacity shrink-0 p-0.5 rounded hover:bg-muted"
+                              data-testid={`button-edit-title-${prayer.id}`}
+                            >
+                              <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                            </button>
+                          </div>
+                        )}
                         <div className="flex items-center gap-2 shrink-0">
                           {isPublic ? (
                             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Public</span>

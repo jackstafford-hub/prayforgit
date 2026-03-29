@@ -138,10 +138,14 @@ export default function CreatePrayer() {
     
     try {
       const generationTitle = (isFlaggedForReview && toneSuggestion) ? toneSuggestion : formData.title;
-      const result = await generatePrayerContent(generationTitle, formData.description);
+      const [result, titleResult] = await Promise.all([
+        generatePrayerContent(generationTitle, formData.description),
+        suggestTitle(generationTitle, formData.description),
+      ]);
       
       setFormData(prev => ({
         ...prev,
+        title: titleResult.suggestedTitle || generationTitle,
         imageUrl: result.imageUrl,
         aiSummary: result.aiSummary,
         recitablePrayer: result.recitablePrayer,
@@ -627,7 +631,20 @@ export default function CreatePrayer() {
             </div>
 
             <div className="space-y-6">
-              {/* A) Header Image */}
+              {/* A) Title */}
+              <div className="space-y-2">
+                <Label htmlFor="review-title" className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Title</Label>
+                <Input
+                  id="review-title"
+                  value={formData.title}
+                  onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  className="text-base font-medium"
+                  data-testid="input-review-title"
+                  maxLength={200}
+                />
+              </div>
+
+              {/* B) Header Image */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Header Image</Label>
                 <div className="aspect-video w-full rounded-xl overflow-hidden relative shadow-md group border bg-muted">
