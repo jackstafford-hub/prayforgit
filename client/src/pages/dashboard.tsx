@@ -61,6 +61,7 @@ export default function Dashboard() {
     const trimmed = editingTitleValue.trim();
     if (trimmed && trimmed.length <= 200) {
       updateTitleMutation.mutate({ id, title: trimmed });
+      toast({ title: "Title updated" });
     }
     setEditingTitleId(null);
   };
@@ -222,7 +223,7 @@ export default function Dashboard() {
                             data-testid={`input-title-${prayer.id}`}
                           />
                         ) : (
-                          <div className="flex items-center gap-1 min-w-0 flex-1 group/title">
+                          <div className="flex items-center gap-1 min-w-0 flex-1">
                             <h3 className="font-serif font-bold text-lg line-clamp-1">{prayer.title}</h3>
                             <button
                               onClick={e => {
@@ -230,10 +231,10 @@ export default function Dashboard() {
                                 setEditingTitleId(prayer.id);
                                 setEditingTitleValue(prayer.title);
                               }}
-                              className="opacity-0 group-hover/title:opacity-100 transition-opacity shrink-0 p-0.5 rounded hover:bg-muted"
+                              className="shrink-0 p-0.5 rounded hover:bg-muted text-muted-foreground/50 hover:text-muted-foreground transition-colors"
                               data-testid={`button-edit-title-${prayer.id}`}
                             >
-                              <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                              <Pencil className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         )}
