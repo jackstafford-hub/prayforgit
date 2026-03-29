@@ -496,7 +496,7 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
   // Update user profile
   app.patch("/api/user/profile", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.session?.userId;
       const { firstName, lastName, email, emailOptIn } = req.body;
 
       if (email && typeof email === 'string') {
