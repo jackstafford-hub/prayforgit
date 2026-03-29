@@ -517,6 +517,13 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
         return res.status(404).json({ error: "User not found" });
       }
 
+      if ((firstName !== undefined || lastName !== undefined) && userId) {
+        const newFirst = updated.firstName || '';
+        const newLast = updated.lastName || '';
+        const fullName = [newFirst, newLast].filter(Boolean).join(' ') || 'Anonymous';
+        await storage.updatePrayerAuthorByUser(userId, fullName);
+      }
+
       const { password, resetToken, resetTokenExpiry, ...safeUser } = updated;
       res.json(safeUser);
     } catch (error: any) {

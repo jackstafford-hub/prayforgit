@@ -22,6 +22,7 @@ export interface IStorage {
   updatePrayerContent(id: string, content: { aiSummary?: string; recitablePrayer?: string }): Promise<Prayer | undefined>;
   updatePrayerTitle(id: string, title: string): Promise<Prayer | undefined>;
   updatePrayerGoal(id: string, goal: number): Promise<Prayer | undefined>;
+  updatePrayerAuthorByUser(authorId: string, authorName: string): Promise<void>;
   
   // Report methods
   createReport(report: InsertReport): Promise<Report>;
@@ -191,6 +192,13 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updated;
+  }
+
+  async updatePrayerAuthorByUser(authorId: string, authorName: string): Promise<void> {
+    await db
+      .update(prayers)
+      .set({ author: authorName })
+      .where(eq(prayers.authorId, authorId));
   }
 
   // Report methods
