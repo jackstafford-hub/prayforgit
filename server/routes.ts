@@ -506,6 +506,9 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
         }
       }
 
+      const currentUser = userId ? await storage.getUser(userId) : undefined;
+      const oldFullName = [currentUser?.firstName || '', currentUser?.lastName || ''].filter(Boolean).join(' ') || 'Anonymous';
+
       const updated = await storage.updateUser(userId, {
         ...(firstName !== undefined && { firstName }),
         ...(lastName !== undefined && { lastName }),
@@ -517,11 +520,9 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
         return res.status(404).json({ error: "User not found" });
       }
 
-      if ((firstName !== undefined || lastName !== undefined) && userId) {
-        const newFirst = updated.firstName || '';
-        const newLast = updated.lastName || '';
-        const fullName = [newFirst, newLast].filter(Boolean).join(' ') || 'Anonymous';
-        await storage.updatePrayerAuthorByUser(userId, fullName);
+      const newFullName = [updated.firstName || '', updated.lastName || ''].filter(Boolean).join(' ') || 'Anonymous';
+      if (userId && newFullName !== oldFullName) {
+        await storage.updatePrayerAuthorByUser(userId, newFullName);
       }
 
       const { password, resetToken, resetTokenExpiry, ...safeUser } = updated;
