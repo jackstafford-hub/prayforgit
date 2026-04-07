@@ -411,7 +411,7 @@ export default function CreatePrayer() {
           </div>
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-serif font-medium">Crafting your prayer...</h2>
-            <p className="text-muted-foreground">Summarizing your story and finding a beautiful image.</p>
+            <p className="text-muted-foreground">Summarizing your story and crafting your prayer.</p>
           </div>
         </div>
       );
