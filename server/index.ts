@@ -122,6 +122,10 @@ let appReady = false;
 
   app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
+  app.get("/start", (_req, res) => {
+    res.redirect(301, "/create");
+  });
+
   app.use((req, res, next) => {
     const start = Date.now();
     const path = req.path;
