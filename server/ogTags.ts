@@ -53,7 +53,7 @@ const HOW_TO_PRAY_DESCRIPTION =
   "Learn how prayer works as a practical force for change. PrayForChange guides you through a simple, interfaith approach to directing spiritual energy toward the people and causes that need it most.";
 
 const PRAYER_FALLBACK_DESCRIPTION =
-  "Join thousands of people praying for this cause on PrayForChange.org \u2014 the world\u2019s platform for collective spiritual support.";
+  "Join thousands of people praying for this cause on PrayForChange.org \u2014 the world's platform for collective spiritual support.";
 
 export async function injectPrayerOgTags(
   html: string,
