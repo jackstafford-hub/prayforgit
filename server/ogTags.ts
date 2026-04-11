@@ -12,6 +12,10 @@ function getBaseUrl(): string {
   if (process.env.SITE_URL) {
     return process.env.SITE_URL;
   }
+  const domains = process.env.REPLIT_DOMAINS?.split(",");
+  if (domains && domains.length > 0) {
+    return `https://${domains[0]}`;
+  }
   return "https://prayforchange.org";
 }
 
@@ -83,7 +87,12 @@ export async function injectPrayerOgTags(
       `<meta name="twitter:image" content="${ogImage}" />`,
     );
 
-    if (!html.includes('og:url')) {
+    if (html.includes('og:url')) {
+      html = html.replace(
+        /<meta property="og:url" content="[^"]*" \/>/,
+        `<meta property="og:url" content="${ogUrl}" />`,
+      );
+    } else {
       html = html.replace(
         /<meta property="og:type"/,
         `<meta property="og:url" content="${ogUrl}" />\n    <meta property="og:type"`,
