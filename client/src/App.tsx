@@ -24,7 +24,7 @@ import { Footer } from "@/components/footer";
 
 function StartRedirect() {
   const [, navigate] = useLocation();
-  useEffect(() => { navigate("/create"); }, []);
+  useEffect(() => { navigate("/create"); }, [navigate]);
   return null;
 }
 
