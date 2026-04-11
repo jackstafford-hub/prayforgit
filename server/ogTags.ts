@@ -9,9 +9,8 @@ function escapeHtml(str: string): string {
 }
 
 function getBaseUrl(): string {
-  const domains = process.env.REPLIT_DOMAINS?.split(",");
-  if (domains && domains.length > 0) {
-    return `https://${domains[0]}`;
+  if (process.env.SITE_URL) {
+    return process.env.SITE_URL;
   }
   return "https://prayforchange.org";
 }

@@ -57,6 +57,7 @@ SEED_DB = "true"
 ADMIN_EMAILS = "jack.stafford@aetherius.org,mrjackstafford@gmail.com"
 VAPID_PUBLIC_KEY = "BIJYovM8PpFwk9IrtYsv7RdP1pxbSrubPSIdG3M1oOwoXNgaOv8ABaOb3GAisrANyV8_CXRtkAFwt87-y8_IUXU"
 VAPID_SUBJECT = "mailto:support@prayforchange.org"
+SITE_URL = "https://prayforchange.org"
 
 [postMerge]
 path = "scripts/post-merge.sh"
