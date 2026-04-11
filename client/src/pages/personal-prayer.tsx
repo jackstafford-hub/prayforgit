@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 
 export default function PersonalPrayer() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8 max-w-3xl">

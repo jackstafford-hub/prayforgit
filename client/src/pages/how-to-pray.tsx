@@ -2,7 +2,7 @@ import { Navbar } from "@/components/navbar";
 
 export default function HowToPray() {
   return (
-    <div className="min-h-screen bg-background font-sans">
+    <div className="bg-background font-sans">
       <Navbar />
       <div className="container mx-auto px-4 md:px-6 py-12 max-w-3xl">
         <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4 leading-tight">

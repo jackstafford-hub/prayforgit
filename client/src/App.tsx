@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
+import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -21,6 +22,12 @@ import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 import { Footer } from "@/components/footer";
 
+function StartRedirect() {
+  const [, navigate] = useLocation();
+  useEffect(() => { navigate("/create"); }, []);
+  return null;
+}
+
 function Router() {
   return (
     <Switch>
@@ -28,6 +35,7 @@ function Router() {
       <Route path="/how-to-pray" component={HowToPray} />
       <Route path="/browse" component={Browse} />
       <Route path="/create" component={CreatePrayer} />
+      <Route path="/start" component={StartRedirect} />
       <Route path="/prayer/:id" component={PrayerDetail} />
       <Route path="/support/:id" component={CompleteSupport} />
       <Route path="/auth" component={AuthPage} />

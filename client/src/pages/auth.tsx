@@ -98,7 +98,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+    <div className="bg-gradient-to-b from-background to-muted/30">
       <div className="container mx-auto px-4 py-8">
         <Link href="/">
           <Button variant="ghost" className="mb-8 gap-2" data-testid="button-back">

@@ -41,7 +41,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background font-sans">
+    <div className="bg-background font-sans">
       <Navbar />
       
       {/* Hero Section */}

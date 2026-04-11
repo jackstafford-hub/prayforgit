@@ -1217,7 +1217,7 @@ export default function CreatePrayer() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4 sm:px-6">
+    <div className="bg-background py-12 px-4 sm:px-6">
       <div className="max-w-md mx-auto">
         {step === 'title' && (
           <Link href="/">

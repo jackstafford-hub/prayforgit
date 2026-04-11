@@ -75,7 +75,7 @@ export default function Settings() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center py-20">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -84,7 +84,7 @@ export default function Settings() {
   if (!isAuthenticated || !user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-gray-900 dark:to-gray-950">
+    <div className="bg-gradient-to-b from-amber-50 to-white dark:from-gray-900 dark:to-gray-950">
       <div className="container mx-auto px-4 py-8 max-w-xl">
         <Button
           variant="ghost"

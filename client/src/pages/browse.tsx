@@ -50,7 +50,7 @@ export default function Browse() {
   const isSearching = searchInput !== debouncedSearch;
 
   return (
-    <div className="min-h-screen bg-background font-sans">
+    <div className="bg-background font-sans">
       <Navbar />
       
       {/* Header */}

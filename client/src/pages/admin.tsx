@@ -130,7 +130,7 @@ export default function AdminDashboard() {
 
   if (authLoading || adminCheckLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="bg-background">
         <Navbar />
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -158,7 +158,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">

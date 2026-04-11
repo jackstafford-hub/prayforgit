@@ -97,7 +97,7 @@ export default function Dashboard() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="bg-background">
         <Navbar />
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -108,7 +108,7 @@ export default function Dashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="font-serif text-3xl font-bold mb-4">Prayer Dashboard</h1>
@@ -122,7 +122,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
