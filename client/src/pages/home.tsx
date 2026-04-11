@@ -74,22 +74,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Stats Section - Common in Change.org style sites */}
-      <div className="bg-muted/30 py-8 border-b">
-        <div className="container mx-auto px-4 md:px-6 flex flex-wrap justify-center gap-8 md:gap-16 text-center">
-          <div>
-            <div className="text-3xl font-bold font-serif text-primary">2,493</div>
-            <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Prayers Today</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold font-serif text-primary">15,201</div>
-            <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Praying Now</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold font-serif text-primary">194</div>
-            <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Countries</div>
-          </div>
-        </div>
+      <div className="bg-muted/30 py-6 border-b text-center">
+        <p className="text-sm text-muted-foreground">Be one of the first to join a global prayer community.</p>
       </div>
 
       {/* Feed Section */}
