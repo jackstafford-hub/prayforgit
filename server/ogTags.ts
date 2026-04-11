@@ -49,6 +49,14 @@ function injectMetaDescription(html: string, description: string): string {
   return html.replace(/<meta property="og:title"/, `${tag}\n    <meta property="og:title"`);
 }
 
+function injectCanonical(html: string, canonicalUrl: string): string {
+  const tag = `<link rel="canonical" href="${canonicalUrl}" />`;
+  if (html.includes('rel="canonical"')) {
+    return html.replace(/<link rel="canonical" href="[^"]*" \/>/, tag);
+  }
+  return html.replace("</head>", `  ${tag}\n  </head>`);
+}
+
 const HOW_TO_PRAY_DESCRIPTION =
   "Learn how prayer works as a practical force for change. PrayForChange guides you through a simple, interfaith approach to directing spiritual energy toward the people and causes that need it most.";
 
@@ -59,6 +67,12 @@ export async function injectPrayerOgTags(
   html: string,
   urlPath: string,
 ): Promise<string> {
+  const baseUrl = getBaseUrl();
+  const cleanPath = urlPath.split("?")[0].split("#")[0];
+  const normalizedPath = cleanPath === "/" ? "/" : cleanPath.replace(/\/+$/, "");
+  const canonicalUrl = `${baseUrl}${normalizedPath}`;
+  html = injectCanonical(html, canonicalUrl);
+
   if (urlPath.startsWith("/how-to-pray")) {
     return injectMetaDescription(html, escapeHtml(HOW_TO_PRAY_DESCRIPTION));
   }
@@ -72,7 +86,6 @@ export async function injectPrayerOgTags(
     const prayer = await storage.getPrayerById(prayerId);
     if (!prayer) return html;
 
-    const baseUrl = getBaseUrl();
     const ogTitle = escapeHtml(prayer.title);
     const rawDesc = prayer.aiSummary || prayer.description || "";
     const ogDescription = escapeHtml(truncateText(rawDesc.replace(/\n+/g, " ").trim(), 200));
