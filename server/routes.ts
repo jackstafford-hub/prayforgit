@@ -29,6 +29,38 @@ export async function registerRoutes(
   // Setup authentication
   await setupAuth(app);
 
+  // Sitemap
+  app.get("/sitemap.xml", async (_req, res) => {
+    try {
+      const baseUrl = process.env.SITE_URL || "https://prayforchange.org";
+      const publicPrayers = await storage.getPublicPrayers();
+
+      const formatDate = (date: Date) => date.toISOString().split("T")[0];
+
+      const staticUrls = [
+        `  <url>\n    <loc>${baseUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>`,
+        `  <url>\n    <loc>${baseUrl}/how-to-pray</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.8</priority>\n  </url>`,
+      ];
+
+      const prayerUrls = publicPrayers.map((p) =>
+        `  <url>\n    <loc>${baseUrl}/prayer/${p.id}</loc>\n    <lastmod>${formatDate(p.createdAt)}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`
+      );
+
+      const xml = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        ...staticUrls,
+        ...prayerUrls,
+        "</urlset>",
+      ].join("\n");
+
+      res.set("Content-Type", "application/xml");
+      res.status(200).send(xml);
+    } catch (error) {
+      console.error("[sitemap] Failed to generate sitemap:", error);
+      res.status(500).send("Failed to generate sitemap");
+    }
+  });
 
   app.post("/api/check-tone", async (req, res) => {
     try {
