@@ -34,10 +34,35 @@ function truncateText(text: string, maxLength: number): string {
   return text.substring(0, maxLength - 1).trimEnd() + "\u2026";
 }
 
+function truncateAtWordBoundary(text: string, maxChars: number): string {
+  if (text.length <= maxChars) return text;
+  const slice = text.substring(0, maxChars);
+  const lastSpace = slice.lastIndexOf(" ");
+  return lastSpace > 0 ? slice.substring(0, lastSpace) : slice;
+}
+
+function injectMetaDescription(html: string, description: string): string {
+  const tag = `<meta name="description" content="${description}" />`;
+  if (html.includes('name="description"')) {
+    return html.replace(/<meta name="description" content="[^"]*" \/>/, tag);
+  }
+  return html.replace(/<meta property="og:title"/, `${tag}\n    <meta property="og:title"`);
+}
+
+const HOW_TO_PRAY_DESCRIPTION =
+  "Learn how prayer works as a practical force for change. PrayForChange guides you through a simple, interfaith approach to directing spiritual energy toward the people and causes that need it most.";
+
+const PRAYER_FALLBACK_DESCRIPTION =
+  "Join thousands of people praying for this cause on PrayForChange.org \u2014 the world\u2019s platform for collective spiritual support.";
+
 export async function injectPrayerOgTags(
   html: string,
   urlPath: string,
 ): Promise<string> {
+  if (urlPath.startsWith("/how-to-pray")) {
+    return injectMetaDescription(html, escapeHtml(HOW_TO_PRAY_DESCRIPTION));
+  }
+
   const match = urlPath.match(/^\/prayer\/([a-f0-9-]+)/i);
   if (!match) return html;
 
@@ -98,6 +123,12 @@ export async function injectPrayerOgTags(
         `<meta property="og:url" content="${ogUrl}" />\n    <meta property="og:type"`,
       );
     }
+
+    const storyText = (prayer.description || "").replace(/\n+/g, " ").trim();
+    const metaDesc = storyText
+      ? escapeHtml(truncateAtWordBoundary(storyText, 140)) + " \u2014 PrayForChange.org"
+      : PRAYER_FALLBACK_DESCRIPTION;
+    html = injectMetaDescription(html, metaDesc);
 
     return html;
   } catch (error) {
