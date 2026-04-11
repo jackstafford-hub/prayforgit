@@ -51,8 +51,8 @@ function injectMetaDescription(html: string, description: string): string {
 
 function injectCanonical(html: string, canonicalUrl: string): string {
   const tag = `<link rel="canonical" href="${canonicalUrl}" />`;
-  if (html.includes('rel="canonical"')) {
-    return html.replace(/<link rel="canonical" href="[^"]*" \/>/, tag);
+  if (html.includes('canonical')) {
+    return html.replace(/<link[^>]*rel="canonical"[^>]*>/, tag);
   }
   return html.replace("</head>", `  ${tag}\n  </head>`);
 }
@@ -67,7 +67,7 @@ export async function injectPrayerOgTags(
   html: string,
   urlPath: string,
 ): Promise<string> {
-  const baseUrl = getBaseUrl();
+  const baseUrl = getBaseUrl().replace(/\/+$/, "");
   const cleanPath = urlPath.split("?")[0].split("#")[0];
   const normalizedPath = cleanPath === "/" ? "/" : cleanPath.replace(/\/+$/, "");
   const canonicalUrl = `${baseUrl}${normalizedPath}`;
