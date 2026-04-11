@@ -1,0 +1,25 @@
+The site currently has no meta description tags on any page. Meta descriptions are the short text snippets that appear under the page title in Google search results — they are what convinces a searcher to click through. Without them, Google generates its own descriptions, which are usually poorly chosen.
+
+Please add meta description tags to pages as follows:
+
+HOMEPAGE (https://prayforchange.org/):
+Add this exact meta description:
+<meta name="description" content="PrayForChange is the world's platform for collective prayer. Share what the world should pray for and turn one prayer into thousands. Join people from 190+ countries.">
+
+HOW TO PRAY PAGE (https://prayforchange.org/how-to-pray):
+Add this exact meta description:
+<meta name="description" content="Learn how prayer works as a practical force for change. PrayForChange guides you through a simple, interfaith approach to directing spiritual energy toward the people and causes that need it most.">
+
+INDIVIDUAL PRAYER PAGES (https://prayforchange.org/prayer/[id]):
+These should be generated dynamically. For each prayer page, auto-generate the meta description using the first 150 characters of the prayer story text (the "The Issue" section body), followed by " — PrayForChange.org". Trim at the nearest word boundary so the description does not cut off mid-word.
+
+Example of what a generated description should look like:
+"Two years ago I submitted a prayer request on this site asking for help with my addiction. Today I am celebrating two years of sobriety — PrayForChange.org"
+
+GENERAL RULES:
+- Meta descriptions must be under 160 characters (including the " — PrayForChange.org" suffix for prayer pages)
+- They must go inside the <head> element
+- Do not duplicate descriptions across pages — every page must have a unique description
+- If a prayer page has no story text yet, use this fallback: "Join thousands of people praying for this cause on PrayForChange.org — the world's platform for collective spiritual support."
+
+Please show me the implementation and confirm it is working on at least three pages.
