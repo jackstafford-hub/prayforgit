@@ -33,10 +33,10 @@ function getFirstSentence(text: string, maxLen = 120): string {
   const match = clean.match(/^[^.!?]+[.!?]/);
   const sentence = match ? match[0].trim() : clean;
   if (!sentence) return "";
-  return sentence.length > maxLen ? sentence.slice(0, maxLen) + "..." : sentence;
+  return sentence.length > maxLen ? sentence.slice(0, maxLen - 3) + "..." : sentence;
 }
 
-function buildEmbedHtml(title: string, count: number, slug: string, summary?: string): string {
+function buildEmbedHtml(title: string, count: number, slug: string, summary?: string | null): string {
   const safeTitle = escapeHtmlEmbed(title);
   const safeCount = count.toLocaleString();
   const prayerUrl = `https://prayforchange.org/prayer/${slug}`;
