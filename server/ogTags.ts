@@ -73,6 +73,33 @@ export async function injectPrayerOgTags(
   const canonicalUrl = `${baseUrl}${normalizedPath}`;
   html = injectCanonical(html, canonicalUrl);
 
+  if (normalizedPath === "/") {
+    const organizationSchema = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "PrayForChange",
+      "url": "https://prayforchange.org",
+      "logo": "https://prayforchange.org/favicon.png",
+      "description": "PrayForChange is a global platform for collective prayer. Share your burden and turn one prayer into thousands. People from over 190 countries pray together for the world's most pressing needs.",
+      "sameAs": [],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "support@prayforchange.org",
+        "contactType": "customer support",
+      },
+    }, null, 2);
+    const websiteSchema = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "PrayForChange",
+      "url": "https://prayforchange.org",
+    }, null, 2);
+    const scripts =
+      `  <script type="application/ld+json">\n${organizationSchema}\n  </script>\n` +
+      `  <script type="application/ld+json">\n${websiteSchema}\n  </script>\n`;
+    html = html.replace("</head>", `${scripts}</head>`);
+  }
+
   if (urlPath.startsWith("/how-to-pray")) {
     return injectMetaDescription(html, escapeHtml(HOW_TO_PRAY_DESCRIPTION));
   }
