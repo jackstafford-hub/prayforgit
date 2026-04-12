@@ -382,7 +382,7 @@ export default function AdminDashboard() {
                                 data-testid={`button-view-prayer-${prayer.id}`}
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => window.open(`/prayer/${prayer.id}`, "_blank")}
+                                onClick={() => window.open(`/prayer/${prayer.slug || prayer.id}`, "_blank")}
                                 className="gap-1 text-muted-foreground"
                               >
                                 <ExternalLink className="w-4 h-4" />
@@ -474,7 +474,7 @@ export default function AdminDashboard() {
                       data-testid={`button-view-prayer-${prayer.id}`}
                       variant="ghost"
                       size="sm"
-                      onClick={() => window.open(`/prayer/${prayer.id}`, "_blank")}
+                      onClick={() => window.open(`/prayer/${prayer.slug || prayer.id}`, "_blank")}
                       className="gap-1 text-muted-foreground"
                     >
                       <ExternalLink className="w-4 h-4" />

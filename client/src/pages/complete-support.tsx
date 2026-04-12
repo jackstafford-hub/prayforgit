@@ -177,12 +177,12 @@ export default function CompleteSupport() {
   };
 
   const copyLink = async () => {
-    const url = `${window.location.origin}/prayer/${id}`;
+    const url = `${window.location.origin}/prayer/${prayer?.slug || id}`;
     await navigator.clipboard.writeText(url);
     toast({ title: "Link copied!", description: "Share it with friends and family." });
   };
 
-  const shareUrl = `${window.location.origin}/prayer/${id}`;
+  const shareUrl = `${window.location.origin}/prayer/${prayer?.slug || id}`;
   const shareText = prayer ? `Pray for ${prayer.title} on PrayForChange.org` : "Pray with me on PrayForChange.org";
 
   const handleCarouselPray = async (prayerId: string) => {
@@ -193,7 +193,7 @@ export default function CompleteSupport() {
         setCarouselIndex(prev => prev + 1);
       } else {
         setShowPrayerCarousel(false);
-        navigate(`/prayer/${id}`);
+        navigate(`/prayer/${prayer?.slug || id}`);
       }
     } catch (error) {
       console.error("Error counting prayer:", error);
@@ -205,7 +205,7 @@ export default function CompleteSupport() {
       setCarouselIndex(prev => prev + 1);
     } else {
       setShowPrayerCarousel(false);
-      navigate(`/prayer/${id}`);
+      navigate(`/prayer/${prayer?.slug || id}`);
     }
   };
 
@@ -380,7 +380,7 @@ export default function CompleteSupport() {
           <Button
             onClick={() => {
               setShowShareModal(false);
-              navigate(`/prayer/${id}`);
+              navigate(`/prayer/${prayer?.slug || id}`);
             }}
             className="w-full cursor-pointer"
             data-testid="button-share-continue"
@@ -414,7 +414,7 @@ export default function CompleteSupport() {
               </p>
               <Button
                 variant="link"
-                onClick={() => navigate(`/prayer/${otherPrayers[carouselIndex].id}`)}
+                onClick={() => navigate(`/prayer/${otherPrayers[carouselIndex].slug || otherPrayers[carouselIndex].id}`)}
                 className="p-0 h-auto text-primary cursor-pointer"
                 data-testid="button-carousel-readmore"
               >

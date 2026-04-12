@@ -1,4 +1,4 @@
-import { db } from "./db";
+import { db, generateSlugFromTitle } from "./db";
 import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, users, prayers, reports, dailyPrayerCounts, prayerUpdates } from "@shared/schema";
 import { eq, desc, gte, and, sql, count as countFn } from "drizzle-orm";
 
@@ -16,6 +16,8 @@ export interface IStorage {
   getPublicPrayers(options?: { q?: string; topic?: string }): Promise<Prayer[]>;
   getPrayersByAuthor(authorId: string): Promise<Prayer[]>;
   getPrayerById(id: string): Promise<Prayer | undefined>;
+  getPrayerBySlug(slug: string): Promise<Prayer | undefined>;
+  getPrayerBySlugOrId(slugOrId: string): Promise<Prayer | undefined>;
   createPrayer(prayer: InsertPrayer): Promise<Prayer>;
   incrementPrayerCount(id: string): Promise<Prayer | undefined>;
   updatePrayerImage(id: string, imageUrl: string): Promise<Prayer | undefined>;
@@ -125,8 +127,35 @@ export class DatabaseStorage implements IStorage {
     return prayer;
   }
 
+  async getPrayerBySlug(slug: string): Promise<Prayer | undefined> {
+    const [prayer] = await db.select().from(prayers).where(eq(prayers.slug, slug));
+    return prayer;
+  }
+
+  async getPrayerBySlugOrId(slugOrId: string): Promise<Prayer | undefined> {
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (UUID_REGEX.test(slugOrId)) {
+      return this.getPrayerById(slugOrId);
+    }
+    return this.getPrayerBySlug(slugOrId);
+  }
+
+  async generateUniqueSlug(title: string): Promise<string> {
+    const base = generateSlugFromTitle(title);
+    const [existing] = await db.select({ slug: prayers.slug }).from(prayers).where(eq(prayers.slug, base));
+    if (!existing) return base;
+    let counter = 2;
+    while (true) {
+      const candidate = `${base}-${counter}`;
+      const [taken] = await db.select({ slug: prayers.slug }).from(prayers).where(eq(prayers.slug, candidate));
+      if (!taken) return candidate;
+      counter++;
+    }
+  }
+
   async createPrayer(insertPrayer: InsertPrayer): Promise<Prayer> {
-    const [prayer] = await db.insert(prayers).values(insertPrayer).returning();
+    const slug = await this.generateUniqueSlug(insertPrayer.title);
+    const [prayer] = await db.insert(prayers).values({ ...insertPrayer, slug }).returning();
     return prayer;
   }
 

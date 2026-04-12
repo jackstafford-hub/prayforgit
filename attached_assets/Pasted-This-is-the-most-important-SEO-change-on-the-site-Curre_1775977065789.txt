@@ -1,0 +1,40 @@
+This is the most important SEO change on the site. Currently, individual prayer pages use UUID-based URLs like:
+https://prayforchange.org/prayer/3b06d10d-3535-488b-b5e0-7f4763cab2a6
+
+This is a serious SEO problem because:
+- Google cannot understand what the page is about from the URL alone
+- The URL contains no keywords, so the page gets no SEO benefit from its own address
+- Users cannot read or remember the URL
+- Journalists and publishers will not link to an ugly UUID URL
+
+The fix is to switch to human-readable "slugs" based on the prayer title. For example:
+https://prayforchange.org/prayer/peace-for-the-people-of-ukraine
+https://prayforchange.org/prayer/healing-for-a-family-after-the-loss-of-a-child
+https://prayforchange.org/prayer/end-to-gun-violence-in-our-schools
+
+Please implement this in the following way:
+
+STEP 1 — Add a slug field to the prayers database table
+- Add a new column called "slug" (text, unique, not null)
+- Generate slugs for all existing prayers by: (a) taking the prayer title, (b) converting to lowercase, (c) replacing spaces with hyphens, (d) removing all characters that are not letters, numbers, or hyphens, (e) trimming hyphens from the start and end
+- If two prayers would generate the same slug, append a short unique suffix (e.g. "-2", "-3")
+
+STEP 2 — Generate slugs for all new prayers automatically
+- When a new prayer is created, auto-generate its slug from the title using the same rules above
+- This should happen server-side at creation time, not client-side
+
+STEP 3 — Update the routing to serve prayer pages by slug
+- The route /prayer/[slug] should look up prayers by their slug field
+- The route /prayer/[uuid] should still work temporarily (for backwards compatibility) but should redirect with a 301 permanent redirect to /prayer/[slug]
+- After 60 days, the UUID routes can be removed — but keep the redirects in place indefinitely
+
+STEP 4 — Update all internal links
+- Anywhere in the codebase that generates a link to a prayer page (e.g. the homepage trending cards, share links, search results), update it to use /prayer/[slug] instead of /prayer/[uuid]
+
+STEP 5 — Verify
+- Check that existing prayers now have slugs in the database
+- Check that navigating to /prayer/peace-for-the-people-of-ukraine (or whichever slug was generated) loads the correct prayer
+- Check that the old UUID URL redirects correctly to the new slug URL
+- Check that the og:url meta tag on each prayer page reflects the new slug URL
+
+This is a significant change so please proceed carefully and test each step before moving to the next. Let me know if you hit any issues.Implement this for all future prayers that are created.

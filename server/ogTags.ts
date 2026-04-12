@@ -151,20 +151,20 @@ export async function injectPrayerOgTags(
     return injectMetaDescription(html, escapeHtml(HOW_TO_PRAY_DESCRIPTION));
   }
 
-  const match = urlPath.match(/^\/prayer\/([a-f0-9-]+)/i);
+  const match = urlPath.match(/^\/prayer\/([a-z0-9-]+)/i);
   if (!match) return html;
 
-  const prayerId = match[1];
+  const prayerSlugOrId = match[1];
 
   try {
-    const prayer = await storage.getPrayerById(prayerId);
+    const prayer = await storage.getPrayerBySlugOrId(prayerSlugOrId);
     if (!prayer) return html;
 
     const ogTitle = escapeHtml(prayer.title);
     const rawDesc = prayer.aiSummary || prayer.description || "";
     const ogDescription = escapeHtml(truncateText(rawDesc.replace(/\n+/g, " ").trim(), 200));
     const ogImage = resolveImageUrl(prayer.imageUrl);
-    const ogUrl = `${baseUrl}/prayer/${prayer.id}`;
+    const ogUrl = `${baseUrl}/prayer/${prayer.slug || prayer.id}`;
 
     html = html.replace(
       /<title>[^<]*<\/title>/,

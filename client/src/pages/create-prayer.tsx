@@ -63,6 +63,7 @@ export default function CreatePrayer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [createdPrayerId, setCreatedPrayerId] = useState<string | null>(null);
+  const [createdPrayerSlug, setCreatedPrayerSlug] = useState<string | null>(null);
   
   const searchParams = new URLSearchParams(window.location.search);
   const initialTitle = searchParams.get('title') || "";
@@ -348,6 +349,7 @@ export default function CreatePrayer() {
       const newPrayer = await response.json();
       
       setCreatedPrayerId(newPrayer.id);
+      setCreatedPrayerSlug(newPrayer.slug || null);
 
       toast({
         title: isFlaggedForReview ? "Prayer Submitted for Review" : "Prayer Published",
@@ -1072,14 +1074,14 @@ export default function CreatePrayer() {
 
             <div className="flex flex-col gap-3 max-w-sm mx-auto">
                <Button variant="outline" className="h-12 text-base gap-2" onClick={() => {
-                  navigator.clipboard.writeText(`${window.location.origin}/prayer/${createdPrayerId}`);
+                  navigator.clipboard.writeText(`${window.location.origin}/prayer/${createdPrayerSlug || createdPrayerId}`);
                   toast({ title: "Link copied" });
                }}>
                  Copy Link
                </Button>
                
                <a 
-                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Join me in prayer: ${formData.title}\n${window.location.origin}/prayer/${createdPrayerId}`)}`}
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Join me in prayer: ${formData.title}\n${window.location.origin}/prayer/${createdPrayerSlug || createdPrayerId}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full"
@@ -1089,7 +1091,7 @@ export default function CreatePrayer() {
                   </Button>
                 </a>
                 
-                <a href={`mailto:?subject=${encodeURIComponent(`Pray with me for ${formData.title}`)}&body=${encodeURIComponent(`Here is a prayer intention I'm supporting:\n\n${formData.title}\n${window.location.origin}/prayer/${createdPrayerId}`)}`} className="w-full">
+                <a href={`mailto:?subject=${encodeURIComponent(`Pray with me for ${formData.title}`)}&body=${encodeURIComponent(`Here is a prayer intention I'm supporting:\n\n${formData.title}\n${window.location.origin}/prayer/${createdPrayerSlug || createdPrayerId}`)}`} className="w-full">
                   <Button variant="outline" className="h-12 text-base gap-2 w-full">
                     Email
                   </Button>
@@ -1119,14 +1121,14 @@ export default function CreatePrayer() {
 
             <div className="flex flex-col gap-3 max-w-sm mx-auto">
                <Button variant="outline" className="h-12 text-base gap-2" onClick={() => {
-                  navigator.clipboard.writeText(`${window.location.origin}/prayer/${createdPrayerId}`);
+                  navigator.clipboard.writeText(`${window.location.origin}/prayer/${createdPrayerSlug || createdPrayerId}`);
                   toast({ title: "Link copied" });
                }}>
                  Copy Link
                </Button>
                
                <a 
-                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/prayer/${createdPrayerId}`)}`}
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/prayer/${createdPrayerSlug || createdPrayerId}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full"
@@ -1140,7 +1142,7 @@ export default function CreatePrayer() {
                 </a>
                 
                 <a 
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Join me in prayer: ${formData.title}`)}&url=${encodeURIComponent(`${window.location.origin}/prayer/${createdPrayerId}`)}`}
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Join me in prayer: ${formData.title}`)}&url=${encodeURIComponent(`${window.location.origin}/prayer/${createdPrayerSlug || createdPrayerId}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full"

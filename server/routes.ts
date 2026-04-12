@@ -29,6 +29,22 @@ export async function registerRoutes(
   // Setup authentication
   await setupAuth(app);
 
+  // Redirect UUID-based prayer URLs to slug-based URLs (301 permanent)
+  const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  app.get("/prayer/:id", async (req, res, next) => {
+    const { id } = req.params;
+    if (!UUID_PATTERN.test(id)) return next();
+    try {
+      const prayer = await storage.getPrayerById(id);
+      if (prayer?.slug) {
+        return res.redirect(301, `/prayer/${prayer.slug}`);
+      }
+    } catch {
+      // fall through on error
+    }
+    return next();
+  });
+
   // Sitemap
   app.get("/sitemap.xml", async (_req, res) => {
     try {
@@ -43,7 +59,7 @@ export async function registerRoutes(
       ];
 
       const prayerUrls = publicPrayers.map((p) =>
-        `  <url>\n    <loc>${baseUrl}/prayer/${p.id}</loc>\n    <lastmod>${formatDate(p.createdAt)}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`
+        `  <url>\n    <loc>${baseUrl}/prayer/${p.slug || p.id}</loc>\n    <lastmod>${formatDate(p.createdAt)}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`
       );
 
       const xml = [
@@ -457,10 +473,10 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
     }
   });
 
-  // Get prayer by ID
+  // Get prayer by slug or ID
   app.get("/api/prayers/:id", async (req, res) => {
     try {
-      const prayer = await storage.getPrayerById(req.params.id);
+      const prayer = await storage.getPrayerBySlugOrId(req.params.id);
       if (!prayer) {
         return res.status(404).json({ error: "Prayer not found" });
       }
@@ -648,7 +664,7 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
           },
         ],
         mode: 'payment',
-        success_url: `${baseUrl}/prayer/${prayerId}?donated=true`,
+        success_url: `${baseUrl}/prayer/${prayer.slug || prayerId}?donated=true`,
         cancel_url: `${baseUrl}/support/${prayerId}`,
         metadata: {
           prayerId,

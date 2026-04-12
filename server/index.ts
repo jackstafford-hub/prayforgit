@@ -189,6 +189,12 @@ let appReady = false;
             } catch (error: any) {
               console.error("[DB] Table initialization failed:", error?.message || error);
             }
+            try {
+              const { backfillPrayerSlugs } = await import('./db');
+              await backfillPrayerSlugs();
+            } catch (error: any) {
+              console.error("[DB] Slug backfill failed:", error?.message || error);
+            }
           }
 
           appReady = true;

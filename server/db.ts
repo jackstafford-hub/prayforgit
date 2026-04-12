@@ -53,6 +53,54 @@ export async function checkDbConnectivity(): Promise<boolean> {
   }
 }
 
+export function generateSlugFromTitle(title: string): string {
+  const slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 100);
+  return slug || 'prayer';
+}
+
+export async function backfillPrayerSlugs(): Promise<void> {
+  console.log("[DB] Starting prayer slug backfill...");
+  try {
+    const toFill = await pool.query<{ id: string; title: string }>(
+      "SELECT id, title FROM prayers WHERE slug IS NULL ORDER BY created_at ASC"
+    );
+
+    if (toFill.rows.length === 0) {
+      console.log("[DB] All prayers already have slugs, skipping backfill");
+      return;
+    }
+
+    console.log(`[DB] Backfilling slugs for ${toFill.rows.length} prayers`);
+
+    const existing = await pool.query<{ slug: string }>(
+      "SELECT slug FROM prayers WHERE slug IS NOT NULL"
+    );
+    const existingSlugs = new Set(existing.rows.map((r) => r.slug));
+
+    for (const row of toFill.rows) {
+      const base = generateSlugFromTitle(row.title);
+      let slug = base;
+      let counter = 2;
+      while (existingSlugs.has(slug)) {
+        slug = `${base}-${counter}`;
+        counter++;
+      }
+      existingSlugs.add(slug);
+      await pool.query("UPDATE prayers SET slug = $1 WHERE id = $2", [slug, row.id]);
+    }
+
+    console.log(`[DB] Slug backfill complete: ${toFill.rows.length} prayers updated`);
+  } catch (error: any) {
+    console.error("[DB] Slug backfill failed:", error?.message || error);
+  }
+}
+
 // Ensure all required tables exist in production with correct schema
 // This uses CREATE TABLE IF NOT EXISTS which is safe - it only creates missing tables
 export async function ensureTablesExist(): Promise<void> {
@@ -120,6 +168,15 @@ export async function ensureTablesExist(): Promise<void> {
     console.log("[DB] Prayers table ensured");
   } catch (error: any) {
     console.error("[DB] Prayers table error:", error?.message);
+  }
+
+  // Add slug column and unique index (safe migration for existing tables)
+  try {
+    await pool.query(`ALTER TABLE prayers ADD COLUMN IF NOT EXISTS slug TEXT`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS prayers_slug_key ON prayers (slug) WHERE slug IS NOT NULL`);
+    console.log("[DB] Prayer slug column ensured");
+  } catch (error: any) {
+    console.error("[DB] Prayer slug migration error:", error?.message);
   }
   
   // Reports table

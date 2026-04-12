@@ -33,6 +33,7 @@ export const users = pgTable("users", {
 export const prayers = pgTable("prayers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
+  slug: text("slug").unique(),
   description: text("description"),
   author: text("author").notNull().default('Anonymous'),
   authorId: varchar("author_id").references(() => users.id),
@@ -66,6 +67,7 @@ export type User = typeof users.$inferSelect;
 export const insertPrayerSchema = createInsertSchema(prayers).omit({
   id: true,
   createdAt: true,
+  slug: true,
 });
 
 export type InsertPrayer = z.infer<typeof insertPrayerSchema>;

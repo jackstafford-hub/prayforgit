@@ -14,7 +14,7 @@ export function PrayerCard({ prayer }: PrayerCardProps) {
   const percentage = Math.min((prayer.count / prayer.goal) * 100, 100);
 
   return (
-    <Link href={`/prayer/${prayer.id}`}>
+    <Link href={`/prayer/${prayer.slug || prayer.id}`}>
       <Card className="group h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow duration-300 border-border cursor-pointer bg-white">
         {/* Placeholder Image Area - In a real app this would be a user upload */}
         <div 

@@ -192,7 +192,7 @@ export default function Dashboard() {
                 <div 
                   key={prayer.id} 
                   className="bg-card border rounded-xl p-4 md:p-6 hover:border-primary/30 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/prayer/${prayer.id}`)}
+                  onClick={() => navigate(`/prayer/${prayer.slug || prayer.id}`)}
                   data-testid={`card-prayer-${prayer.id}`}
                 >
                   <div className="flex gap-4">
@@ -278,7 +278,7 @@ export default function Dashboard() {
                           className="shrink-0 gap-1"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigator.clipboard.writeText(`${window.location.origin}/prayer/${prayer.id}`);
+                            navigator.clipboard.writeText(`${window.location.origin}/prayer/${prayer.slug || prayer.id}`);
                           }}
                           data-testid={`button-share-${prayer.id}`}
                         >
