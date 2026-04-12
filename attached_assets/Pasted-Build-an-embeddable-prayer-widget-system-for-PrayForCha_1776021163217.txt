@@ -1,0 +1,43 @@
+Build an embeddable prayer widget system for PrayForChange.org.
+I want any website (news sites, blogs, churches) to be able to embed a small prayer widget on their page, similar to how Change.org lets you embed a petition. This is a critical feature — it's how prayers spread beyond our site.
+There are 4 parts to build:
+Part 1: The embed page route (/embed/:slug)
+Create a new route at /embed/:slug that renders a minimal, standalone prayer card. This page should:
+
+Look up the prayer by its URL slug
+Show ONLY: the prayer title, the current prayer count (e.g., "1,247 people praying"), and a "Pray" button
+Have NO site header, NO footer, NO navigation — just the card itself
+Be styled to look good at any width between 300px and 800px, with a max height of around 200px
+Use a clean, light design with your existing red accent color for the Pray button
+When someone clicks "Pray", increment the count via your existing API and update the number on screen without a page reload
+Include a small "Powered by PrayForChange.org" link at the bottom that opens the full prayer page in a new tab
+Set appropriate CORS headers so this page can be loaded in an iframe from ANY domain: Access-Control-Allow-Origin: *
+
+Part 2: The widget.js script
+Create a static JavaScript file at /widget.js that:
+
+Reads a data-prayer attribute from its own script tag to get the prayer slug
+Creates and injects an iframe pointing to /embed/{slug}
+Sets the iframe to width: 100%; height: 200px; border: none; border-radius: 8px;
+Example usage on an external site: <script src="https://prayforchange.org/widget.js" data-prayer="pray-for-bangladesh"></script>
+
+Part 3: Embed code on every prayer page
+On each existing prayer page, add a "Share" or "Embed" section (maybe behind a share icon or button) that shows:
+
+A copyable iframe code: <iframe src="https://prayforchange.org/embed/[slug]" width="100%" height="200" frameborder="0"></iframe>
+A copyable script tag: <script src="https://prayforchange.org/widget.js" data-prayer="[slug]"></script>
+A "Copy" button next to each that copies the code to clipboard
+A small preview of what the widget looks like
+
+Part 4: CORS and security
+
+Add Access-Control-Allow-Origin: * headers to the /embed/ route and /widget.js
+Add X-Frame-Options: ALLOWALL on the /embed/ route only (keep the rest of the site's normal frame policy)
+Rate-limit the pray action from embeds to prevent abuse: max 1 pray per IP per prayer per hour
+
+Important implementation notes:
+
+The embed page must be server-side rendered (not a client-side SPA route) so it loads fast and works in iframes reliably
+The widget should work without requiring the user to log in — anonymous praying via embeds is the whole point
+The Pray button should show a brief animation or state change (e.g., button changes to "Prayed ✓" and the count animates up) so the user knows it worked
+Test by creating a simple test HTML page that embeds the widget via both the iframe and script tag methods
