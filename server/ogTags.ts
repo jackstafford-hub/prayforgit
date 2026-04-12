@@ -94,9 +94,56 @@ export async function injectPrayerOgTags(
       "name": "PrayForChange",
       "url": "https://prayforchange.org",
     }, null, 2);
+    const faqSchema = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is PrayForChange?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PrayForChange is a global platform where anyone can start a prayer for a person, a cause, or a world event \u2014 and invite others to pray alongside them. It is interfaith and open to everyone, regardless of tradition or belief.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "How does collective prayer work on this platform?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You describe what you want the world to pray for. Our AI generates a prayer in a universalist, interfaith style. Others can then click \u2018I prayed for this\u2019 to join you. You can see how many people across the world are praying for the same intention.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Is PrayForChange interfaith?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. PrayForChange is designed for people of all faith traditions \u2014 Christian, Muslim, Jewish, Hindu, Buddhist, and anyone who believes in the power of prayer or spiritual intention. The prayers are written in an inclusive style that speaks to the shared spiritual values across traditions.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need to create an account to pray?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can pray for others without creating an account. To start your own prayer request and track how many people are praying for it, you will need to sign in.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Is PrayForChange free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, PrayForChange is completely free.",
+          },
+        },
+      ],
+    }, null, 2);
     const scripts =
       `  <script type="application/ld+json">\n${organizationSchema}\n  </script>\n` +
-      `  <script type="application/ld+json">\n${websiteSchema}\n  </script>\n`;
+      `  <script type="application/ld+json">\n${websiteSchema}\n  </script>\n` +
+      `  <script type="application/ld+json">\n${faqSchema}\n  </script>\n`;
     html = html.replace("</head>", `${scripts}</head>`);
   }
 

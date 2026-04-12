@@ -6,6 +6,30 @@ import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { getPrayers } from "@/lib/api";
 import type { Prayer } from "@shared/schema";
+import { ChevronDown } from "lucide-react";
+
+const FAQ_ITEMS = [
+  {
+    question: "What is PrayForChange?",
+    answer: "PrayForChange is a global platform where anyone can start a prayer for a person, a cause, or a world event \u2014 and invite others to pray alongside them. It is interfaith and open to everyone, regardless of tradition or belief.",
+  },
+  {
+    question: "How does collective prayer work on this platform?",
+    answer: "You describe what you want the world to pray for. Our AI generates a prayer in a universalist, interfaith style. Others can then click \u2018I prayed for this\u2019 to join you. You can see how many people across the world are praying for the same intention.",
+  },
+  {
+    question: "Is PrayForChange interfaith?",
+    answer: "Yes. PrayForChange is designed for people of all faith traditions \u2014 Christian, Muslim, Jewish, Hindu, Buddhist, and anyone who believes in the power of prayer or spiritual intention. The prayers are written in an inclusive style that speaks to the shared spiritual values across traditions.",
+  },
+  {
+    question: "Do I need to create an account to pray?",
+    answer: "You can pray for others without creating an account. To start your own prayer request and track how many people are praying for it, you will need to sign in.",
+  },
+  {
+    question: "Is PrayForChange free to use?",
+    answer: "Yes, PrayForChange is completely free.",
+  },
+];
 
 export default function Home() {
   const [prayers, setPrayers] = useState<Prayer[]>([]);
@@ -13,6 +37,7 @@ export default function Home() {
   const [prayerTopic, setPrayerTopic] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchPrayers = async () => {
@@ -116,6 +141,35 @@ export default function Home() {
                 See more prayers
               </Button>
             </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="border-t py-16 bg-background">
+        <div className="container mx-auto px-4 md:px-6 max-w-3xl">
+          <h2 className="text-3xl font-serif font-bold mb-10">Frequently Asked Questions</h2>
+          <div className="divide-y">
+            {FAQ_ITEMS.map((item, index) => (
+              <div key={index} className="py-5">
+                <button
+                  className="w-full flex items-center justify-between text-left gap-4"
+                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                  data-testid={`button-faq-${index}`}
+                  aria-expanded={openFaq === index}
+                >
+                  <span className="font-serif font-semibold text-lg leading-snug">{item.question}</span>
+                  <ChevronDown
+                    className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform duration-200 ${openFaq === index ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {openFaq === index && (
+                  <p className="mt-3 text-muted-foreground leading-relaxed" data-testid={`text-faq-answer-${index}`}>
+                    {item.answer}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>
