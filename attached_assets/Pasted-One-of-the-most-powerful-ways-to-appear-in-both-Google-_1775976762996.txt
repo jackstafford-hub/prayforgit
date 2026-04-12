@@ -1,0 +1,81 @@
+One of the most powerful ways to appear in both Google's featured snippets and in AI assistant answers (ChatGPT, Perplexity, Claude, Gemini) is to have a FAQ section with proper structured data markup on the homepage. AI models are significantly more likely to cite pages with clear question-and-answer formatting.
+
+Please do two things:
+
+STEP 1 — Add a visible FAQ section to the homepage
+
+Add a new section near the bottom of the homepage (above the footer) with the heading "Frequently Asked Questions" and the following questions and answers as visible text on the page:
+
+Q: What is PrayForChange?
+A: PrayForChange is a global platform where anyone can start a prayer for a person, a cause, or a world event — and invite others to pray alongside them. It is interfaith and open to everyone, regardless of tradition or belief.
+
+Q: How does collective prayer work on this platform?
+A: You describe what you want the world to pray for. Our AI generates a prayer in a universalist, interfaith style. Others can then click "I prayed for this" to join you. You can see how many people across the world are praying for the same intention.
+
+Q: Is PrayForChange interfaith?
+A: Yes. PrayForChange is designed for people of all faith traditions — Christian, Muslim, Jewish, Hindu, Buddhist, and anyone who believes in the power of prayer or spiritual intention. The prayers are written in an inclusive style that speaks to the shared spiritual values across traditions.
+
+Q: Do I need to create an account to pray?
+A: You can pray for others without creating an account. To start your own prayer request and track how many people are praying for it, you will need to sign in.
+
+Q: Is PrayForChange free to use?
+A: Yes, PrayForChange is completely free.
+
+The FAQ section should be styled consistently with the rest of the site. Each question can be in an accordion/expandable format or displayed as plain text — either works.
+
+STEP 2 — Add FAQPage JSON-LD schema
+
+Once the visible FAQ section is in place, add the following structured data block to the homepage <head>:
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is PrayForChange?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "PrayForChange is a global platform where anyone can start a prayer for a person, a cause, or a world event — and invite others to pray alongside them. It is interfaith and open to everyone, regardless of tradition or belief."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does collective prayer work on this platform?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You describe what you want the world to pray for. Our AI generates a prayer in a universalist, interfaith style. Others can then click 'I prayed for this' to join you. You can see how many people across the world are praying for the same intention."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is PrayForChange interfaith?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. PrayForChange is designed for people of all faith traditions — Christian, Muslim, Jewish, Hindu, Buddhist, and anyone who believes in the power of prayer or spiritual intention. The prayers are written in an inclusive style that speaks to the shared spiritual values across traditions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need to create an account to pray?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can pray for others without creating an account. To start your own prayer request and track how many people are praying for it, you will need to sign in."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is PrayForChange free to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, PrayForChange is completely free."
+      }
+    }
+  ]
+}
+</script>
+
+IMPORTANT: The text in the JSON-LD must exactly match the visible text on the page. Do not add schema markup for questions that are not visibly shown to users — Google penalises hidden FAQ schema.
+
+Please confirm both the visible section and the schema block are in place.
