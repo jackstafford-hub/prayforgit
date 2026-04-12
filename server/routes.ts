@@ -98,6 +98,8 @@ function buildEmbedHtml(title: string, count: number, slug: string): string {
       text-decoration: none;
     }
     .powered:hover { color: #6b7280; }
+    @keyframes pop { 0%,100%{transform:scale(1)} 40%{transform:scale(1.25)} }
+    .pop { animation: pop 0.35s ease; }
   </style>
 </head>
 <body>
@@ -124,7 +126,12 @@ function buildEmbedHtml(title: string, count: number, slug: string): string {
             btn.textContent = 'Prayed \u2713';
             btn.classList.add('prayed');
             var el = document.getElementById('count-num');
-            if (el && data.count != null) el.textContent = data.count.toLocaleString();
+            if (el && data.count != null) {
+              el.textContent = data.count.toLocaleString();
+              el.classList.remove('pop');
+              void el.offsetWidth;
+              el.classList.add('pop');
+            }
           });
         })
         .catch(function() { btn.disabled = false; btn.textContent = 'Pray'; });

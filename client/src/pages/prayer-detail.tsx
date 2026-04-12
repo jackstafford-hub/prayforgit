@@ -3,7 +3,7 @@ import { useRoute, Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
-import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Link2, Share2, Mail, Upload, Wand2, Code2, Copy, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Link2, Share2, Mail, Upload, Wand2, Code2, Copy } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -897,7 +897,7 @@ export default function PrayerDetail() {
                   <div className="space-y-1 pt-1">
                     <p className="text-xs text-muted-foreground">Preview</p>
                     <iframe
-                      src={`/embed/${prayer.slug}`}
+                      src={`https://prayforchange.org/embed/${prayer.slug}`}
                       width="100%"
                       height="200"
                       style={{ border: "none", borderRadius: "8px", display: "block" }}
