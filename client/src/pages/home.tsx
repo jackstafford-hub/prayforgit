@@ -15,7 +15,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "How does collective prayer work on this platform?",
-    answer: "You describe what you want the world to pray for. Our AI generates a prayer in a universalist, interfaith style. Others can then click \u2018I prayed for this\u2019 to join you. You can see how many people across the world are praying for the same intention.",
+    answer: "You describe what you want the world to pray for. Our AI generates a prayer in a universalist, interfaith style. Others can then click 'I prayed for this' to join you. You can see how many people across the world are praying for the same intention.",
   },
   {
     question: "Is PrayForChange interfaith?",
