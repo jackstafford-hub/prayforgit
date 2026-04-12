@@ -17,6 +17,123 @@ if (process.env.OPENAI_API_KEY) {
   });
 }
 
+const embedPrayRateLimit = new Map<string, number>();
+
+function escapeHtmlEmbed(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildEmbedHtml(title: string, count: number, slug: string): string {
+  const safeTitle = escapeHtmlEmbed(title);
+  const safeCount = count.toLocaleString();
+  const prayerUrl = `https://prayforchange.org/prayer/${slug}`;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${safeTitle} - PrayForChange</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 200px; overflow: hidden; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      background: #fff;
+      display: flex;
+      align-items: stretch;
+    }
+    .card {
+      width: 100%;
+      padding: 16px 20px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+    }
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .count {
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .count strong { color: #111827; font-weight: 600; }
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pray-btn {
+      background: #e11d48;
+      color: #fff;
+      border: none;
+      border-radius: 9999px;
+      padding: 8px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .pray-btn:hover:not(:disabled) { background: #be123c; }
+    .pray-btn:active:not(:disabled) { transform: scale(0.97); }
+    .pray-btn:disabled { background: #9ca3af; cursor: default; }
+    .pray-btn.prayed { background: #16a34a; }
+    .powered {
+      font-size: 11px;
+      color: #9ca3af;
+      text-decoration: none;
+    }
+    .powered:hover { color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div>
+      <div class="title">${safeTitle}</div>
+      <div class="count"><strong id="count-num">${safeCount}</strong> people praying</div>
+    </div>
+    <div class="actions">
+      <button class="pray-btn" id="pray-btn" onclick="doPray()">Pray</button>
+      <a class="powered" href="${prayerUrl}" target="_blank" rel="noopener">Powered by PrayForChange.org</a>
+    </div>
+  </div>
+  <script>
+    function doPray() {
+      var btn = document.getElementById('pray-btn');
+      btn.disabled = true;
+      btn.textContent = 'Praying\u2026';
+      fetch('/api/embed/${slug}/pray', { method: 'POST' })
+        .then(function(r) {
+          if (r.status === 429) { btn.textContent = 'Already prayed'; return; }
+          if (!r.ok) { btn.disabled = false; btn.textContent = 'Pray'; return; }
+          return r.json().then(function(data) {
+            btn.textContent = 'Prayed \u2713';
+            btn.classList.add('prayed');
+            var el = document.getElementById('count-num');
+            if (el && data.count != null) el.textContent = data.count.toLocaleString();
+          });
+        })
+        .catch(function() { btn.disabled = false; btn.textContent = 'Pray'; });
+    }
+  </script>
+</body>
+</html>`;
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -75,6 +192,61 @@ export async function registerRoutes(
     } catch (error) {
       console.error("[sitemap] Failed to generate sitemap:", error);
       res.status(500).send("Failed to generate sitemap");
+    }
+  });
+
+  // widget.js — injectable script for external sites
+  app.get("/widget.js", (_req, res) => {
+    const js = `(function(){var s=document.currentScript;var slug=s&&s.getAttribute('data-prayer');if(!slug)return;var f=document.createElement('iframe');f.src='https://prayforchange.org/embed/'+slug;f.style.cssText='width:100%;height:200px;border:none;border-radius:8px;display:block;';f.setAttribute('frameborder','0');f.setAttribute('scrolling','no');f.setAttribute('allowtransparency','true');s.parentNode.insertBefore(f,s.nextSibling);})();`;
+    res.set("Content-Type", "application/javascript");
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("Cache-Control", "public, max-age=3600");
+    res.status(200).send(js);
+  });
+
+  // Embed prayer widget page — server-side rendered, no React
+  app.get("/embed/:slug", async (req, res) => {
+    const { slug } = req.params;
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("X-Frame-Options", "ALLOWALL");
+    res.set("Content-Type", "text/html");
+    try {
+      const prayer = await storage.getPrayerBySlugOrId(slug);
+      if (!prayer) {
+        return res.status(404).send("<!DOCTYPE html><html><body><p style='font-family:sans-serif;padding:20px;color:#6b7280;'>Prayer not found.</p></body></html>");
+      }
+      const html = buildEmbedHtml(prayer.title, prayer.count, prayer.slug || prayer.id);
+      return res.status(200).send(html);
+    } catch (err) {
+      console.error("[embed] Failed to render embed:", err);
+      return res.status(500).send("<!DOCTYPE html><html><body><p style='font-family:sans-serif;padding:20px;color:#6b7280;'>Unable to load prayer.</p></body></html>");
+    }
+  });
+
+  // Embed pray action — rate-limited (1 per IP per prayer per hour)
+  app.post("/api/embed/:slug/pray", async (req, res) => {
+    res.set("Access-Control-Allow-Origin", "*");
+    try {
+      const prayer = await storage.getPrayerBySlugOrId(req.params.slug);
+      if (!prayer) {
+        return res.status(404).json({ error: "Prayer not found" });
+      }
+      const ip = req.ip || "unknown";
+      const key = `${ip}:${prayer.id}`;
+      const lastPray = embedPrayRateLimit.get(key);
+      const ONE_HOUR = 60 * 60 * 1000;
+      if (lastPray && Date.now() - lastPray < ONE_HOUR) {
+        return res.status(429).json({ error: "Already prayed recently" });
+      }
+      const updated = await storage.incrementPrayerCount(prayer.id);
+      embedPrayRateLimit.set(key, Date.now());
+      storage.incrementDailyPrayerCount(prayer.id).catch((err: any) => {
+        console.error("[embed] Failed to track daily prayer count:", err);
+      });
+      return res.json(updated);
+    } catch (err: any) {
+      console.error("[embed] Failed to process pray:", err);
+      return res.status(500).json({ error: "Failed to process prayer" });
     }
   });
 

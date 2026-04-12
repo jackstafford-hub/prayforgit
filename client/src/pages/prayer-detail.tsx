@@ -3,7 +3,7 @@ import { useRoute, Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
-import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Link2, Share2, Mail, Upload, Wand2 } from "lucide-react";
+import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Link2, Share2, Mail, Upload, Wand2, Code2, Copy, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -69,6 +69,7 @@ export default function PrayerDetail() {
   const [isPostingUpdate, setIsPostingUpdate] = useState(false);
   const [shareCardOpen, setShareCardOpen] = useState(false);
   const [regenerateTarget, setRegenerateTarget] = useState<'issue' | 'prayer' | null>(null);
+  const [showEmbedSection, setShowEmbedSection] = useState(false);
   const [regenerateInstructions, setRegenerateInstructions] = useState("");
   
   const { data: adminCheck } = useQuery<{ isAdmin: boolean } | null>({
@@ -835,8 +836,77 @@ export default function PrayerDetail() {
                   >
                     <Image className="w-4 h-4" />
                   </button>
+                  <button
+                    onClick={() => setShowEmbedSection(v => !v)}
+                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${showEmbedSection ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}
+                    title="Embed this prayer"
+                    aria-label="Embed this prayer"
+                    data-testid="button-embed-toggle"
+                  >
+                    <Code2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
+
+              {showEmbedSection && prayer.slug && (
+                <div className="border-t pt-4 space-y-3">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Embed this prayer</p>
+
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">iframe</p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 text-xs bg-muted rounded px-2 py-1.5 truncate text-foreground">
+                        {`<iframe src="https://prayforchange.org/embed/${prayer.slug}" width="100%" height="200" frameborder="0"></iframe>`}
+                      </code>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(`<iframe src="https://prayforchange.org/embed/${prayer.slug}" width="100%" height="200" frameborder="0"></iframe>`).then(() => {
+                            toast({ title: "Copied", description: "iframe code copied to clipboard." });
+                          });
+                        }}
+                        className="shrink-0 w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        title="Copy iframe code"
+                        data-testid="button-copy-iframe"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">script tag</p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 text-xs bg-muted rounded px-2 py-1.5 truncate text-foreground">
+                        {`<script src="https://prayforchange.org/widget.js" data-prayer="${prayer.slug}"></script>`}
+                      </code>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(`<script src="https://prayforchange.org/widget.js" data-prayer="${prayer.slug}"><\/script>`).then(() => {
+                            toast({ title: "Copied", description: "Script tag copied to clipboard." });
+                          });
+                        }}
+                        className="shrink-0 w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        title="Copy script tag"
+                        data-testid="button-copy-script"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 pt-1">
+                    <p className="text-xs text-muted-foreground">Preview</p>
+                    <iframe
+                      src={`/embed/${prayer.slug}`}
+                      width="100%"
+                      height="200"
+                      style={{ border: "none", borderRadius: "8px", display: "block" }}
+                      title="Widget preview"
+                      data-testid="iframe-embed-preview"
+                    />
+                  </div>
+                </div>
+              )}
 
               {donated ? (
                 <>
