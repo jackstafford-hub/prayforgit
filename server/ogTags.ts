@@ -217,6 +217,25 @@ export async function injectPrayerOgTags(
       : PRAYER_FALLBACK_DESCRIPTION;
     html = injectMetaDescription(html, metaDesc);
 
+    const articleBody = (prayer.aiSummary || prayer.description || "").trim();
+    const articleSchema = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": prayer.title,
+      "articleBody": articleBody,
+      "url": ogUrl,
+      "datePublished": prayer.createdAt.toISOString(),
+      "publisher": {
+        "@type": "Organization",
+        "name": "PrayForChange",
+        "url": "https://prayforchange.org",
+      },
+    }, null, 2);
+    html = html.replace(
+      "</head>",
+      `  <script type="application/ld+json">\n${articleSchema}\n  </script>\n</head>`,
+    );
+
     return html;
   } catch (error) {
     console.error("[OG] Failed to inject prayer OG tags:", error);
