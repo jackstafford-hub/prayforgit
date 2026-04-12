@@ -1,0 +1,51 @@
+Search engines and AI assistants (like ChatGPT, Perplexity, and Google's AI Overviews) use structured data to understand what a website is and what it does. The site currently has zero structured data markup. This is a significant gap.
+
+Please add an Organization schema block to the homepage. This tells search engines the basic facts about PrayForChange as an entity.
+
+Add the following JSON-LD script block inside the <head> element of the homepage (not on other pages — just the homepage for now):
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "PrayForChange",
+  "url": "https://prayforchange.org",
+  "logo": "https://prayforchange.org/logo.png",
+  "description": "PrayForChange is a global platform for collective prayer. Share your burden and turn one prayer into thousands. People from over 190 countries pray together for the world's most pressing needs.",
+  "sameAs": [],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "support@prayforchange.org",
+    "contactType": "customer support"
+  }
+}
+</script>
+
+NOTES:
+- Replace "logo.png" with whatever the actual logo image filename is on the site. The logo image should be publicly accessible at that URL.
+- The "sameAs" array is intentionally empty for now — we will add social media profile URLs later as the accounts are created.
+- JSON-LD must be valid JSON. Please validate it before deploying.
+- This block goes in <head>, not at the bottom of <body>.
+
+Also, please add a WebSite schema block on the same page to enable the search box in Google results:
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "PrayForChange",
+  "url": "https://prayforchange.org",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://prayforchange.org/search?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+Note: The SearchAction only works if a search page exists at /search?q=. If search is not yet implemented, omit the potentialAction block and just add the WebSite type without it.
+
+Please confirm both schema blocks are in the page source and validate the JSON is correctly formed.
