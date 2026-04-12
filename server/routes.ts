@@ -28,10 +28,20 @@ function escapeHtmlEmbed(str: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function buildEmbedHtml(title: string, count: number, slug: string): string {
+function getFirstSentence(text: string, maxLen = 120): string {
+  const clean = text.replace(/\n+/g, " ").trim();
+  const match = clean.match(/^[^.!?]+[.!?]/);
+  const sentence = match ? match[0].trim() : clean;
+  if (!sentence) return "";
+  return sentence.length > maxLen ? sentence.slice(0, maxLen) + "..." : sentence;
+}
+
+function buildEmbedHtml(title: string, count: number, slug: string, summary?: string): string {
   const safeTitle = escapeHtmlEmbed(title);
   const safeCount = count.toLocaleString();
   const prayerUrl = `https://prayforchange.org/prayer/${slug}`;
+  const summaryLine = summary ? getFirstSentence(summary) : "";
+  const safeSummary = summaryLine ? escapeHtmlEmbed(summaryLine) : "";
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,6 +76,14 @@ function buildEmbedHtml(title: string, count: number, slug: string): string {
       -webkit-box-orient: vertical;
       overflow: hidden;
       margin-bottom: 6px;
+    }
+    .summary {
+      font-size: 12px;
+      color: #6b7280;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
     }
     .count {
       font-size: 13px;
@@ -106,6 +124,7 @@ function buildEmbedHtml(title: string, count: number, slug: string): string {
   <div class="card">
     <div>
       <div class="title">${safeTitle}</div>
+      ${safeSummary ? `<div class="summary">${safeSummary}</div>` : ''}
       <div class="count"><strong id="count-num">${safeCount}</strong> people praying</div>
     </div>
     <div class="actions">
@@ -222,7 +241,7 @@ export async function registerRoutes(
       if (!prayer) {
         return res.status(404).send("<!DOCTYPE html><html><body><p style='font-family:sans-serif;padding:20px;color:#6b7280;'>Prayer not found.</p></body></html>");
       }
-      const html = buildEmbedHtml(prayer.title, prayer.count, prayer.slug || prayer.id);
+      const html = buildEmbedHtml(prayer.title, prayer.count, prayer.slug || prayer.id, prayer.aiSummary || prayer.description || "");
       return res.status(200).send(html);
     } catch (err) {
       console.error("[embed] Failed to render embed:", err);
