@@ -144,3 +144,12 @@ export const subscribers = pgTable("email_subscribers", {
 export const insertSubscriberSchema = createInsertSchema(subscribers).omit({ id: true, subscribedAt: true });
 export type InsertSubscriber = z.infer<typeof insertSubscriberSchema>;
 export type Subscriber = typeof subscribers.$inferSelect;
+
+export const crisisPrayerSends = pgTable("crisis_prayer_sends", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  prayerId: varchar("prayer_id").references(() => prayers.id).notNull(),
+  sentAt: timestamp("sent_at").notNull().defaultNow(),
+  subscriberCount: integer("subscriber_count").notNull().default(0),
+});
+
+export type CrisisPrayerSend = typeof crisisPrayerSends.$inferSelect;

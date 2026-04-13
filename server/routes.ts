@@ -9,7 +9,7 @@ import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClie
 import express from "express";
 import path from "path";
 import { randomBytes } from "node:crypto";
-import { sendPrayerSavedEmail, sendAdminPrayerCopyEmail, sendModerationEmail } from "./emailService";
+import { sendPrayerSavedEmail, sendAdminPrayerCopyEmail, sendModerationEmail, sendDailyCrisisPrayerEmail } from "./emailService";
 
 let openai: OpenAI | null = null;
 if (process.env.OPENAI_API_KEY) {
@@ -326,6 +326,89 @@ export async function registerRoutes(
     } catch (err: any) {
       console.error("[unsubscribe] Failed:", err);
       return res.status(200).send(buildUnsubscribePage(false));
+    }
+  });
+
+  const CRISIS_PRAYER_EMAIL = 'jackstaffmail@gmail.com';
+  const SITE_URL = process.env.SITE_URL || 'https://prayforchange.org';
+
+  // Get crisis prayer status for a specific prayer (auth-required)
+  app.get("/api/prayers/:id/crisis-status", isAuthenticated, async (req, res) => {
+    try {
+      const prayer = await storage.getPrayerBySlugOrId(req.params.id);
+      if (!prayer) return res.status(404).json({ error: "Prayer not found" });
+
+      let isCrisisPrayer = false;
+      if (prayer.authorId) {
+        const author = await storage.getUser(prayer.authorId);
+        isCrisisPrayer = !!(author && author.email?.toLowerCase() === CRISIS_PRAYER_EMAIL.toLowerCase());
+      }
+
+      const todaySend = await storage.getCrisisPrayerSendToday();
+      return res.json({
+        isCrisisPrayer,
+        sentToday: !!todaySend,
+        lastSentAt: todaySend?.sentAt ?? null,
+        lastSentCount: todaySend?.subscriberCount ?? null,
+      });
+    } catch (err: any) {
+      console.error("[crisis-status] Failed:", err);
+      return res.status(500).json({ error: "Failed to check crisis status" });
+    }
+  });
+
+  // Send Daily Crisis Prayer to all active subscribers (jackstaffmail@gmail.com only)
+  app.post("/api/prayers/:id/send-crisis-email", isAuthenticated, async (req: any, res) => {
+    try {
+      const sessionUser = req.user as { id: string; email?: string } | undefined;
+      if (!sessionUser) return res.status(401).json({ error: "Unauthorized" });
+
+      const prayer = await storage.getPrayerBySlugOrId(req.params.id);
+      if (!prayer) return res.status(404).json({ error: "Prayer not found" });
+
+      if (!prayer.authorId) return res.status(403).json({ error: "Forbidden" });
+      const author = await storage.getUser(prayer.authorId);
+      if (!author || author.email?.toLowerCase() !== CRISIS_PRAYER_EMAIL.toLowerCase()) {
+        return res.status(403).json({ error: "Forbidden: not a crisis prayer account" });
+      }
+      if (sessionUser.id !== prayer.authorId) {
+        return res.status(403).json({ error: "Forbidden: not your prayer" });
+      }
+
+      // One-per-day guard
+      const todaySend = await storage.getCrisisPrayerSendToday();
+      if (todaySend) {
+        return res.status(409).json({ error: "Already sent today", sentCount: todaySend.subscriberCount });
+      }
+
+      const allSubscribers = await storage.getActiveSubscribers();
+      if (allSubscribers.length === 0) {
+        return res.json({ sent: 0, failed: 0 });
+      }
+
+      const prayerUrl = `${SITE_URL}/prayer/${prayer.slug || prayer.id}`;
+      const BATCH_SIZE = 100;
+      let sent = 0;
+      let failed = 0;
+
+      for (let i = 0; i < allSubscribers.length; i += BATCH_SIZE) {
+        const batch = allSubscribers.slice(i, i + BATCH_SIZE);
+        const results = await Promise.all(
+          batch.map(subscriber =>
+            sendDailyCrisisPrayerEmail(subscriber, prayer, prayerUrl, prayer.count)
+          )
+        );
+        for (const ok of results) {
+          if (ok) sent++; else failed++;
+        }
+      }
+
+      await storage.logCrisisPrayerSend(prayer.id, sent);
+      console.log(`[CRISIS] Daily crisis prayer sent: ${sent} delivered, ${failed} failed`);
+      return res.json({ sent, failed });
+    } catch (err: any) {
+      console.error("[crisis-send] Failed:", err);
+      return res.status(500).json({ error: "Failed to send crisis prayer email" });
     }
   });
 

@@ -1,4 +1,5 @@
 import sgMail from '@sendgrid/mail';
+import type { Subscriber, Prayer } from '@shared/schema';
 
 function escapeHtml(text: string): string {
   return text
@@ -296,5 +297,89 @@ export async function sendAdminPrayerCopyEmail(prayerTitle: string, prayerDescri
   } catch (error: any) {
     const detail = error?.response?.body ? JSON.stringify(error.response.body) : (error?.message || error);
     console.error(`[EMAIL] Failed to send admin prayer copy to ${ADMIN_EMAIL}:`, detail);
+  }
+}
+
+export async function sendDailyCrisisPrayerEmail(
+  subscriber: Subscriber,
+  prayer: Prayer,
+  prayerUrl: string,
+  prayerCount: number
+): Promise<boolean> {
+  try {
+    const { client, fromEmail } = await getUncachableSendGridClient();
+    const SITE_URL = process.env.SITE_URL || 'https://prayforchange.org';
+    const unsubscribeUrl = `${SITE_URL}/api/unsubscribe?token=${subscriber.unsubscribeToken}`;
+
+    const imageSection = prayer.imageUrl
+      ? `<img src="${escapeHtml(prayer.imageUrl)}" alt="" style="display:block;width:100%;max-width:600px;height:auto;border-radius:6px 6px 0 0;margin-bottom:0;" />`
+      : '';
+
+    const issueSection = prayer.description
+      ? `<p style="font-size:16px;line-height:1.75;color:#374151;margin:0 0 24px;">${escapeHtml(prayer.description).replace(/\n/g, '<br />')}</p>`
+      : '';
+
+    const prayerSection = prayer.recitablePrayer
+      ? `<div style="border-left:4px solid #c9a96e;padding:16px 20px;margin:0 0 28px;background:#fafaf8;">
+           <p style="font-style:italic;font-size:16px;line-height:1.8;color:#4b5563;margin:0;">${escapeHtml(prayer.recitablePrayer).replace(/\n/g, '<br />')}</p>
+         </div>`
+      : '';
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(prayer.title)}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f0;font-family:'Georgia',serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f0;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          ${imageSection ? `<tr><td style="padding:0;">${imageSection}</td></tr>` : ''}
+          <tr>
+            <td style="padding:36px 40px 0;">
+              <p style="font-size:13px;font-weight:600;letter-spacing:0.08em;color:#9ca3af;text-transform:uppercase;margin:0 0 12px;">Daily Crisis Prayer</p>
+              <h1 style="font-family:'Georgia',serif;font-size:26px;font-weight:700;color:#111827;line-height:1.35;margin:0 0 24px;">${escapeHtml(prayer.title)}</h1>
+              ${issueSection}
+              <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 24px;" />
+              ${prayerSection}
+              <div style="text-align:center;margin:0 0 16px;">
+                <a href="${escapeHtml(prayerUrl)}" style="display:inline-block;background-color:#C94040;color:#ffffff;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:17px;font-weight:700;padding:16px 36px;border-radius:50px;">I Prayed For This</a>
+              </div>
+              <p style="text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#9ca3af;margin:0 0 36px;">Join ${prayerCount.toLocaleString()} people praying</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="border-top:1px solid #e5e7eb;padding:20px 40px;text-align:center;">
+              <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:#9ca3af;margin:0 0 8px;">PrayForChange.org &mdash; Every morning, a prayer for the world&#39;s most urgent crisis.</p>
+              <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:#9ca3af;margin:0;"><a href="${escapeHtml(unsubscribeUrl)}" style="color:#9ca3af;">Unsubscribe</a></p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    await client.send({
+      to: subscriber.email,
+      from: { email: fromEmail, name: 'PrayForChange.org' },
+      subject: prayer.title,
+      html,
+      headers: {
+        'List-Unsubscribe': `<${unsubscribeUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      },
+    });
+
+    console.log(`[CRISIS] Crisis prayer email sent to ${subscriber.email}`);
+    return true;
+  } catch (error: any) {
+    const detail = error?.response?.body ? JSON.stringify(error.response.body) : (error?.message || error);
+    console.error(`[CRISIS] Failed to send crisis prayer email to ${subscriber.email}:`, detail);
+    return false;
   }
 }

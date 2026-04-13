@@ -3,7 +3,7 @@ import { useRoute, Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
-import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Link2, Share2, Mail, Upload, Wand2, Code2, Copy } from "lucide-react";
+import { ArrowLeft, UserCircle, Flag, Pencil, RefreshCw, Check, X, Loader2, MessageSquarePlus, Clock, Image, Link2, Share2, Mail, Upload, Wand2, Code2, Copy, Send } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -71,6 +71,8 @@ export default function PrayerDetail() {
   const [regenerateTarget, setRegenerateTarget] = useState<'issue' | 'prayer' | null>(null);
   const [showEmbedSection, setShowEmbedSection] = useState(false);
   const [regenerateInstructions, setRegenerateInstructions] = useState("");
+  const [isSendingCrisis, setIsSendingCrisis] = useState(false);
+  const [crisisSendResult, setCrisisSendResult] = useState<{ sent: number; failed: number } | null>(null);
   
   const { data: adminCheck } = useQuery<{ isAdmin: boolean } | null>({
     queryKey: ["/api/admin/check"],
@@ -79,6 +81,45 @@ export default function PrayerDetail() {
   const isAdmin = !!adminCheck?.isAdmin;
   const isAuthor = isAuthenticated && prayer && prayer.authorId === user?.id;
   const canEdit = isAuthor || isAdmin;
+
+  const { data: crisisStatus, refetch: refetchCrisisStatus } = useQuery<{
+    isCrisisPrayer: boolean;
+    sentToday: boolean;
+    lastSentAt: string | null;
+    lastSentCount: number | null;
+  } | null>({
+    queryKey: ["/api/prayers", id, "crisis-status"],
+    queryFn: async () => {
+      const res = await fetch(`/api/prayers/${id}/crisis-status`, { credentials: "include" });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: isAuthenticated && !!id,
+    staleTime: 30_000,
+  });
+
+  const handleSendCrisisPrayer = async () => {
+    if (!prayer || isSendingCrisis) return;
+    setIsSendingCrisis(true);
+    try {
+      const res = await fetch(`/api/prayers/${prayer.id}/send-crisis-email`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast({ title: "Failed to send", description: data.error || "Something went wrong.", variant: "destructive" });
+        return;
+      }
+      setCrisisSendResult({ sent: data.sent, failed: data.failed });
+      refetchCrisisStatus();
+      toast({ title: `Sent to ${data.sent} subscribers`, description: data.failed > 0 ? `${data.failed} failed` : undefined });
+    } catch {
+      toast({ title: "Failed to send", description: "Network error.", variant: "destructive" });
+    } finally {
+      setIsSendingCrisis(false);
+    }
+  };
 
   const handleSubmitReport = async () => {
     if (!prayer || !reportReason) return;
@@ -759,6 +800,44 @@ export default function PrayerDetail() {
           </div>
 
           <div className="lg:sticky lg:top-24 h-fit">
+            {crisisStatus?.isCrisisPrayer && (
+              <div className="bg-white border-2 border-rose-200 rounded-xl shadow-sm p-5 mb-4 space-y-3">
+                <p className="text-xs font-semibold text-rose-600 uppercase tracking-wider">Daily Crisis Prayer</p>
+                {crisisSendResult ? (
+                  <div className="flex items-center gap-2 text-sm font-medium text-green-700" data-testid="text-crisis-send-result">
+                    <Check className="w-4 h-4 shrink-0" />
+                    <span>Sent to {crisisSendResult.sent} subscriber{crisisSendResult.sent !== 1 ? 's' : ''}{crisisSendResult.failed > 0 ? ` (${crisisSendResult.failed} failed)` : ''}</span>
+                  </div>
+                ) : crisisStatus.sentToday ? (
+                  <div className="space-y-1">
+                    <Button
+                      disabled
+                      className="w-full h-10 bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 hover:bg-gray-100"
+                      data-testid="button-crisis-sent-today"
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Sent today ✓
+                    </Button>
+                    {crisisStatus.lastSentCount != null && (
+                      <p className="text-xs text-center text-muted-foreground">{crisisStatus.lastSentCount} subscriber{crisisStatus.lastSentCount !== 1 ? 's' : ''} received this</p>
+                    )}
+                  </div>
+                ) : (
+                  <Button
+                    onClick={handleSendCrisisPrayer}
+                    disabled={isSendingCrisis}
+                    className="w-full h-10 bg-rose-600 hover:bg-rose-700 text-white"
+                    data-testid="button-send-crisis-prayer"
+                  >
+                    {isSendingCrisis ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending&hellip;</>
+                    ) : (
+                      <><Send className="w-4 h-4 mr-2" />Send as Daily Crisis Prayer</>
+                    )}
+                  </Button>
+                )}
+              </div>
+            )}
             <div className="bg-white border rounded-xl shadow-sm p-6 space-y-6">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-muted-foreground">Share</span>

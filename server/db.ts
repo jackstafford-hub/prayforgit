@@ -235,5 +235,20 @@ export async function ensureTablesExist(): Promise<void> {
     console.error("[DB] Email subscribers table error:", error?.message);
   }
 
+  // Crisis prayer sends table
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS crisis_prayer_sends (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        prayer_id VARCHAR REFERENCES prayers(id) NOT NULL,
+        sent_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        subscriber_count INTEGER NOT NULL DEFAULT 0
+      )
+    `);
+    console.log("[DB] Crisis prayer sends table ensured");
+  } catch (error: any) {
+    console.error("[DB] Crisis prayer sends table error:", error?.message);
+  }
+
   console.log("[DB] All required tables verified");
 }

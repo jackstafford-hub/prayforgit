@@ -1,5 +1,5 @@
 import { db, generateSlugFromTitle } from "./db";
-import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, type Subscriber, users, prayers, reports, dailyPrayerCounts, prayerUpdates, subscribers } from "@shared/schema";
+import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, type Subscriber, type CrisisPrayerSend, users, prayers, reports, dailyPrayerCounts, prayerUpdates, subscribers, crisisPrayerSends } from "@shared/schema";
 import { eq, desc, gte, and, sql, count as countFn } from "drizzle-orm";
 
 export interface IStorage {
@@ -55,6 +55,11 @@ export interface IStorage {
   addSubscriber(email: string, token: string): Promise<'created' | 'reactivated' | 'already_active'>;
   getSubscriberByToken(token: string): Promise<Subscriber | undefined>;
   deactivateSubscriberByToken(token: string): Promise<boolean>;
+  getActiveSubscribers(): Promise<Subscriber[]>;
+
+  // Crisis prayer send methods
+  logCrisisPrayerSend(prayerId: string, subscriberCount: number): Promise<void>;
+  getCrisisPrayerSendToday(): Promise<CrisisPrayerSend | null>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -383,6 +388,25 @@ export class DatabaseStorage implements IStorage {
       .set({ isActive: false })
       .where(and(eq(subscribers.unsubscribeToken, token), eq(subscribers.isActive, true)));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  async getActiveSubscribers(): Promise<Subscriber[]> {
+    return await db.select().from(subscribers).where(eq(subscribers.isActive, true));
+  }
+
+  async logCrisisPrayerSend(prayerId: string, subscriberCount: number): Promise<void> {
+    await db.insert(crisisPrayerSends).values({ prayerId, subscriberCount });
+  }
+
+  async getCrisisPrayerSendToday(): Promise<CrisisPrayerSend | null> {
+    const todayStart = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
+    const [row] = await db
+      .select()
+      .from(crisisPrayerSends)
+      .where(gte(crisisPrayerSends.sentAt, todayStart))
+      .orderBy(desc(crisisPrayerSends.sentAt))
+      .limit(1);
+    return row ?? null;
   }
 }
 
