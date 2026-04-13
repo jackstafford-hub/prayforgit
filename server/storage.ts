@@ -381,7 +381,7 @@ export class DatabaseStorage implements IStorage {
   async deactivateSubscriberByToken(token: string): Promise<boolean> {
     const result = await db.update(subscribers)
       .set({ isActive: false })
-      .where(eq(subscribers.unsubscribeToken, token));
+      .where(and(eq(subscribers.unsubscribeToken, token), eq(subscribers.isActive, true)));
     return (result.rowCount ?? 0) > 0;
   }
 }
