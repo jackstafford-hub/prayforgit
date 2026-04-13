@@ -9,7 +9,7 @@ import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClie
 import express from "express";
 import path from "path";
 import { randomBytes } from "node:crypto";
-import { sendPrayerSavedEmail, sendAdminPrayerCopyEmail, sendModerationEmail, sendDailyCrisisPrayerEmail } from "./emailService";
+import { sendPrayerSavedEmail, sendAdminPrayerCopyEmail, sendModerationEmail, sendCrisisPrayerEmailBatch } from "./emailService";
 
 let openai: OpenAI | null = null;
 if (process.env.OPENAI_API_KEY) {
@@ -389,26 +389,9 @@ export async function registerRoutes(
       }
 
       const allSubscribers = await storage.getActiveSubscribers();
-      if (allSubscribers.length === 0) {
-        return res.json({ sent: 0, failed: 0 });
-      }
-
       const prayerUrl = `${SITE_URL}/prayer/${prayer.slug || prayer.id}`;
-      const BATCH_SIZE = 100;
-      let sent = 0;
-      let failed = 0;
 
-      for (let i = 0; i < allSubscribers.length; i += BATCH_SIZE) {
-        const batch = allSubscribers.slice(i, i + BATCH_SIZE);
-        const results = await Promise.all(
-          batch.map(subscriber =>
-            sendDailyCrisisPrayerEmail(subscriber, prayer, prayerUrl, prayer.count)
-          )
-        );
-        for (const ok of results) {
-          if (ok) sent++; else failed++;
-        }
-      }
+      const { sent, failed } = await sendCrisisPrayerEmailBatch(allSubscribers, prayer, prayerUrl, prayer.count);
 
       await storage.logCrisisPrayerSend(prayer.id, sent);
       console.log(`[CRISIS] Daily crisis prayer sent: ${sent} delivered, ${failed} failed`);

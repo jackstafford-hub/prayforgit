@@ -300,32 +300,30 @@ export async function sendAdminPrayerCopyEmail(prayerTitle: string, prayerDescri
   }
 }
 
-export async function sendDailyCrisisPrayerEmail(
+function buildCrisisPrayerHtml(
   subscriber: Subscriber,
   prayer: Prayer,
   prayerUrl: string,
-  prayerCount: number
-): Promise<boolean> {
-  try {
-    const { client, fromEmail } = await getUncachableSendGridClient();
-    const SITE_URL = process.env.SITE_URL || 'https://prayforchange.org';
-    const unsubscribeUrl = `${SITE_URL}/api/unsubscribe?token=${subscriber.unsubscribeToken}`;
+  prayerCount: number,
+  siteUrl: string
+): string {
+  const unsubscribeUrl = `${siteUrl}/api/unsubscribe?token=${subscriber.unsubscribeToken}`;
 
-    const imageSection = prayer.imageUrl
-      ? `<img src="${escapeHtml(prayer.imageUrl)}" alt="" style="display:block;width:100%;max-width:600px;height:auto;border-radius:6px 6px 0 0;margin-bottom:0;" />`
-      : '';
+  const imageSection = prayer.imageUrl
+    ? `<tr><td style="padding:0;"><img src="${escapeHtml(prayer.imageUrl)}" alt="" style="display:block;width:100%;max-width:600px;height:auto;border-radius:6px 6px 0 0;" /></td></tr>`
+    : '';
 
-    const issueSection = prayer.description
-      ? `<p style="font-size:16px;line-height:1.75;color:#374151;margin:0 0 24px;">${escapeHtml(prayer.description).replace(/\n/g, '<br />')}</p>`
-      : '';
+  const issueSection = prayer.description
+    ? `<p style="font-size:16px;line-height:1.75;color:#374151;margin:0 0 24px;">${escapeHtml(prayer.description).replace(/\n/g, '<br />')}</p>`
+    : '';
 
-    const prayerSection = prayer.recitablePrayer
-      ? `<div style="border-left:4px solid #c9a96e;padding:16px 20px;margin:0 0 28px;background:#fafaf8;">
-           <p style="font-style:italic;font-size:16px;line-height:1.8;color:#4b5563;margin:0;">${escapeHtml(prayer.recitablePrayer).replace(/\n/g, '<br />')}</p>
-         </div>`
-      : '';
+  const prayerSection = prayer.recitablePrayer
+    ? `<div style="border-left:4px solid #c9a96e;padding:16px 20px;margin:0 0 28px;background:#fafaf8;">
+         <p style="font-style:italic;font-size:16px;line-height:1.8;color:#4b5563;margin:0;">${escapeHtml(prayer.recitablePrayer).replace(/\n/g, '<br />')}</p>
+       </div>`
+    : '';
 
-    const html = `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -337,7 +335,7 @@ export async function sendDailyCrisisPrayerEmail(
     <tr>
       <td align="center">
         <table width="100%" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-          ${imageSection ? `<tr><td style="padding:0;">${imageSection}</td></tr>` : ''}
+          ${imageSection}
           <tr>
             <td style="padding:36px 40px 0;">
               <p style="font-size:13px;font-weight:600;letter-spacing:0.08em;color:#9ca3af;text-transform:uppercase;margin:0 0 12px;">Daily Crisis Prayer</p>
@@ -363,23 +361,64 @@ export async function sendDailyCrisisPrayerEmail(
   </table>
 </body>
 </html>`;
+}
 
-    await client.send({
-      to: subscriber.email,
-      from: { email: fromEmail, name: 'PrayForChange.org' },
-      subject: prayer.title,
-      html,
-      headers: {
-        'List-Unsubscribe': `<${unsubscribeUrl}>`,
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-      },
-    });
+export async function sendCrisisPrayerEmailBatch(
+  subscribers: Subscriber[],
+  prayer: Prayer,
+  prayerUrl: string,
+  prayerCount: number
+): Promise<{ sent: number; failed: number }> {
+  const SITE_URL = process.env.SITE_URL || 'https://prayforchange.org';
+  const BATCH_SIZE = 100;
+  let sent = 0;
+  let failed = 0;
 
-    console.log(`[CRISIS] Crisis prayer email sent to ${subscriber.email}`);
-    return true;
-  } catch (error: any) {
-    const detail = error?.response?.body ? JSON.stringify(error.response.body) : (error?.message || error);
-    console.error(`[CRISIS] Failed to send crisis prayer email to ${subscriber.email}:`, detail);
-    return false;
+  if (subscribers.length === 0) {
+    console.log('[CRISIS] No active subscribers — send skipped');
+    return { sent: 0, failed: 0 };
   }
+
+  let client: typeof sgMail;
+  let fromEmail: string;
+  try {
+    const creds = await getUncachableSendGridClient();
+    client = creds.client;
+    fromEmail = creds.fromEmail;
+  } catch (err: any) {
+    console.error('[CRISIS] Could not initialize SendGrid client:', err?.message || err);
+    return { sent: 0, failed: subscribers.length };
+  }
+
+  for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
+    const batch = subscribers.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(
+      batch.map(async (subscriber) => {
+        const unsubscribeUrl = `${SITE_URL}/api/unsubscribe?token=${subscriber.unsubscribeToken}`;
+        try {
+          await client.send({
+            to: subscriber.email,
+            from: { email: fromEmail, name: 'PrayForChange.org' },
+            subject: prayer.title,
+            html: buildCrisisPrayerHtml(subscriber, prayer, prayerUrl, prayerCount, SITE_URL),
+            headers: {
+              'List-Unsubscribe': `<${unsubscribeUrl}>`,
+              'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+            },
+          });
+          console.log(`[CRISIS] Sent to ${subscriber.email}`);
+          return true;
+        } catch (error: any) {
+          const detail = error?.response?.body ? JSON.stringify(error.response.body) : (error?.message || error);
+          console.error(`[CRISIS] Failed to send to ${subscriber.email}:`, detail);
+          return false;
+        }
+      })
+    );
+    for (const ok of results) {
+      if (ok) sent++; else failed++;
+    }
+  }
+
+  return { sent, failed };
 }
