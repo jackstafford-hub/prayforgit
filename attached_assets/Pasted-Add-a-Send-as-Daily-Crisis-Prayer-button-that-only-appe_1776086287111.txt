@@ -1,0 +1,43 @@
+Add a "Send as Daily Crisis Prayer" button that only appears on prayers created by the account jackstaffmail@gmail.com. This button emails the prayer to all subscribers via SendGrid.
+SendGrid is already configured. Use the existing API key in Replit Secrets.
+What to build:
+On published prayer pages, check if the prayer was created by the account with email jackstaffmail@gmail.com. ONLY for those prayers, show a button: "Send as Daily Crisis Prayer". Do NOT show this button on any other prayers — it is exclusively for the daily crisis prayers posted from that account.
+When clicked, this button should:
+
+Check that no other Daily Crisis Prayer email has been sent today (max one per day)
+If clear, send the prayer to all active subscribers using SendGrid
+Show a confirmation: "Sent to X subscribers"
+Log the send: prayer ID, timestamp, subscriber count
+
+Email content (use SendGrid's API, not SMTP):
+From: PrayForChange.org daily@prayforchange.org
+Subject: [Prayer Title] — e.g., "Pray for the Children of Bangladesh"
+Email body (inline CSS, mobile-friendly, max-width 600px):
+[Prayer header image — full width, if one exists]
+
+[Prayer Title — large, bold, dark text]
+
+[Story text — the "The Issue" section, regular weight, readable font size]
+
+─── horizontal divider ───
+
+[Community Prayer text — in italic, slightly indented, with a subtle left border]
+
+[ I Prayed For This ]  ← centered red button (background: #C94040, white text, rounded corners, padding 16px 32px), links to the prayer page URL
+
+"Join X people praying" — centered, small gray text below button
+
+─── footer divider ───
+
+PrayForChange.org — Every morning, a prayer for the world's most urgent crisis.
+[Unsubscribe] ← links to /api/unsubscribe?token={subscriber's unsubscribe_token}
+Important technical details:
+
+Send emails in batches if you have more than 100 subscribers (SendGrid rate limits)
+Each email must have a unique unsubscribe link using that subscriber's personal unsubscribe_token
+If sending fails for one subscriber, log the error and continue with the rest
+The button should be disabled and show "Sent today ✓" after use, preventing double-sends
+Add a List-Unsubscribe header to the email for one-click unsubscribe in Gmail
+This button should only be visible to the logged-in admin user who owns the prayer — not to the public
+
+Sending domain: Make sure prayforchange.org is verified as a sender in SendGrid. If it's not, tell me what DNS records (CNAME or TXT) I need to add.
