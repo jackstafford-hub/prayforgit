@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
+import { DailyPrayerSignup } from "@/components/daily-prayer-signup";
 import {
   Dialog,
   DialogContent,
@@ -1082,6 +1083,8 @@ export default function PrayerDetail() {
           onOpenChange={setShareCardOpen}
         />
       )}
+
+      <DailyPrayerSignup />
 
       <Dialog open={regenerateTarget !== null} onOpenChange={(open) => !open && setRegenerateTarget(null)}>
         <DialogContent className="sm:max-w-md">
