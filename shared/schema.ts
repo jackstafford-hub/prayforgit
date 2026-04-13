@@ -132,3 +132,15 @@ export const dailyPrayerCounts = pgTable("daily_prayer_counts", {
 });
 
 export type DailyPrayerCount = typeof dailyPrayerCounts.$inferSelect;
+
+export const subscribers = pgTable("email_subscribers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").notNull().unique(),
+  subscribedAt: timestamp("subscribed_at").notNull().defaultNow(),
+  isActive: boolean("is_active").notNull().default(true),
+  unsubscribeToken: varchar("unsubscribe_token").notNull().unique(),
+});
+
+export const insertSubscriberSchema = createInsertSchema(subscribers).omit({ id: true, subscribedAt: true });
+export type InsertSubscriber = z.infer<typeof insertSubscriberSchema>;
+export type Subscriber = typeof subscribers.$inferSelect;

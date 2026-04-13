@@ -8,6 +8,7 @@ import { setupAuth, isAuthenticated } from "./auth";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import express from "express";
 import path from "path";
+import { randomBytes } from "node:crypto";
 import { sendPrayerSavedEmail, sendAdminPrayerCopyEmail, sendModerationEmail } from "./emailService";
 
 let openai: OpenAI | null = null;
@@ -18,6 +19,7 @@ if (process.env.OPENAI_API_KEY) {
 }
 
 const embedPrayRateLimit = new Map<string, number>();
+const subscribeRateLimit = new Map<string, number[]>(); // ip → array of timestamps (last hour)
 
 function escapeHtmlEmbed(str: string): string {
   return str
@@ -160,6 +162,13 @@ function buildEmbedHtml(title: string, count: number, slug: string, summary?: st
 </html>`;
 }
 
+function buildUnsubscribePage(success: boolean): string {
+  const message = success
+    ? "You've been unsubscribed from the Daily Crisis Prayer. You can rejoin any time at <a href=\"https://prayforchange.org\" style=\"color:#e11d48;\">prayforchange.org</a>."
+    : "This unsubscribe link is not valid or has already been used.";
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Unsubscribed - PrayForChange</title><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;box-sizing:border-box;}.card{max-width:480px;text-align:center;padding:40px 32px;border:1px solid #e5e7eb;border-radius:12px;}h1{font-size:22px;font-weight:700;margin:0 0 12px;}p{color:#6b7280;line-height:1.6;margin:0;}</style></head><body><div class="card"><h1>PrayForChange</h1><p>${message}</p></div></body></html>`;
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -273,6 +282,50 @@ export async function registerRoutes(
     } catch (err: any) {
       console.error("[embed] Failed to process pray:", err);
       return res.status(500).json({ error: "Failed to process prayer" });
+    }
+  });
+
+  // Subscribe to Daily Crisis Prayer
+  app.post("/api/subscribe", async (req, res) => {
+    try {
+      const parsed = z.object({ email: z.string().email() }).safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid email address" });
+      }
+      const email = parsed.data.email.toLowerCase().trim();
+
+      const ip = req.ip || "unknown";
+      const ONE_HOUR = 60 * 60 * 1000;
+      const now = Date.now();
+      const timestamps = (subscribeRateLimit.get(ip) || []).filter(t => now - t < ONE_HOUR);
+      if (timestamps.length >= 5) {
+        return res.status(429).json({ error: "Too many signups. Please try again later." });
+      }
+      timestamps.push(now);
+      subscribeRateLimit.set(ip, timestamps);
+
+      const token = randomBytes(32).toString("hex");
+      const status = await storage.addSubscriber(email, token);
+      return res.json({ status });
+    } catch (err: any) {
+      console.error("[subscribe] Failed to process subscription:", err);
+      return res.status(500).json({ error: "Failed to process subscription" });
+    }
+  });
+
+  // Unsubscribe via token (server-rendered HTML, not React)
+  app.get("/api/unsubscribe", async (req, res) => {
+    res.set("Content-Type", "text/html");
+    const token = typeof req.query.token === "string" ? req.query.token : "";
+    if (!token) {
+      return res.status(200).send(buildUnsubscribePage(false));
+    }
+    try {
+      const deactivated = await storage.deactivateSubscriberByToken(token);
+      return res.status(200).send(buildUnsubscribePage(deactivated));
+    } catch (err: any) {
+      console.error("[unsubscribe] Failed:", err);
+      return res.status(200).send(buildUnsubscribePage(false));
     }
   });
 

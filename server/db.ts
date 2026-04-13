@@ -210,6 +210,30 @@ export async function ensureTablesExist(): Promise<void> {
   } catch (error: any) {
     console.error("[DB] Daily prayer counts table error:", error?.message);
   }
-  
+
+  // Ensure email_opt_in column exists on users (safe migration)
+  try {
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_opt_in BOOLEAN DEFAULT false`);
+    console.log("[DB] Users email_opt_in column ensured");
+  } catch (error: any) {
+    console.error("[DB] Users email_opt_in migration error:", error?.message);
+  }
+
+  // Email subscribers table
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS email_subscribers (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        email VARCHAR NOT NULL UNIQUE,
+        subscribed_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        is_active BOOLEAN NOT NULL DEFAULT true,
+        unsubscribe_token VARCHAR NOT NULL UNIQUE
+      )
+    `);
+    console.log("[DB] Email subscribers table ensured");
+  } catch (error: any) {
+    console.error("[DB] Email subscribers table error:", error?.message);
+  }
+
   console.log("[DB] All required tables verified");
 }

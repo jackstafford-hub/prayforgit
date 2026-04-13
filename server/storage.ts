@@ -1,5 +1,5 @@
 import { db, generateSlugFromTitle } from "./db";
-import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, users, prayers, reports, dailyPrayerCounts, prayerUpdates } from "@shared/schema";
+import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, type Subscriber, users, prayers, reports, dailyPrayerCounts, prayerUpdates, subscribers } from "@shared/schema";
 import { eq, desc, gte, and, sql, count as countFn } from "drizzle-orm";
 
 export interface IStorage {
@@ -50,6 +50,11 @@ export interface IStorage {
   incrementDailyPrayerCount(prayerId: string): Promise<void>;
   getDailyPrayerCountsForDate(date: string): Promise<{ prayerId: string; count: number }[]>;
   resetDailyPrayerCounts(date: string): Promise<void>;
+
+  // Subscriber methods
+  addSubscriber(email: string, token: string): Promise<'created' | 'reactivated' | 'already_active'>;
+  getSubscriberByToken(token: string): Promise<Subscriber | undefined>;
+  deactivateSubscriberByToken(token: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -350,6 +355,34 @@ export class DatabaseStorage implements IStorage {
 
   async resetDailyPrayerCounts(date: string): Promise<void> {
     await db.delete(dailyPrayerCounts).where(eq(dailyPrayerCounts.date, date));
+  }
+
+  // Subscriber methods
+  async addSubscriber(email: string, token: string): Promise<'created' | 'reactivated' | 'already_active'> {
+    const [existing] = await db.select().from(subscribers).where(eq(subscribers.email, email));
+    if (!existing) {
+      await db.insert(subscribers).values({ email, unsubscribeToken: token, isActive: true });
+      return 'created';
+    }
+    if (existing.isActive) {
+      return 'already_active';
+    }
+    await db.update(subscribers)
+      .set({ isActive: true, subscribedAt: new Date() })
+      .where(eq(subscribers.id, existing.id));
+    return 'reactivated';
+  }
+
+  async getSubscriberByToken(token: string): Promise<Subscriber | undefined> {
+    const [row] = await db.select().from(subscribers).where(eq(subscribers.unsubscribeToken, token));
+    return row;
+  }
+
+  async deactivateSubscriberByToken(token: string): Promise<boolean> {
+    const result = await db.update(subscribers)
+      .set({ isActive: false })
+      .where(eq(subscribers.unsubscribeToken, token));
+    return (result.rowCount ?? 0) > 0;
   }
 }
 
