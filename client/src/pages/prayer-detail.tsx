@@ -84,6 +84,7 @@ export default function PrayerDetail() {
 
   const { data: crisisStatus, refetch: refetchCrisisStatus } = useQuery<{
     isCrisisPrayer: boolean;
+    canSend: boolean;
     sentToday: boolean;
     lastSentAt: string | null;
     lastSentCount: number | null;
@@ -800,7 +801,7 @@ export default function PrayerDetail() {
           </div>
 
           <div className="lg:sticky lg:top-24 h-fit">
-            {crisisStatus?.isCrisisPrayer && (
+            {crisisStatus?.canSend && (
               <div className="bg-white border-2 border-rose-200 rounded-xl shadow-sm p-5 mb-4 space-y-3">
                 <p className="text-xs font-semibold text-rose-600 uppercase tracking-wider">Daily Crisis Prayer</p>
                 {crisisSendResult ? (

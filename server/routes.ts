@@ -333,20 +333,28 @@ export async function registerRoutes(
   const SITE_URL = process.env.SITE_URL || 'https://prayforchange.org';
 
   // Get crisis prayer status for a specific prayer (auth-required)
-  app.get("/api/prayers/:id/crisis-status", isAuthenticated, async (req, res) => {
+  app.get("/api/prayers/:id/crisis-status", isAuthenticated, async (req: any, res) => {
     try {
+      const sessionUserId: string = req.session.userId;
       const prayer = await storage.getPrayerBySlugOrId(req.params.id);
       if (!prayer) return res.status(404).json({ error: "Prayer not found" });
 
-      let isCrisisPrayer = false;
-      if (prayer.authorId) {
+      // Check if the current session user IS the crisis prayer account and IS the author
+      let canSend = false;
+      if (prayer.authorId && sessionUserId === prayer.authorId) {
         const author = await storage.getUser(prayer.authorId);
-        isCrisisPrayer = !!(author && author.email?.toLowerCase() === CRISIS_PRAYER_EMAIL.toLowerCase());
+        canSend = !!(author && author.email?.toLowerCase() === CRISIS_PRAYER_EMAIL.toLowerCase());
+      }
+
+      if (!canSend) {
+        // Non-owners only get the bare minimum (no send metadata)
+        return res.json({ isCrisisPrayer: false, canSend: false, sentToday: false, lastSentAt: null, lastSentCount: null });
       }
 
       const todaySend = await storage.getCrisisPrayerSendToday();
       return res.json({
-        isCrisisPrayer,
+        isCrisisPrayer: true,
+        canSend: true,
         sentToday: !!todaySend,
         lastSentAt: todaySend?.sentAt ?? null,
         lastSentCount: todaySend?.subscriberCount ?? null,
@@ -360,19 +368,18 @@ export async function registerRoutes(
   // Send Daily Crisis Prayer to all active subscribers (jackstaffmail@gmail.com only)
   app.post("/api/prayers/:id/send-crisis-email", isAuthenticated, async (req: any, res) => {
     try {
-      const sessionUser = req.user as { id: string; email?: string } | undefined;
-      if (!sessionUser) return res.status(401).json({ error: "Unauthorized" });
+      const sessionUserId: string = req.session.userId;
 
       const prayer = await storage.getPrayerBySlugOrId(req.params.id);
       if (!prayer) return res.status(404).json({ error: "Prayer not found" });
 
       if (!prayer.authorId) return res.status(403).json({ error: "Forbidden" });
+      if (sessionUserId !== prayer.authorId) {
+        return res.status(403).json({ error: "Forbidden: not your prayer" });
+      }
       const author = await storage.getUser(prayer.authorId);
       if (!author || author.email?.toLowerCase() !== CRISIS_PRAYER_EMAIL.toLowerCase()) {
         return res.status(403).json({ error: "Forbidden: not a crisis prayer account" });
-      }
-      if (sessionUser.id !== prayer.authorId) {
-        return res.status(403).json({ error: "Forbidden: not your prayer" });
       }
 
       // One-per-day guard
