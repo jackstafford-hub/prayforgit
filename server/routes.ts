@@ -939,6 +939,8 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
       const authorUser = userId ? await storage.getUser(userId) : undefined;
       const isCrisisPrayerAccount = !!(userId && authorUser?.email?.toLowerCase() === CRISIS_PRAYER_EMAIL.toLowerCase());
 
+      let prayerResponse: typeof prayer = prayer;
+
       if (isCrisisPrayerAccount) {
         // Hold for editorial approval before publishing or sending to subscribers
         const token = randomBytes(32).toString('hex');
@@ -950,6 +952,7 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
           console.error('[APPROVAL] Failed to send approval email:', err?.message || err);
         });
         console.log(`[APPROVAL] Crisis prayer ${prayer.id} held for approval, email sent to ${APPROVER_EMAIL}`);
+        prayerResponse = pendingPrayer;
       } else {
         // Normal email flow for all other accounts
         if (authorUser?.email) {
@@ -963,7 +966,7 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
         }
       }
 
-      res.status(201).json(prayer);
+      res.status(201).json(prayerResponse);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "Invalid prayer data", details: error.errors });

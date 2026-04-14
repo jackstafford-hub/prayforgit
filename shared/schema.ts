@@ -46,7 +46,7 @@ export const prayers = pgTable("prayers", {
   flaggedForReview: boolean("flagged_for_review").default(false),
   approvalStatus: text("approval_status").notNull().default('published'),
   approvalToken: varchar("approval_token"),
-  approvalTokenExpiry: timestamp("approval_token_expiry"),
+  approvalTokenExpiry: timestamp("approval_token_expiry", { withTimezone: true }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
