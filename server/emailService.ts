@@ -254,7 +254,7 @@ export async function sendModerationEmail(prayerTitle: string, prayerDescription
             <h2 style="color: #4a3728; margin-top: 0;">${escapeHtml(prayerTitle)}</h2>
             <h3 style="color: #666; margin-top: 12px;">Original Description</h3>
             <p style="font-size: 15px; line-height: 1.6; color: #555; white-space: pre-wrap;">${escapeHtml(prayerDescription)}</p>
-            <h3 style="color: #666; margin-top: 12px;">AI-Generated Prayer</h3>
+            <h3 style="color: #666; margin-top: 12px;">Prayer</h3>
             <p style="font-size: 15px; line-height: 1.6; color: #555; white-space: pre-wrap;">${escapeHtml(prayerContent || 'No AI prayer generated.')}</p>
           </div>
           <p style="font-size: 14px; color: #999; text-align: center;">This prayer requires manual review before it can be made publicly visible.</p>
@@ -285,7 +285,7 @@ export async function sendAdminPrayerCopyEmail(prayerTitle: string, prayerDescri
             <h2 style="color: #4a3728; margin-top: 0;">${escapeHtml(prayerTitle)}</h2>
             <h3 style="color: #666; margin-top: 12px;">Original Description</h3>
             <p style="font-size: 15px; line-height: 1.6; color: #555; white-space: pre-wrap;">${escapeHtml(prayerDescription)}</p>
-            <h3 style="color: #666; margin-top: 12px;">AI-Generated Prayer</h3>
+            <h3 style="color: #666; margin-top: 12px;">Prayer</h3>
             <p style="font-size: 15px; line-height: 1.6; color: #555; white-space: pre-wrap;">${escapeHtml(prayerContent || 'No AI prayer generated.')}</p>
           </div>
           <p style="font-size: 14px; color: #999; text-align: center;">This is an automated admin notification from Pray For Change.</p>
