@@ -9,7 +9,7 @@ import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClie
 import express from "express";
 import path from "path";
 import { randomBytes } from "node:crypto";
-import { sendPrayerSavedEmail, sendAdminPrayerCopyEmail, sendModerationEmail, sendCrisisPrayerEmailBatch } from "./emailService";
+import { sendPrayerSavedEmail, sendAdminPrayerCopyEmail, sendModerationEmail, sendCrisisPrayerEmailBatch, sendCrisisPrayerApprovalEmail } from "./emailService";
 
 let openai: OpenAI | null = null;
 if (process.env.OPENAI_API_KEY) {
@@ -167,6 +167,32 @@ function buildUnsubscribePage(success: boolean): string {
     ? "You've been unsubscribed from the Daily Crisis Prayer. You can rejoin any time at <a href=\"https://prayforchange.org\" style=\"color:#e11d48;\">prayforchange.org</a>."
     : "This unsubscribe link is not valid or has already been used.";
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Unsubscribed - PrayForChange</title><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;box-sizing:border-box;}.card{max-width:480px;text-align:center;padding:40px 32px;border:1px solid #e5e7eb;border-radius:12px;}h1{font-size:22px;font-weight:700;margin:0 0 12px;}p{color:#6b7280;line-height:1.6;margin:0;}</style></head><body><div class="card"><h1>PrayForChange</h1><p>${message}</p></div></body></html>`;
+}
+
+const APPROVAL_PAGE_STYLE = `body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f0;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;box-sizing:border-box;}.card{max-width:540px;width:100%;background:#fff;padding:40px 36px;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}h1{font-size:13px;font-weight:600;letter-spacing:0.08em;color:#9ca3af;text-transform:uppercase;margin:0 0 10px;}h2{font-family:'Georgia',serif;font-size:22px;font-weight:700;color:#111827;margin:0 0 20px;line-height:1.35;}p{color:#6b7280;line-height:1.6;margin:0 0 24px;font-size:15px;}.btn-approve{display:inline-block;background:#166534;color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 28px;border-radius:6px;border:none;cursor:pointer;font-family:inherit;}.btn-reject{display:inline-block;background:#f3f4f6;color:#374151;text-decoration:none;font-size:15px;font-weight:700;padding:14px 28px;border-radius:6px;border:1px solid #d1d5db;cursor:pointer;font-family:inherit;}.btn-reject-red{display:inline-block;background:#dc2626;color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 28px;border-radius:6px;border:none;cursor:pointer;font-family:inherit;}.secondary{font-size:13px;color:#9ca3af;margin:16px 0 0;}.secondary a{color:#6b7280;}`;
+
+function buildApprovalConfirmPage(prayerTitle: string, prayerId: string, token: string): string {
+  const esc = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Approve Prayer - PrayForChange</title><style>${APPROVAL_PAGE_STYLE}</style></head><body><div class="card"><h1>Daily Crisis Prayer</h1><h2>${esc(prayerTitle)}</h2><p>This will publish the prayer and immediately send it to all active subscribers.</p><form method="POST" action="/api/prayers/${esc(prayerId)}/approve?token=${esc(token)}"><button type="submit" class="btn-approve">Confirm Approval &amp; Send to Subscribers</button></form><p class="secondary"><a href="/api/prayers/${esc(prayerId)}/reject?token=${esc(token)}">No — reject this prayer instead</a></p></div></body></html>`;
+}
+
+function buildRejectConfirmPage(prayerTitle: string, prayerId: string, token: string): string {
+  const esc = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reject Prayer - PrayForChange</title><style>${APPROVAL_PAGE_STYLE}</style></head><body><div class="card"><h1>Daily Crisis Prayer</h1><h2>${esc(prayerTitle)}</h2><p>This will remove the prayer from the approval queue without publishing it.</p><form method="POST" action="/api/prayers/${esc(prayerId)}/reject?token=${esc(token)}"><button type="submit" class="btn-reject-red">Confirm Rejection</button></form><p class="secondary"><a href="/api/prayers/${esc(prayerId)}/approve?token=${esc(token)}">Go back to approval page</a></p></div></body></html>`;
+}
+
+function buildApprovalSuccessPage(prayerTitle: string, sent: number): string {
+  const esc = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prayer Approved - PrayForChange</title><style>${APPROVAL_PAGE_STYLE}</style></head><body><div class="card"><h1>Prayer Approved</h1><h2>${esc(prayerTitle)}</h2><p>The prayer has been published and sent to <strong>${sent.toLocaleString()} subscriber${sent !== 1 ? 's' : ''}</strong>.</p></div></body></html>`;
+}
+
+function buildRejectSuccessPage(prayerTitle: string): string {
+  const esc = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prayer Rejected - PrayForChange</title><style>${APPROVAL_PAGE_STYLE}</style></head><body><div class="card"><h1>Prayer Rejected</h1><h2>${esc(prayerTitle)}</h2><p>The prayer has been rejected and removed from the approval queue.</p></div></body></html>`;
+}
+
+function buildApprovalErrorPage(message: string): string {
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Error - PrayForChange</title><style>${APPROVAL_PAGE_STYLE}</style></head><body><div class="card"><h1>PrayForChange</h1><h2>Unable to process request</h2><p>${message}</p></div></body></html>`;
 }
 
 export async function registerRoutes(
@@ -330,6 +356,7 @@ export async function registerRoutes(
   });
 
   const CRISIS_PRAYER_EMAIL = 'jackstaffmail@gmail.com';
+  const APPROVER_EMAIL = 'mrjackstafford@gmail.com';
   const SITE_URL = process.env.SITE_URL || 'https://prayforchange.org';
 
   // Get crisis prayer status for a specific prayer (auth-required)
@@ -399,6 +426,86 @@ export async function registerRoutes(
     } catch (err: any) {
       console.error("[crisis-send] Failed:", err);
       return res.status(500).json({ error: "Failed to send crisis prayer email" });
+    }
+  });
+
+  // ── Approval flow: GET renders confirmation page, POST performs the action ─────────────────
+
+  async function resolveApprovalToken(id: string, token: string) {
+    if (!token) return { ok: false as const, errorHtml: buildApprovalErrorPage('No token provided.') };
+    const prayer = await storage.getPrayerByApprovalToken(token);
+    if (!prayer || prayer.id !== id) return { ok: false as const, errorHtml: buildApprovalErrorPage('This approval link is invalid or has already been used.') };
+    if (!prayer.approvalTokenExpiry || prayer.approvalTokenExpiry < new Date()) return { ok: false as const, errorHtml: buildApprovalErrorPage('This approval link has expired. Please create a new prayer.') };
+    if (prayer.approvalStatus !== 'pending_approval') return { ok: false as const, errorHtml: buildApprovalErrorPage('This prayer has already been approved or rejected.') };
+    return { ok: true as const, prayer };
+  }
+
+  // GET /api/prayers/:id/approve — renders confirmation page (safe for email prefetch)
+  app.get("/api/prayers/:id/approve", async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const token = typeof req.query.token === 'string' ? req.query.token : '';
+      const result = await resolveApprovalToken(id, token);
+      if (!result.ok) return res.status(400).send(result.errorHtml);
+      return res.send(buildApprovalConfirmPage(result.prayer.title, id, token));
+    } catch (err: any) {
+      console.error('[approval-get] Failed:', err);
+      return res.status(500).send(buildApprovalErrorPage('An unexpected error occurred.'));
+    }
+  });
+
+  // POST /api/prayers/:id/approve — publishes prayer and sends to subscribers
+  app.post("/api/prayers/:id/approve", async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const token = typeof req.query.token === 'string' ? req.query.token : '';
+      const result = await resolveApprovalToken(id, token);
+      if (!result.ok) return res.status(400).send(result.errorHtml);
+
+      await storage.setPrayerApprovalStatus(id, 'published');
+      const publishedPrayer = await storage.getPrayerById(id);
+      if (!publishedPrayer) return res.status(500).send(buildApprovalErrorPage('Prayer not found after approval.'));
+
+      const prayerUrl = `${SITE_URL}/prayer/${publishedPrayer.slug || id}`;
+      const allSubscribers = await storage.getActiveSubscribers();
+      const { sent, failed } = await sendCrisisPrayerEmailBatch(allSubscribers, publishedPrayer, prayerUrl, publishedPrayer.count);
+      await storage.logCrisisPrayerSend(id, sent);
+      console.log(`[APPROVAL] Prayer ${id} approved and sent: ${sent} delivered, ${failed} failed`);
+      return res.send(buildApprovalSuccessPage(publishedPrayer.title, sent));
+    } catch (err: any) {
+      console.error('[approval-post] Failed:', err);
+      return res.status(500).send(buildApprovalErrorPage('An unexpected error occurred while approving.'));
+    }
+  });
+
+  // GET /api/prayers/:id/reject — renders rejection confirmation page
+  app.get("/api/prayers/:id/reject", async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const token = typeof req.query.token === 'string' ? req.query.token : '';
+      const result = await resolveApprovalToken(id, token);
+      if (!result.ok) return res.status(400).send(result.errorHtml);
+      return res.send(buildRejectConfirmPage(result.prayer.title, id, token));
+    } catch (err: any) {
+      console.error('[reject-get] Failed:', err);
+      return res.status(500).send(buildApprovalErrorPage('An unexpected error occurred.'));
+    }
+  });
+
+  // POST /api/prayers/:id/reject — marks prayer as rejected
+  app.post("/api/prayers/:id/reject", async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const token = typeof req.query.token === 'string' ? req.query.token : '';
+      const result = await resolveApprovalToken(id, token);
+      if (!result.ok) return res.status(400).send(result.errorHtml);
+
+      await storage.setPrayerApprovalStatus(id, 'rejected');
+      console.log(`[APPROVAL] Prayer ${id} rejected`);
+      return res.send(buildRejectSuccessPage(result.prayer.title));
+    } catch (err: any) {
+      console.error('[reject-post] Failed:', err);
+      return res.status(500).send(buildApprovalErrorPage('An unexpected error occurred while rejecting.'));
     }
   });
 
@@ -826,22 +933,34 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
       };
       
       const prayer = await storage.createPrayer(prayerData);
-
       const prayerContent = prayer.recitablePrayer || prayer.aiSummary || prayer.description || '';
 
-      if (userId) {
-        const user = await storage.getUser(userId);
-        if (user?.email) {
-          sendPrayerSavedEmail(user.email, user.firstName || 'Friend', prayer.title, prayerContent).catch(() => {});
-        }
-      }
+      // Fetch the author user once (used for both crisis-prayer detection and normal emails)
+      const authorUser = userId ? await storage.getUser(userId) : undefined;
+      const isCrisisPrayerAccount = !!(userId && authorUser?.email?.toLowerCase() === CRISIS_PRAYER_EMAIL.toLowerCase());
 
-      const authorName = prayer.author || 'Anonymous';
-
-      if (prayer.flaggedForReview) {
-        sendModerationEmail(prayer.title, prayer.description || '', prayerContent, authorName, toneSuggestion).catch(() => {});
+      if (isCrisisPrayerAccount) {
+        // Hold for editorial approval before publishing or sending to subscribers
+        const token = randomBytes(32).toString('hex');
+        const expiry = new Date(Date.now() + 48 * 60 * 60 * 1000);
+        const pendingPrayer = await storage.setPrayerPendingApproval(prayer.id, token, expiry);
+        const approveUrl = `${SITE_URL}/api/prayers/${prayer.id}/approve?token=${token}`;
+        const rejectUrl = `${SITE_URL}/api/prayers/${prayer.id}/reject?token=${token}`;
+        sendCrisisPrayerApprovalEmail(pendingPrayer, approveUrl, rejectUrl).catch((err: any) => {
+          console.error('[APPROVAL] Failed to send approval email:', err?.message || err);
+        });
+        console.log(`[APPROVAL] Crisis prayer ${prayer.id} held for approval, email sent to ${APPROVER_EMAIL}`);
       } else {
-        sendAdminPrayerCopyEmail(prayer.title, prayer.description || '', prayerContent, authorName).catch(() => {});
+        // Normal email flow for all other accounts
+        if (authorUser?.email) {
+          sendPrayerSavedEmail(authorUser.email, authorUser.firstName || 'Friend', prayer.title, prayerContent).catch(() => {});
+        }
+        const authorName = prayer.author || 'Anonymous';
+        if (prayer.flaggedForReview) {
+          sendModerationEmail(prayer.title, prayer.description || '', prayerContent, authorName, toneSuggestion).catch(() => {});
+        } else {
+          sendAdminPrayerCopyEmail(prayer.title, prayer.description || '', prayerContent, authorName).catch(() => {});
+        }
       }
 
       res.status(201).json(prayer);

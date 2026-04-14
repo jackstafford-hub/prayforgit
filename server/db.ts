@@ -250,5 +250,15 @@ export async function ensureTablesExist(): Promise<void> {
     console.error("[DB] Crisis prayer sends table error:", error?.message);
   }
 
+  // Approval flow columns on prayers (safe migrations for existing tables)
+  try {
+    await pool.query(`ALTER TABLE prayers ADD COLUMN IF NOT EXISTS approval_status TEXT NOT NULL DEFAULT 'published'`);
+    await pool.query(`ALTER TABLE prayers ADD COLUMN IF NOT EXISTS approval_token VARCHAR`);
+    await pool.query(`ALTER TABLE prayers ADD COLUMN IF NOT EXISTS approval_token_expiry TIMESTAMPTZ`);
+    console.log("[DB] Prayer approval columns ensured");
+  } catch (error: any) {
+    console.error("[DB] Prayer approval columns migration error:", error?.message);
+  }
+
   console.log("[DB] All required tables verified");
 }

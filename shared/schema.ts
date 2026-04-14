@@ -44,6 +44,9 @@ export const prayers = pgTable("prayers", {
   goal: integer("goal").notNull().default(100),
   topic: text("topic").notNull().default('General'),
   flaggedForReview: boolean("flagged_for_review").default(false),
+  approvalStatus: text("approval_status").notNull().default('published'),
+  approvalToken: varchar("approval_token"),
+  approvalTokenExpiry: timestamp("approval_token_expiry"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -68,6 +71,9 @@ export const insertPrayerSchema = createInsertSchema(prayers).omit({
   id: true,
   createdAt: true,
   slug: true,
+  approvalStatus: true,
+  approvalToken: true,
+  approvalTokenExpiry: true,
 });
 
 export type InsertPrayer = z.infer<typeof insertPrayerSchema>;

@@ -60,6 +60,11 @@ export interface IStorage {
   // Crisis prayer send methods
   logCrisisPrayerSend(prayerId: string, subscriberCount: number): Promise<void>;
   getCrisisPrayerSendToday(): Promise<CrisisPrayerSend | null>;
+
+  // Approval flow methods
+  getPrayerByApprovalToken(token: string): Promise<Prayer | undefined>;
+  setPrayerPendingApproval(id: string, token: string, expiry: Date): Promise<Prayer>;
+  setPrayerApprovalStatus(id: string, status: 'published' | 'rejected'): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -109,7 +114,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPublicPrayers(options?: { q?: string; topic?: string }): Promise<Prayer[]> {
-    const conditions = [gte(prayers.count, 5), eq(prayers.flaggedForReview, false)];
+    const conditions = [gte(prayers.count, 5), eq(prayers.flaggedForReview, false), eq(prayers.approvalStatus, 'published')];
 
     if (options?.q) {
       conditions.push(
@@ -407,6 +412,27 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(crisisPrayerSends.sentAt))
       .limit(1);
     return row ?? null;
+  }
+
+  async getPrayerByApprovalToken(token: string): Promise<Prayer | undefined> {
+    const [prayer] = await db.select().from(prayers).where(eq(prayers.approvalToken, token));
+    return prayer;
+  }
+
+  async setPrayerPendingApproval(id: string, token: string, expiry: Date): Promise<Prayer> {
+    const [prayer] = await db
+      .update(prayers)
+      .set({ approvalStatus: 'pending_approval', approvalToken: token, approvalTokenExpiry: expiry })
+      .where(eq(prayers.id, id))
+      .returning();
+    return prayer;
+  }
+
+  async setPrayerApprovalStatus(id: string, status: 'published' | 'rejected'): Promise<void> {
+    await db
+      .update(prayers)
+      .set({ approvalStatus: status, approvalToken: null, approvalTokenExpiry: null })
+      .where(eq(prayers.id, id));
   }
 }
 

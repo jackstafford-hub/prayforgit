@@ -363,6 +363,90 @@ function buildCrisisPrayerHtml(
 </html>`;
 }
 
+const APPROVER_EMAIL = 'mrjackstafford@gmail.com';
+
+export async function sendCrisisPrayerApprovalEmail(
+  prayer: Prayer,
+  approveUrl: string,
+  rejectUrl: string
+): Promise<void> {
+  try {
+    const { client, fromEmail } = await getUncachableSendGridClient();
+
+    const descriptionSection = prayer.description
+      ? `<div style="margin:0 0 24px;">
+           <p style="font-size:13px;font-weight:600;letter-spacing:0.06em;color:#9ca3af;text-transform:uppercase;margin:0 0 8px;">The Issue</p>
+           <p style="font-size:15px;line-height:1.75;color:#374151;margin:0;white-space:pre-wrap;">${escapeHtml(prayer.description)}</p>
+         </div>`
+      : '';
+
+    const prayerSection = prayer.recitablePrayer
+      ? `<div style="border-left:4px solid #c9a96e;padding:16px 20px;margin:0 0 28px;background:#fafaf8;">
+           <p style="font-size:13px;font-weight:600;letter-spacing:0.06em;color:#9ca3af;text-transform:uppercase;margin:0 0 8px;">Prayer</p>
+           <p style="font-style:italic;font-size:15px;line-height:1.8;color:#4b5563;margin:0;white-space:pre-wrap;">${escapeHtml(prayer.recitablePrayer)}</p>
+         </div>`
+      : '';
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crisis Prayer Approval</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f0;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="padding:36px 40px 32px;">
+              <p style="font-size:13px;font-weight:600;letter-spacing:0.08em;color:#9ca3af;text-transform:uppercase;margin:0 0 12px;">Daily Crisis Prayer — Approval Required</p>
+              <h1 style="font-family:'Georgia',serif;font-size:24px;font-weight:700;color:#111827;line-height:1.35;margin:0 0 28px;">${escapeHtml(prayer.title)}</h1>
+              ${descriptionSection}
+              ${prayerSection}
+              <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 28px;" />
+              <p style="font-size:15px;color:#374151;margin:0 0 20px;">Click a button below to review before taking any action.</p>
+              <table cellpadding="0" cellspacing="0" style="margin:0 0 16px;">
+                <tr>
+                  <td style="padding-right:12px;">
+                    <a href="${escapeHtml(approveUrl)}" style="display:inline-block;background-color:#166534;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 28px;border-radius:6px;">Review &amp; Approve</a>
+                  </td>
+                  <td>
+                    <a href="${escapeHtml(rejectUrl)}" style="display:inline-block;background-color:#f3f4f6;color:#374151;text-decoration:none;font-size:15px;font-weight:700;padding:14px 28px;border-radius:6px;border:1px solid #d1d5db;">Review &amp; Reject</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="font-size:12px;color:#9ca3af;margin:0;">Clicking a button shows a confirmation page before taking any action. Links expire in 48 hours.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="border-top:1px solid #e5e7eb;padding:16px 40px;text-align:center;">
+              <p style="font-size:12px;color:#9ca3af;margin:0;">PrayForChange.org — Daily Crisis Prayer system</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    await client.send({
+      to: APPROVER_EMAIL,
+      from: { email: fromEmail, name: 'PrayForChange.org' },
+      subject: `Daily Crisis Prayer for approval: ${prayer.title}`,
+      html,
+    });
+
+    console.log(`[APPROVAL] Approval email sent to ${APPROVER_EMAIL} for prayer: ${prayer.id}`);
+  } catch (error: any) {
+    const detail = error?.response?.body ? JSON.stringify(error.response.body) : (error?.message || error);
+    console.error(`[APPROVAL] Failed to send approval email to ${APPROVER_EMAIL}:`, detail);
+    throw error;
+  }
+}
+
 export async function sendCrisisPrayerEmailBatch(
   subscribers: Subscriber[],
   prayer: Prayer,
