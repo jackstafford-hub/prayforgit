@@ -47,6 +47,8 @@ export const prayers = pgTable("prayers", {
   approvalStatus: text("approval_status").notNull().default('published'),
   approvalToken: varchar("approval_token"),
   approvalTokenExpiry: timestamp("approval_token_expiry", { withTimezone: true }),
+  isDailyCrisisPrayer: boolean("is_daily_crisis_prayer").notNull().default(false),
+  createdByEmail: text("created_by_email"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -74,6 +76,8 @@ export const insertPrayerSchema = createInsertSchema(prayers).omit({
   approvalStatus: true,
   approvalToken: true,
   approvalTokenExpiry: true,
+  isDailyCrisisPrayer: true,
+  createdByEmail: true,
 });
 
 export type InsertPrayer = z.infer<typeof insertPrayerSchema>;
@@ -157,5 +161,23 @@ export const crisisPrayerSends = pgTable("crisis_prayer_sends", {
   sentAt: timestamp("sent_at").notNull().defaultNow(),
   subscriberCount: integer("subscriber_count").notNull().default(0),
 });
+
+export const dailyPrayerRuns = pgTable("daily_prayer_runs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  runAt: timestamp("run_at", { withTimezone: true }).notNull().defaultNow(),
+  crisisChosen: text("crisis_chosen"),
+  llmLatencyMs: integer("llm_latency_ms"),
+  imageSource: text("image_source"),
+  imageLatencyMs: integer("image_latency_ms"),
+  draftId: varchar("draft_id"),
+  emailSentAt: timestamp("email_sent_at", { withTimezone: true }),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  newsletterRecipients: integer("newsletter_recipients"),
+  error: text("error"),
+});
+
+export type DailyPrayerRun = typeof dailyPrayerRuns.$inferSelect;
+export type InsertDailyPrayerRun = typeof dailyPrayerRuns.$inferInsert;
 
 export type CrisisPrayerSend = typeof crisisPrayerSends.$inferSelect;

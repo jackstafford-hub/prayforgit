@@ -260,5 +260,38 @@ export async function ensureTablesExist(): Promise<void> {
     console.error("[DB] Prayer approval columns migration error:", error?.message);
   }
 
+  // Autonomous daily crisis prayer columns
+  try {
+    await pool.query(`ALTER TABLE prayers ADD COLUMN IF NOT EXISTS is_daily_crisis_prayer BOOLEAN NOT NULL DEFAULT false`);
+    await pool.query(`ALTER TABLE prayers ADD COLUMN IF NOT EXISTS created_by_email TEXT`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_prayers_approval_token ON prayers (approval_token) WHERE approval_token IS NOT NULL`);
+    console.log("[DB] Daily crisis prayer columns ensured");
+  } catch (error: any) {
+    console.error("[DB] Daily crisis prayer columns migration error:", error?.message);
+  }
+
+  // Daily prayer runs observability table
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS daily_prayer_runs (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        run_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        crisis_chosen TEXT,
+        llm_latency_ms INTEGER,
+        image_source TEXT,
+        image_latency_ms INTEGER,
+        draft_id VARCHAR,
+        email_sent_at TIMESTAMPTZ,
+        approved_at TIMESTAMPTZ,
+        published_at TIMESTAMPTZ,
+        newsletter_recipients INTEGER,
+        error TEXT
+      )
+    `);
+    console.log("[DB] Daily prayer runs table ensured");
+  } catch (error: any) {
+    console.error("[DB] Daily prayer runs table error:", error?.message);
+  }
+
   console.log("[DB] All required tables verified");
 }

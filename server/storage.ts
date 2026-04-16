@@ -1,6 +1,6 @@
 import { db, generateSlugFromTitle } from "./db";
-import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, type Subscriber, type CrisisPrayerSend, users, prayers, reports, dailyPrayerCounts, prayerUpdates, subscribers, crisisPrayerSends } from "@shared/schema";
-import { eq, desc, gte, and, sql, count as countFn } from "drizzle-orm";
+import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, type Subscriber, type CrisisPrayerSend, type DailyPrayerRun, type InsertDailyPrayerRun, users, prayers, reports, dailyPrayerCounts, prayerUpdates, subscribers, crisisPrayerSends, dailyPrayerRuns } from "@shared/schema";
+import { eq, desc, gte, and, sql, count as countFn, lte } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -65,6 +65,11 @@ export interface IStorage {
   getPrayerByApprovalToken(token: string): Promise<Prayer | undefined>;
   setPrayerPendingApproval(id: string, token: string, expiry: Date): Promise<Prayer>;
   setPrayerApprovalStatus(id: string, status: 'published' | 'rejected'): Promise<void>;
+
+  // Autonomous daily prayer pipeline methods
+  logDailyPrayerRun(data: Omit<InsertDailyPrayerRun, 'id'>): Promise<DailyPrayerRun>;
+  updateDailyPrayerRun(id: string, data: Partial<InsertDailyPrayerRun>): Promise<void>;
+  getRecentDailyCrisisPrayers(days: number): Promise<string[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -433,6 +438,24 @@ export class DatabaseStorage implements IStorage {
       .update(prayers)
       .set({ approvalStatus: status, approvalToken: null, approvalTokenExpiry: null })
       .where(eq(prayers.id, id));
+  }
+
+  async logDailyPrayerRun(data: Omit<InsertDailyPrayerRun, 'id'>): Promise<DailyPrayerRun> {
+    const [row] = await db.insert(dailyPrayerRuns).values(data).returning();
+    return row;
+  }
+
+  async updateDailyPrayerRun(id: string, data: Partial<InsertDailyPrayerRun>): Promise<void> {
+    await db.update(dailyPrayerRuns).set(data).where(eq(dailyPrayerRuns.id, id));
+  }
+
+  async getRecentDailyCrisisPrayers(days: number): Promise<string[]> {
+    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    const rows = await db
+      .select({ crisisChosen: dailyPrayerRuns.crisisChosen })
+      .from(dailyPrayerRuns)
+      .where(and(gte(dailyPrayerRuns.runAt, cutoff), sql`${dailyPrayerRuns.crisisChosen} IS NOT NULL`));
+    return rows.map(r => r.crisisChosen as string);
   }
 }
 
