@@ -1,0 +1,109 @@
+Daily Crisis Prayer — end-to-end autonomous pipeline
+Goal: A fully autonomous daily crisis prayer system that runs in the cloud (no laptop, no Chrome, no Claude scheduled task). News is fetched, a prayer is drafted by an LLM, an image is generated or sourced, a draft is saved, I (Jack) get an email with a one-click approve link, and on approval the prayer publishes live + the newsletter goes out.
+Architecture overview:
+Replit Scheduled Deployment (07:00 UTC daily)
+  → fetch top global crisis from news API
+  → call Claude API to draft prayer
+  → generate or source an image
+  → save as pending_approval draft with secure token
+  → SendGrid email to jackstaffmail@gmail.com with approve/reject links
+  → Jack clicks approve
+  → GET /prayer/approve/:token renders a confirmation page with "Publish now" button
+  → button POSTs to /api/prayer/approve/:token
+  → prayer goes live + newsletter sends to all subscribers
+Step 1: Scheduled runner
+Use Replit Scheduled Deployments (not a background worker — deployments are more reliable and cost-efficient for once-daily jobs). Schedule: 0 7 * * * UTC. Entry point: scripts/daily-prayer.ts.
+Step 2: News fetching
+Primary source: GDELT Project (free, no key, global crisis-focused) — query the Doc API for the last 24 hours filtered by themes like HUMAN_RIGHTS, NATURAL_DISASTER, ARMEDCONFLICT, KILL, DISPLACED, REFUGEES, DISEASE. Sort by tone (most negative) + volume. Return top 5 candidates.
+Fallback if GDELT fails: NewsAPI.org top-headlines endpoint with category=general and keyword filter for crisis terms. Needs NEWSAPI_KEY env var.
+From the 5 candidates, pick the one with the highest combined (volume × negative tone) score that doesn't duplicate a crisis we prayed for in the last 14 days (check DB).
+Step 3: Prayer drafting
+Call the Claude API at api.anthropic.com/v1/messages. Model: claude-sonnet-4-6. Needs ANTHROPIC_API_KEY env var.
+System prompt should bake in the tone:
+You write short, interfaith, politically neutral prayers for PrayForChange.org.
+
+Constraints:
+- 80–120 words
+- First-person plural ("we pray," "may we")
+- Interfaith: no mention of Jesus, Allah, Krishna, etc. Use "God" or "Source of Life" or no addressee.
+- Politically neutral: no blame, no policy, no sides.
+- Lament + hope + action in that order.
+- No rhyming. No archaic language.
+- End with "Amen."
+
+Also return:
+- A one-line summary (max 18 words) for the card/widget
+- A URL slug (lowercase, hyphenated, no stopwords, max 60 chars)
+- An image prompt (1 sentence describing a symbolic, hopeful image — no faces, no text, no logos)
+- A 5-keyword array for image-search fallback
+User prompt: the crisis headline + 2-sentence summary from GDELT.
+Return JSON: { title, summary, body, slug, imagePrompt, imageKeywords }.
+Step 4: Image
+Try AI first, fall back to stock:
+
+Primary: Flux Schnell via Replicate — black-forest-labs/flux-schnell model. Cheap (~$0.003/image), fast (~3 sec). Pass imagePrompt. Needs REPLICATE_API_TOKEN env var.
+Fallback: Unsplash API — search with imageKeywords, take the first result. Free. Requires attribution in the image alt text (e.g., Photo by {name} on Unsplash). Needs UNSPLASH_ACCESS_KEY env var.
+
+Download the image, upload to your existing image storage (S3 / Replit Object Storage), save the URL on the draft.
+Step 5: Database — pending-approval drafts
+Add a status column to the existing prayers table:
+sqlALTER TABLE prayers ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'published';
+ALTER TABLE prayers ADD COLUMN IF NOT EXISTS approval_token TEXT;
+ALTER TABLE prayers ADD COLUMN IF NOT EXISTS approval_token_expires_at TIMESTAMP;
+ALTER TABLE prayers ADD COLUMN IF NOT EXISTS created_by_email TEXT;
+ALTER TABLE prayers ADD COLUMN IF NOT EXISTS is_daily_crisis_prayer BOOLEAN NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_prayers_approval_token ON prayers(approval_token);
+Status values: pending_approval, published, rejected.
+The scheduled runner inserts a row with:
+
+status = 'pending_approval'
+approval_token = <64-char hex from crypto.randomBytes(32).toString('hex')>
+approval_token_expires_at = now + 48 hours
+created_by_email = 'system@prayforchange.org' (or whatever — the key thing is it's flagged)
+is_daily_crisis_prayer = true
+
+Step 6: Approval email
+Send via SendGrid (already set up). To: jackstaffmail@gmail.com. Subject: [Prayer pending] {title}.
+Body includes: title, summary, full prayer text, image preview, and two links:
+
+https://prayforchange.org/prayer/approve/{token} — Approve
+https://prayforchange.org/prayer/reject/{token} — Reject
+
+CRITICAL: these must be GET endpoints. Email clients cannot trigger POST from link clicks. The GET handler renders a simple confirmation page with a "Confirm publish" button that POSTs to the real mutation endpoint. This prevents accidental approval from link previewers (Gmail, Slack, iMessage) that silently fetch URLs.
+Flow:
+
+GET /prayer/approve/:token → renders confirmation page with prayer preview + [Confirm publish] button
+Button submits POST /api/prayer/approve/:token
+Handler: verify token exists, not expired, not already used. Set status = 'published', clear the token, trigger newsletter send.
+Same pattern for reject.
+
+Step 7: Newsletter send on approval
+Only fires when is_daily_crisis_prayer = true AND status transitions to published. Do NOT wire this up for regular user prayers.
+For each subscriber in the subscribers table:
+
+Generate (or reuse) a per-subscriber unsubscribe_token
+Send via SendGrid: subject = prayer title, body = prayer + "Pray now" CTA linking to the live prayer page
+Include List-Unsubscribe: <https://prayforchange.org/unsubscribe/{token}> header for Gmail native one-click unsubscribe
+Include visible unsubscribe link in footer
+
+Rate-limit SendGrid calls (batch with their personalizations array — one API call per batch of up to 1000 recipients).
+Step 8: Environment variables needed
+ANTHROPIC_API_KEY
+REPLICATE_API_TOKEN
+UNSPLASH_ACCESS_KEY
+NEWSAPI_KEY            # optional fallback only
+SENDGRID_API_KEY       # already have
+APP_BASE_URL=https://prayforchange.org
+Step 9: Observability
+Log every step to a daily_prayer_runs table:
+id, run_at, crisis_chosen, llm_latency_ms, image_source, image_latency_ms, draft_id, email_sent_at, approved_at, published_at, newsletter_recipients, error
+If any step fails, email me a short error summary instead of the approval email. I'd rather know it broke than wonder.
+Step 10: Acceptance criteria
+
+Cron runs at 07:00 UTC without any Chrome / laptop dependency
+I receive exactly one email per day: either approval request or error report
+Clicking approve from Gmail takes ≤ 2 clicks to publish (link → confirm button)
+Expired tokens show a friendly "this approval link has expired" page
+Already-used tokens show "this prayer has already been approved/rejected"
+Newsletter send is only triggered for daily crisis prayers, never for user-generated prayers
+If no suitable crisis is found (rare), send me an email saying "no prayer drafted today — no crisis met threshold" rather than picking something weak
