@@ -61,8 +61,6 @@ function injectCanonical(html: string, canonicalUrl: string): string {
   return html.replace("</head>", `  ${tag}\n  </head>`);
 }
 
-const HOW_TO_PRAY_DESCRIPTION =
-  "Learn how prayer works as a practical force for change. PrayForChange guides you through a simple, interfaith approach to directing spiritual energy toward the people and causes that need it most.";
 
 const PRAYER_FALLBACK_DESCRIPTION =
   "Join thousands of people praying for this cause on PrayForChange.org \u2014 the world\u2019s platform for collective spiritual support.";
@@ -190,9 +188,44 @@ export async function injectPrayerOgTags(
     html = html.replace("</head>", `${scripts}</head>`);
   }
 
-  if (urlPath.startsWith("/how-to-pray")) {
-    html = injectTitle(html, "How To Pray | PrayForChange.org");
-    return injectMetaDescription(html, escapeHtml(HOW_TO_PRAY_DESCRIPTION));
+  if (normalizedPath === "/how-to-pray" || normalizedPath.startsWith("/how-to-pray/")) {
+    const howToPrayTitle = "How to Pray | A Practical Guide to Prayer | PrayForChange.org";
+    const howToPrayDesc = "Learn a practical, step-by-step prayer technique. Discover how to pray with sincerity, direct healing energy, and deepen your practice for real-world impact.";
+    html = injectTitle(html, howToPrayTitle);
+    html = injectMetaDescription(html, escapeHtml(howToPrayDesc));
+    html = html.replace(
+      /<meta property="og:title" content="[^"]*" \/>/,
+      `<meta property="og:title" content="${escapeHtml(howToPrayTitle)}" />`,
+    );
+    html = html.replace(
+      /<meta property="og:description" content="[^"]*" \/>/,
+      `<meta property="og:description" content="${escapeHtml(howToPrayDesc)}" />`,
+    );
+    html = html.replace(
+      /<meta property="og:type" content="[^"]*" \/>/,
+      `<meta property="og:type" content="article" />`,
+    );
+    const ogUrl = `${baseUrl}/how-to-pray`;
+    if (html.includes('og:url')) {
+      html = html.replace(
+        /<meta property="og:url" content="[^"]*" \/>/,
+        `<meta property="og:url" content="${ogUrl}" />`,
+      );
+    } else {
+      html = html.replace(
+        /<meta property="og:type"/,
+        `<meta property="og:url" content="${ogUrl}" />\n    <meta property="og:type"`,
+      );
+    }
+    html = html.replace(
+      /<meta name="twitter:title" content="[^"]*" \/>/,
+      `<meta name="twitter:title" content="${escapeHtml(howToPrayTitle)}" />`,
+    );
+    html = html.replace(
+      /<meta name="twitter:description" content="[^"]*" \/>/,
+      `<meta name="twitter:description" content="${escapeHtml(howToPrayDesc)}" />`,
+    );
+    return html;
   }
 
   if (normalizedPath === "/browse") {
