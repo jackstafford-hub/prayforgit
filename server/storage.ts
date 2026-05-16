@@ -71,6 +71,7 @@ export interface IStorage {
   updateDailyPrayerRun(id: string, data: Partial<InsertDailyPrayerRun>): Promise<void>;
   getRecentDailyCrisisPrayers(days: number): Promise<string[]>;
   getPublishedDailyCrisisPrayers(limit: number): Promise<Prayer[]>;
+  getDailyPrayerRunByDraftId(draftId: string): Promise<DailyPrayerRun | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -466,6 +467,15 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(prayers.isDailyCrisisPrayer, true), eq(prayers.approvalStatus, 'published')))
       .orderBy(desc(prayers.createdAt))
       .limit(limit);
+  }
+
+  async getDailyPrayerRunByDraftId(draftId: string): Promise<DailyPrayerRun | undefined> {
+    const [row] = await db
+      .select()
+      .from(dailyPrayerRuns)
+      .where(eq(dailyPrayerRuns.draftId, draftId))
+      .limit(1);
+    return row;
   }
 }
 

@@ -62,35 +62,67 @@ async function fetchFromGDELT(): Promise<CrisisCandidate[]> {
     String(d.getMinutes()).padStart(2, '0') +
     String(d.getSeconds()).padStart(2, '0');
 
-  const query = encodeURIComponent(
-    '(crisis OR disaster OR war OR humanitarian OR refugees OR famine OR earthquake OR flood OR conflict OR massacre) sourcelang:english'
-  );
+  // Use GDELT crisis-specific theme filters for more targeted results
+  const themeFilter = [
+    'theme:NATURAL_DISASTER',
+    'theme:ARMEDCONFLICT',
+    'theme:HUMAN_RIGHTS_ABUSES',
+    'theme:KILL',
+    'theme:DISPLACED',
+    'theme:REFUGEES_MIGRANT',
+    'theme:TAX_FAMINE_FOOD',
+    'theme:WB_635_HEALTH_GLOBAL_HEALTH_SECURITY',
+  ].join(' OR ');
+
+  const query = encodeURIComponent(`(${themeFilter}) sourcelang:english`);
 
   const url =
     `https://api.gdeltproject.org/api/v2/doc/doc?query=${query}` +
-    `&mode=artlist&maxrecords=25&sortby=ToneDesc&format=json` +
+    `&mode=artlist&maxrecords=50&sortby=ToneDesc&format=json` +
     `&startdatetime=${fmt(yesterday)}&enddatetime=${fmt(now)}`;
 
   const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
   if (!res.ok) throw new Error(`GDELT responded ${res.status}`);
 
-  const data = await res.json() as { articles?: Array<{ title?: string; url?: string; tone?: string; domain?: string }> };
+  const data = await res.json() as {
+    articles?: Array<{ title?: string; url?: string; tone?: string; domain?: string; seendate?: string }>
+  };
   if (!data.articles?.length) return [];
 
-  return data.articles
-    .filter(a => a.title && a.url)
-    .slice(0, 10)
-    .map(a => {
-      const tone = parseFloat(a.tone ?? '0');
-      return {
-        title: a.title!,
-        summary: '',
-        url: a.url!,
-        tone,
-        volume: 1,
-        score: Math.abs(tone),
-      };
+  // Score = |tone| × volume_proxy (frequency of similar domain/story in batch)
+  const articles = data.articles.filter(a => a.title && a.url);
+  const domainCounts: Record<string, number> = {};
+  for (const a of articles) {
+    const domain = a.domain || 'unknown';
+    domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+  }
+
+  // Deduplicate by title prefix (first 6 words), keeping most-negative tone per group
+  const seen = new Set<string>();
+  const deduped: CrisisCandidate[] = [];
+  for (const a of articles) {
+    const tone = parseFloat(a.tone ?? '0');
+    const negativeTone = Math.min(tone, 0);
+    // Skip articles with tone better than -1 (not genuinely crisis-level)
+    if (negativeTone > -1) continue;
+
+    const titleKey = a.title!.split(' ').slice(0, 6).join(' ').toLowerCase();
+    if (seen.has(titleKey)) continue;
+    seen.add(titleKey);
+
+    const domain = a.domain || 'unknown';
+    const volume = domainCounts[domain] || 1;
+    deduped.push({
+      title: a.title!,
+      summary: '',
+      url: a.url!,
+      tone,
+      volume,
+      score: Math.abs(tone) * volume,
     });
+  }
+
+  return deduped.slice(0, 15);
 }
 
 async function fetchFromNewsAPI(): Promise<CrisisCandidate[]> {

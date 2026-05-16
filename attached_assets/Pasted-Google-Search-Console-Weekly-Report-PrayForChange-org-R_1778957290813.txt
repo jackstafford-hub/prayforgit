@@ -1,0 +1,74 @@
+Google Search Console Weekly Report — PrayForChange.org
+Report Date: May 11, 2026
+Data Last Updated: ~4 hours ago (May 11, 2026)
+Property: https://prayforchange.org/
+
+Performance Summary
+Last 7 Days (May 3–9, 2026)
+Metric	Value
+Total Clicks	0
+Total Impressions	1
+Average CTR	0%
+Average Position	52
+Only one query appeared in the last 7 days: "pray for change" (1 impression, 0 clicks).
+
+Last 28 Days (Apr 12 – May 9, 2026)
+Metric	Value
+Total Clicks	0
+Total Impressions	9
+Average CTR	0%
+Average Position	41.3
+Last 3 Months
+Metric	Value
+Total Clicks	0
+Total Impressions	11
+Average CTR	0%
+Average Position	47
+Top Queries (3-Month View — All Queries)
+Query	Clicks	Impressions
+pray for change	0	4
+alternative prayer	0	1
+praying for change	0	1
+prayer to end gun violence	0	1
+Indexing Status
+Status	Count
+Indexed	5
+Not Indexed	3
+Not-Indexed Pages (Reason: "Crawled – currently not indexed")
+URL	Last Crawled
+/prayer/b3c518e9-28aa-45fc-813f-36938eb3728f	26 Mar 2026
+/how-to-pray	6 Feb 2026
+/browse	12 Jan 2026
+Google crawled these pages but chose not to index them. This typically means Google doesn't consider the content substantial or unique enough to warrant inclusion in search results.
+
+Sitemap Status
+Sitemap	Submitted	Last Read	Status	Discovered Pages
+/sitemap.xml	12 Apr 2026	17 Apr 2026	Success	33
+The sitemap is healthy. However, note the gap: 33 pages discovered in the sitemap but only 5 indexed (and 3 flagged as crawled-but-not-indexed). The remaining ~25 pages haven't been crawled yet or have been deprioritized by Google.
+
+Key Takeaways
+Wins
+The site is appearing in Google search results — impressions are trickling in for brand-adjacent queries like "pray for change" and "praying for change."
+The sitemap is successfully submitted and read with no errors.
+5 pages are indexed, up from zero at launch on April 12.
+No security issues or manual actions flagged.
+Issues Needing Attention
+Zero clicks so far. Average position in the 40s–50s means the site is appearing on page 4–5 of Google results, far from the click-generating first page.
+3 crawled-but-not-indexed pages. /how-to-pray and /browse are important site pages that Google is choosing not to index. The individual prayer page may be less critical, but the other two should be indexed.
+Very low crawl activity. The sitemap lists 33 pages but only 8 have been crawled. Google hasn't re-read the sitemap since April 17 — nearly a month ago.
+No impressions for target keyword clusters. The high-value targets ("prayer request online," "prayers for world events") are not generating any impressions yet.
+Recommended Next Actions
+Improve content depth on /how-to-pray and /browse. These pages were crawled but not indexed — add more unique, substantive content (800+ words, internal links, structured data) to signal value to Google.
+
+Request re-indexing. Use GSC's URL Inspection tool to request indexing for /how-to-pray and /browse after improving their content.
+
+Build backlinks. The site needs external authority signals. Consider guest posts on faith/prayer blogs, church directory listings, and outreach to faith-based organizations for links.
+
+Publish fresh content targeting long-tail keywords. Create blog posts or prayer guides targeting specific queries like "prayer for world peace," "how to pray for others," "prayer request online" — these have lower competition and can build topical authority.
+
+Resubmit the sitemap. Since it hasn't been re-read since April 17, resubmit /sitemap.xml to prompt Google to re-crawl.
+
+Add internal linking. Ensure the 5 indexed pages link to the unindexed pages to help Google discover and value them.
+
+Be patient but proactive. The site is ~1 month old. It's normal for new domains to have low visibility initially. Consistent content publishing and link building over the next 2–3 months will be critical for growth.
+

@@ -471,6 +471,22 @@ export async function registerRoutes(
       const { sent, failed } = await sendCrisisPrayerEmailBatch(allSubscribers, publishedPrayer, prayerUrl, publishedPrayer.count);
       await storage.logCrisisPrayerSend(id, sent);
       console.log(`[APPROVAL] Prayer ${id} approved and sent: ${sent} delivered, ${failed} failed`);
+
+      // Update daily_prayer_runs observability row (best-effort, non-blocking)
+      try {
+        const run = await storage.getDailyPrayerRunByDraftId(id);
+        if (run) {
+          const now = new Date();
+          await storage.updateDailyPrayerRun(run.id, {
+            approvedAt: now,
+            publishedAt: now,
+            newsletterRecipients: sent,
+          });
+        }
+      } catch (runErr: any) {
+        console.warn('[APPROVAL] Could not update daily_prayer_runs row:', runErr?.message);
+      }
+
       return res.send(buildApprovalSuccessPage(publishedPrayer.title, sent));
     } catch (err: any) {
       console.error('[approval-post] Failed:', err);
@@ -502,6 +518,17 @@ export async function registerRoutes(
 
       await storage.setPrayerApprovalStatus(id, 'rejected');
       console.log(`[APPROVAL] Prayer ${id} rejected`);
+
+      // Update daily_prayer_runs observability row (best-effort, non-blocking)
+      try {
+        const run = await storage.getDailyPrayerRunByDraftId(id);
+        if (run) {
+          await storage.updateDailyPrayerRun(run.id, { error: 'rejected_by_approver' });
+        }
+      } catch (runErr: any) {
+        console.warn('[APPROVAL] Could not update daily_prayer_runs row:', runErr?.message);
+      }
+
       return res.send(buildRejectSuccessPage(result.prayer.title));
     } catch (err: any) {
       console.error('[reject-post] Failed:', err);

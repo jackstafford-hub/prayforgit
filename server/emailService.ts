@@ -524,6 +524,13 @@ export async function sendDailyPrayerApprovalEmail(
        </div>`
     : '';
 
+  const summarySection = prayer.aiSummary
+    ? `<div style="margin:0 0 20px;padding:12px 16px;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0;">
+         <p style="font-size:13px;font-weight:600;letter-spacing:0.06em;color:#15803d;text-transform:uppercase;margin:0 0 6px;">Summary</p>
+         <p style="font-size:14px;line-height:1.65;color:#166534;margin:0;">${escapeHtml(prayer.aiSummary)}</p>
+       </div>`
+    : '';
+
   const descriptionSection = prayer.description
     ? `<div style="margin:0 0 24px;">
          <p style="font-size:13px;font-weight:600;letter-spacing:0.06em;color:#9ca3af;text-transform:uppercase;margin:0 0 8px;">The Issue</p>
@@ -544,7 +551,8 @@ export async function sendDailyPrayerApprovalEmail(
       <table width="100%" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
         <tr><td style="padding:36px 40px 32px;">
           <p style="font-size:13px;font-weight:600;letter-spacing:0.08em;color:#9ca3af;text-transform:uppercase;margin:0 0 12px;">Automated Daily Crisis Prayer</p>
-          <h1 style="font-family:'Georgia',serif;font-size:24px;font-weight:700;color:#111827;line-height:1.35;margin:0 0 24px;">${escapeHtml(prayer.title)}</h1>
+          <h1 style="font-family:'Georgia',serif;font-size:24px;font-weight:700;color:#111827;line-height:1.35;margin:0 0 16px;">${escapeHtml(prayer.title)}</h1>
+          ${summarySection}
           ${imageSection}
           ${descriptionSection}
           ${prayerSection}
