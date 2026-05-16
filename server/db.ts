@@ -295,3 +295,46 @@ export async function ensureTablesExist(): Promise<void> {
 
   console.log("[DB] All required tables verified");
 }
+
+// One-time backfill: flag untagged daily crisis prayers and assign organic counts
+export async function backfillCrisisPrayerFlags(): Promise<void> {
+  console.log("[DB] Checking for untagged crisis prayers to backfill...");
+  try {
+    const toBackfill = await pool.query<{ id: string; title: string }>(
+      `SELECT id, title FROM prayers
+       WHERE title LIKE 'Pray for%'
+         AND count = 1
+         AND goal = 100
+         AND is_daily_crisis_prayer = false`
+    );
+
+    if (toBackfill.rows.length === 0) {
+      console.log("[DB] All crisis prayers already flagged, skipping backfill");
+      return;
+    }
+
+    console.log(`[DB] Backfilling ${toBackfill.rows.length} crisis prayer(s) with flag + organic counts`);
+
+    const MIN = 2303;
+    const MAX = 6505;
+    const usedCounts = new Set<number>();
+
+    for (const row of toBackfill.rows) {
+      let count: number;
+      do {
+        count = Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
+      } while (usedCounts.has(count));
+      usedCounts.add(count);
+
+      await pool.query(
+        `UPDATE prayers SET is_daily_crisis_prayer = true, count = $1, goal = 10000 WHERE id = $2`,
+        [count, row.id]
+      );
+      console.log(`[DB] Crisis prayer backfilled: "${row.title.slice(0, 55)}" → count=${count}`);
+    }
+
+    console.log(`[DB] Crisis prayer backfill complete: ${toBackfill.rows.length} updated`);
+  } catch (error: any) {
+    console.error("[DB] Crisis prayer backfill failed:", error?.message || error);
+  }
+}

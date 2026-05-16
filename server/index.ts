@@ -195,6 +195,12 @@ let appReady = false;
             } catch (error: any) {
               console.error("[DB] Slug backfill failed:", error?.message || error);
             }
+            try {
+              const { backfillCrisisPrayerFlags } = await import('./db');
+              await backfillCrisisPrayerFlags();
+            } catch (error: any) {
+              console.error("[DB] Crisis prayer backfill failed:", error?.message || error);
+            }
           }
 
           appReady = true;
