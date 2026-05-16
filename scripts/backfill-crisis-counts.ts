@@ -1,6 +1,6 @@
 import { pool, db } from "../server/db";
 import { prayers, users } from "../shared/schema";
-import { eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 async function run() {
   console.log("[BACKFILL] Seeding prayer counts for jackstaffmail@gmail.com...");
@@ -39,9 +39,9 @@ async function run() {
     const newCount = Math.floor(Math.random() * (6505 - 2303 + 1)) + 2303;
     await db
       .update(prayers)
-      .set({ count: newCount, goal: 10000 })
+      .set({ count: newCount })
       .where(eq(prayers.id, p.id));
-    console.log(`  ✓ "${p.title.slice(0, 60)}" → count=${newCount}, goal=10000`);
+    console.log(`  ✓ "${p.title.slice(0, 60)}" → count=${newCount}`);
     updated++;
   }
 
