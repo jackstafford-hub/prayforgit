@@ -17,14 +17,12 @@ export function PrayerCard({ prayer }: PrayerCardProps) {
     <Link href={`/prayer/${prayer.slug || prayer.id}`}>
       <Card className="group h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow duration-300 border-border cursor-pointer bg-white">
         {/* Placeholder Image Area - In a real app this would be a user upload */}
-        <div 
-          className="h-48 w-full bg-muted relative overflow-hidden"
-          style={{ 
-            backgroundImage: `url(${prayer.imageUrl || bgTexture})`,
-            backgroundSize: 'cover', 
-            backgroundPosition: 'center' 
-          }}
-        >
+        <div className="h-48 w-full bg-muted relative overflow-hidden">
+          <img
+            src={prayer.imageUrl || bgTexture}
+            alt={prayer.title}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
           <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors duration-300" />
         </div>
 

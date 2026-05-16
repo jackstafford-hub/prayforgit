@@ -10,6 +10,7 @@ import { formatDistanceToNow } from "date-fns";
 import bgTexture from "@assets/generated_images/subtle_warm_paper_texture_background.png";
 import { getPrayerById, updatePrayerContent, regeneratePrayerContent, generateImage } from "@/lib/api";
 import type { Prayer, PrayerUpdate, User } from "@shared/schema";
+import { PrayerCard } from "@/components/prayer-card";
 import { ShareableCardDialog } from "@/components/shareable-card";
 import { SiWhatsapp, SiFacebook, SiX } from "react-icons/si";
 import { Textarea } from "@/components/ui/textarea";
@@ -82,6 +83,13 @@ export default function PrayerDetail() {
   const isAdmin = !!adminCheck?.isAdmin;
   const isAuthor = isAuthenticated && prayer && prayer.authorId === user?.id;
   const canEdit = isAuthor || isAdmin;
+
+  const { data: relatedPrayers } = useQuery<Prayer[]>({
+    queryKey: ["/api/prayers", id, "related"],
+    queryFn: () => fetch(`/api/prayers/${id}/related`).then(r => r.json()),
+    enabled: !!id,
+    staleTime: 60_000,
+  });
 
   const { data: crisisStatus, refetch: refetchCrisisStatus } = useQuery<{
     isCrisisPrayer: boolean;
@@ -449,13 +457,10 @@ export default function PrayerDetail() {
             </div>
 
             <div className="aspect-video w-full bg-muted rounded-xl overflow-hidden relative shadow-sm group">
-              <div 
-                className="absolute inset-0 transition-transform duration-700 hover:scale-105"
-                style={{ 
-                  backgroundImage: `url(${prayer.imageUrl || bgTexture})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }} 
+              <img
+                src={prayer.imageUrl || bgTexture}
+                alt={prayer.title}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105"
               />
               {canEdit && (
                 <div className={`absolute inset-0 bg-black/40 flex items-center justify-center gap-2 transition-opacity ${(isRegeneratingImage || isUploadingImage) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
@@ -1090,6 +1095,21 @@ export default function PrayerDetail() {
           </div>
         </div>
       </div>
+
+      {relatedPrayers && relatedPrayers.length > 0 && (
+        <div className="border-t bg-muted/20">
+          <div className="container mx-auto px-4 md:px-6 py-12">
+            <h2 className="font-serif text-2xl font-bold mb-8" data-testid="heading-related-prayers">
+              Others Are Praying For
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedPrayers.map(p => (
+                <PrayerCard key={p.id} prayer={p} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {prayer && (
         <ShareableCardDialog

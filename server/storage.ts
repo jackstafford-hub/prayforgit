@@ -1,6 +1,6 @@
 import { db, generateSlugFromTitle } from "./db";
 import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, type Subscriber, type CrisisPrayerSend, type DailyPrayerRun, type InsertDailyPrayerRun, users, prayers, reports, dailyPrayerCounts, prayerUpdates, subscribers, crisisPrayerSends, dailyPrayerRuns } from "@shared/schema";
-import { eq, desc, gte, and, sql, count as countFn, lte } from "drizzle-orm";
+import { eq, desc, gte, and, sql, count as countFn, lte, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -72,6 +72,9 @@ export interface IStorage {
   getRecentDailyCrisisPrayers(days: number): Promise<string[]>;
   getPublishedDailyCrisisPrayers(limit: number): Promise<Prayer[]>;
   getDailyPrayerRunByDraftId(draftId: string): Promise<DailyPrayerRun | undefined>;
+
+  // Related prayers
+  getRelatedPrayers(prayerId: string, topic: string, limit: number): Promise<Prayer[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -476,6 +479,21 @@ export class DatabaseStorage implements IStorage {
       .where(eq(dailyPrayerRuns.draftId, draftId))
       .limit(1);
     return row;
+  }
+
+  async getRelatedPrayers(prayerId: string, topic: string, limit: number): Promise<Prayer[]> {
+    return await db
+      .select()
+      .from(prayers)
+      .where(and(
+        eq(prayers.topic, topic),
+        eq(prayers.approvalStatus, 'published'),
+        eq(prayers.flaggedForReview, false),
+        gte(prayers.count, 5),
+        ne(prayers.id, prayerId),
+      ))
+      .orderBy(desc(prayers.count))
+      .limit(limit);
   }
 }
 

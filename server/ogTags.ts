@@ -41,6 +41,10 @@ function truncateAtWordBoundary(text: string, maxChars: number): string {
   return lastSpace > 0 ? slice.substring(0, lastSpace) : slice;
 }
 
+function injectTitle(html: string, title: string): string {
+  return html.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`);
+}
+
 function injectMetaDescription(html: string, description: string): string {
   const tag = `<meta name="description" content="${description}" />`;
   if (html.includes('name="description"')) {
@@ -61,7 +65,46 @@ const HOW_TO_PRAY_DESCRIPTION =
   "Learn how prayer works as a practical force for change. PrayForChange guides you through a simple, interfaith approach to directing spiritual energy toward the people and causes that need it most.";
 
 const PRAYER_FALLBACK_DESCRIPTION =
-  "Join thousands of people praying for this cause on PrayForChange.org \u2014 the world's platform for collective spiritual support.";
+  "Join thousands of people praying for this cause on PrayForChange.org \u2014 the world\u2019s platform for collective spiritual support.";
+
+const CATEGORY_META: Record<string, { title: string; description: string }> = {
+  Health: {
+    title: "Health Prayers \u2014 Pray Together for Healing | PrayForChange.org",
+    description: "Join the community in prayer for healing and health. Browse prayer requests for illness, recovery, and wellbeing from people around the world.",
+  },
+  Family: {
+    title: "Family Prayers \u2014 Pray for Your Loved Ones | PrayForChange.org",
+    description: "Find prayers for family relationships, marriage, parenting, and the people closest to your heart. Join thousands praying together.",
+  },
+  Employment: {
+    title: "Employment Prayers \u2014 Pray for Work & Provision | PrayForChange.org",
+    description: "Browse prayer requests for jobs, careers, financial provision, and economic breakthrough. Stand with those seeking God\u2019s guidance in their work.",
+  },
+  "World Peace": {
+    title: "Prayers for World Peace \u2014 Pray for Nations | PrayForChange.org",
+    description: "Join thousands praying for peace, conflict resolution, and justice in the world\u2019s most troubled places. Collective prayer for global healing.",
+  },
+  Community: {
+    title: "Community Prayers \u2014 Pray for Your Neighbours | PrayForChange.org",
+    description: "Browse prayers for local communities, neighbourhoods, and the people around us. Prayer that builds up the world one community at a time.",
+  },
+  Faith: {
+    title: "Faith Prayers \u2014 Strengthen Your Spiritual Life | PrayForChange.org",
+    description: "Find prayers for deeper faith, spiritual growth, and connection with God. Join a global community seeking spiritual renewal together.",
+  },
+  Education: {
+    title: "Education Prayers \u2014 Pray for Students & Schools | PrayForChange.org",
+    description: "Browse prayer requests for students, teachers, and educational institutions. Support the next generation through the power of collective prayer.",
+  },
+  Gratitude: {
+    title: "Prayers of Gratitude \u2014 Give Thanks Together | PrayForChange.org",
+    description: "Join the community in prayers of thanksgiving, blessing, and gratitude to God. Celebrate answered prayers and everyday grace.",
+  },
+  General: {
+    title: "General Prayer Requests \u2014 Community Prayers | PrayForChange.org",
+    description: "Browse a wide range of prayer requests from the PrayForChange community. Every prayer is an invitation for others to stand with you.",
+  },
+};
 
 export async function injectPrayerOgTags(
   html: string,
@@ -148,7 +191,44 @@ export async function injectPrayerOgTags(
   }
 
   if (urlPath.startsWith("/how-to-pray")) {
+    html = injectTitle(html, "How To Pray | PrayForChange.org");
     return injectMetaDescription(html, escapeHtml(HOW_TO_PRAY_DESCRIPTION));
+  }
+
+  if (normalizedPath === "/browse") {
+    const queryStr = urlPath.includes("?") ? urlPath.split("?")[1] : "";
+    const topic = new URLSearchParams(queryStr).get("topic") || "";
+    const categoryMeta = topic && CATEGORY_META[topic] ? CATEGORY_META[topic] : null;
+
+    if (categoryMeta) {
+      const topicCanonical = `${baseUrl}/browse?topic=${encodeURIComponent(topic)}`;
+      html = injectCanonical(html, topicCanonical);
+      html = injectTitle(html, escapeHtml(categoryMeta.title));
+      html = injectMetaDescription(html, escapeHtml(categoryMeta.description));
+    } else {
+      html = injectTitle(html, "Browse All Prayers | PrayForChange.org");
+      html = injectMetaDescription(
+        html,
+        "Explore prayer requests from communities around the world. Browse by category \u2014 health, family, world peace, and more. Join in prayer for the causes that matter most.",
+      );
+    }
+    return html;
+  }
+
+  if (normalizedPath === "/terms") {
+    html = injectTitle(html, "Terms of Service | PrayForChange.org");
+    return injectMetaDescription(
+      html,
+      "Read the Terms of Service for PrayForChange.org \u2014 the global community prayer platform.",
+    );
+  }
+
+  if (normalizedPath === "/privacy") {
+    html = injectTitle(html, "Privacy Policy | PrayForChange.org");
+    return injectMetaDescription(
+      html,
+      "Read the Privacy Policy for PrayForChange.org. Learn how we handle your data and protect your privacy.",
+    );
   }
 
   const match = urlPath.match(/^\/prayer\/([a-z0-9-]+)/i);
@@ -218,6 +298,34 @@ export async function injectPrayerOgTags(
     html = injectMetaDescription(html, metaDesc);
 
     const articleBody = (prayer.aiSummary || prayer.description || "").trim();
+    const topic = prayer.topic || "General";
+    const topicLabel = CATEGORY_META[topic] ? `${topic} Prayers` : "Community Prayers";
+
+    const breadcrumbSchema = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": `${baseUrl}/`,
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": topicLabel,
+          "item": `${baseUrl}/browse?topic=${encodeURIComponent(topic)}`,
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": prayer.title,
+          "item": ogUrl,
+        },
+      ],
+    }, null, 2);
+
     const articleSchema = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Article",
@@ -225,15 +333,26 @@ export async function injectPrayerOgTags(
       "articleBody": articleBody,
       "url": ogUrl,
       "datePublished": prayer.createdAt.toISOString(),
+      "author": {
+        "@type": "Person",
+        "name": prayer.author || "Anonymous",
+      },
       "publisher": {
         "@type": "Organization",
         "name": "PrayForChange",
         "url": "https://prayforchange.org",
       },
+      "interactionStatistic": {
+        "@type": "InteractionCounter",
+        "interactionType": "https://schema.org/LikeAction",
+        "userInteractionCount": prayer.count,
+      },
+      ...(prayer.imageUrl ? { "image": resolveImageUrl(prayer.imageUrl) } : {}),
     }, null, 2);
+
     html = html.replace(
       "</head>",
-      `  <script type="application/ld+json">\n${articleSchema}\n  </script>\n</head>`,
+      `  <script type="application/ld+json">\n${breadcrumbSchema}\n  </script>\n  <script type="application/ld+json">\n${articleSchema}\n  </script>\n</head>`,
     );
 
     return html;

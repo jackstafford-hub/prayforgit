@@ -242,9 +242,18 @@ export async function registerRoutes(
 
       const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
+      const PRAYER_CATEGORIES = [
+        "Health", "Family", "Employment", "World Peace",
+        "Community", "Faith", "Education", "Gratitude", "General",
+      ];
+
       const staticUrls = [
         `  <url>\n    <loc>${baseUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>`,
         `  <url>\n    <loc>${baseUrl}/how-to-pray</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.8</priority>\n  </url>`,
+        `  <url>\n    <loc>${baseUrl}/browse</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>`,
+        ...PRAYER_CATEGORIES.map(cat =>
+          `  <url>\n    <loc>${baseUrl}/browse?topic=${encodeURIComponent(cat)}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`
+        ),
       ];
 
       const prayerUrls = publicPrayers.map((p) =>
@@ -369,6 +378,19 @@ export async function registerRoutes(
   const CRISIS_PRAYER_EMAIL = 'jackstaffmail@gmail.com';
   const APPROVER_EMAIL = 'mrjackstafford@gmail.com';
   const SITE_URL = process.env.SITE_URL || 'https://prayforchange.org';
+
+  // Related prayers — up to 4 prayers in the same category, excluding current
+  app.get("/api/prayers/:id/related", async (req, res) => {
+    try {
+      const prayer = await storage.getPrayerBySlugOrId(req.params.id);
+      if (!prayer) return res.status(404).json({ error: "Prayer not found" });
+      const related = await storage.getRelatedPrayers(prayer.id, prayer.topic, 4);
+      return res.json(related);
+    } catch (err: any) {
+      console.error("[related] Failed:", err);
+      return res.status(500).json({ error: "Failed to fetch related prayers" });
+    }
+  });
 
   // Get crisis prayer status for a specific prayer (auth-required)
   app.get("/api/prayers/:id/crisis-status", isAuthenticated, async (req: any, res) => {
