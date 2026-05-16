@@ -26,8 +26,11 @@ const REQUIRED_PRAYER_OPENING = `Oh Mighty God, Creator of Life,\nWe humbly rais
 
 function ensurePrayerOpening(prayer: string): string {
   const trimmed = prayer.trim();
-  // Accept any prayer that opens with an "Oh [X]" divine address
-  if (/^oh\b/i.test(trimmed)) return trimmed;
+  const firstThreeLines = trimmed.split('\n').slice(0, 3).join('\n');
+  // Accept prayers that open with "Oh [X]" AND include the second-line phrase in the first 3 lines
+  if (/^oh\b/i.test(trimmed) && /we humbly raise our hearts to thee/i.test(firstThreeLines)) {
+    return trimmed;
+  }
   // Otherwise prepend the required opening
   return REQUIRED_PRAYER_OPENING + '\n' + trimmed;
 }
@@ -781,7 +784,7 @@ CRITICAL INSTRUCTIONS - Follow these EXACTLY:
    - "the wounded and the grieving"
    - "the frightened and the lost"
    - "boundless Love"
-   - "Light of Peace descend"
+   - "Light of Peace descend now"
    - "noble vision of freedom and peace"
    - "unity and love for all humanity"
    - "new era of Love and Understanding"
@@ -810,7 +813,10 @@ CRITICAL INSTRUCTIONS - Follow these EXACTLY:
 
 7. WORD LIMIT: Your response must be 100 words or fewer. Keep each stanza tight and focused.
 
-8. MANDATORY OPENING: Your response MUST begin with an "Oh [Divine Name]" invocation on the first line, followed by "We humbly raise our hearts to Thee" on the second line.
+8. MANDATORY OPENING: Your response MUST begin with three lines:
+   Line 1: An "Oh [Divine Name]" invocation (e.g. "Oh Wondrous God, Oh Mighty God, Oh God,")
+   Line 2: "We humbly raise our hearts to Thee"
+   Line 3: "In prayer for [specific topic/place/cause]"
 
 Do NOT include a title.`;
 
@@ -1421,7 +1427,7 @@ CRITICAL INSTRUCTIONS - Follow these EXACTLY:
    - "the wounded and the grieving"
    - "the frightened and the lost"
    - "boundless Love"
-   - "Light of Peace descend"
+   - "Light of Peace descend now"
    - "noble vision of freedom and peace"
    - "unity and love for all humanity"
    - "new era of Love and Understanding"
@@ -1450,7 +1456,10 @@ CRITICAL INSTRUCTIONS - Follow these EXACTLY:
 
 7. WORD LIMIT: Your response must be 100 words or fewer. Keep each stanza tight and focused.
 
-8. MANDATORY OPENING: Your response MUST begin with an "Oh [Divine Name]" invocation on the first line, followed by "We humbly raise our hearts to Thee" on the second line.
+8. MANDATORY OPENING: Your response MUST begin with three lines:
+   Line 1: An "Oh [Divine Name]" invocation (e.g. "Oh Wondrous God, Oh Mighty God, Oh God,")
+   Line 2: "We humbly raise our hearts to Thee"
+   Line 3: "In prayer for [specific topic/place/cause]"
 
 Do NOT include a title.`;
 
