@@ -382,6 +382,19 @@ export async function registerRoutes(
   const APPROVER_EMAIL = 'mrjackstafford@gmail.com';
   const SITE_URL = process.env.SITE_URL || 'https://prayforchange.org';
 
+  // Get the latest published daily crisis prayer (public, no auth required)
+  // MUST be before any /api/prayers/:id parameterized route
+  app.get("/api/prayers/latest-crisis", async (_req, res) => {
+    try {
+      const prayer = await storage.getLatestCrisisPrayer();
+      if (!prayer) return res.json(null);
+      return res.json(prayer);
+    } catch (err: any) {
+      console.error("[latest-crisis] Failed:", err);
+      return res.status(500).json({ error: "Failed to fetch latest crisis prayer" });
+    }
+  });
+
   // Related prayers — up to 4 prayers in the same category, excluding current
   app.get("/api/prayers/:id/related", async (req, res) => {
     try {

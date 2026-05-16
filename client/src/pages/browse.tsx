@@ -1,5 +1,6 @@
 import { PrayerCard } from "@/components/prayer-card";
 import { Navbar } from "@/components/navbar";
+import { CrisisPrayerSpotlight } from "@/components/crisis-prayer-spotlight";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect, useMemo, useRef } from "react";
@@ -83,6 +84,9 @@ export default function Browse() {
           </div>
         </div>
       </div>
+
+      {/* Daily Crisis Prayer Spotlight */}
+      <CrisisPrayerSpotlight />
 
       {/* Category Filters */}
       <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-14 z-40">

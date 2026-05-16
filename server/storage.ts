@@ -75,6 +75,7 @@ export interface IStorage {
 
   // Related prayers
   getRelatedPrayers(prayerId: string, topic: string, limit: number): Promise<Prayer[]>;
+  getLatestCrisisPrayer(): Promise<Prayer | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -494,6 +495,16 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(desc(prayers.count))
       .limit(limit);
+  }
+
+  async getLatestCrisisPrayer(): Promise<Prayer | undefined> {
+    const [prayer] = await db
+      .select()
+      .from(prayers)
+      .where(and(eq(prayers.isDailyCrisisPrayer, true), eq(prayers.approvalStatus, 'published')))
+      .orderBy(desc(prayers.createdAt))
+      .limit(1);
+    return prayer;
   }
 }
 
