@@ -8,6 +8,7 @@ import { getPrayers } from "@/lib/api";
 import type { Prayer } from "@shared/schema";
 import { ChevronDown } from "lucide-react";
 import { DailyPrayerSignup } from "@/components/daily-prayer-signup";
+import { CrisisPrayerSpotlight } from "@/components/crisis-prayer-spotlight";
 
 const FAQ_ITEMS = [
   {
@@ -103,6 +104,9 @@ export default function Home() {
       <div className="bg-muted/30 py-6 border-b text-center">
         <p className="text-sm text-muted-foreground">Be one of the first to join a global prayer community.</p>
       </div>
+
+      {/* Daily Crisis Prayer Banner */}
+      <CrisisPrayerSpotlight />
 
       {/* Feed Section */}
       <div className="bg-muted/10 py-16">
