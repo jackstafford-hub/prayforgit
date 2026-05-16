@@ -974,18 +974,25 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
       
       // Link prayer to logged-in user if authenticated
       const userId = req.session?.userId;
+
+      // Fetch author early so we can seed count/goal for the crisis account before saving
+      const authorUser = userId ? await storage.getUser(userId) : undefined;
+      const isCrisisPrayerAccount = !!(userId && authorUser?.email?.toLowerCase() === CRISIS_PRAYER_EMAIL.toLowerCase());
+
+      // Crisis account prayers get a seeded community count and a high goal
+      const crisisSeedCount = isCrisisPrayerAccount
+        ? Math.floor(Math.random() * (6505 - 2303 + 1)) + 2303
+        : undefined;
+
       const prayerData = {
         ...validatedData,
-        goal: 100,
+        goal: isCrisisPrayerAccount ? 10000 : 100,
+        count: isCrisisPrayerAccount ? crisisSeedCount : validatedData.count,
         authorId: userId || null,
       };
       
       const prayer = await storage.createPrayer(prayerData);
       const prayerContent = prayer.recitablePrayer || prayer.aiSummary || prayer.description || '';
-
-      // Fetch the author user once (used for both crisis-prayer detection and normal emails)
-      const authorUser = userId ? await storage.getUser(userId) : undefined;
-      const isCrisisPrayerAccount = !!(userId && authorUser?.email?.toLowerCase() === CRISIS_PRAYER_EMAIL.toLowerCase());
 
       let prayerResponse: typeof prayer = prayer;
 
