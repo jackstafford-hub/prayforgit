@@ -197,7 +197,10 @@ export async function injectPrayerOgTags(
 
   if (normalizedPath === "/browse") {
     const queryStr = urlPath.includes("?") ? urlPath.split("?")[1] : "";
-    const topic = new URLSearchParams(queryStr).get("topic") || "";
+    const rawTopic = new URLSearchParams(queryStr).get("topic") || "";
+    const topic = Object.keys(CATEGORY_META).find(
+      k => k.toLowerCase() === rawTopic.toLowerCase()
+    ) || rawTopic;
     const categoryMeta = topic && CATEGORY_META[topic] ? CATEGORY_META[topic] : null;
 
     if (categoryMeta) {

@@ -86,7 +86,11 @@ export default function PrayerDetail() {
 
   const { data: relatedPrayers } = useQuery<Prayer[]>({
     queryKey: ["/api/prayers", id, "related"],
-    queryFn: () => fetch(`/api/prayers/${id}/related`).then(r => r.json()),
+    queryFn: async () => {
+      const res = await fetch(`/api/prayers/${id}/related`);
+      if (!res.ok) return [];
+      return res.json();
+    },
     enabled: !!id,
     staleTime: 60_000,
   });
