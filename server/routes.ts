@@ -21,13 +21,13 @@ if (process.env.OPENAI_API_KEY) {
 const embedPrayRateLimit = new Map<string, number>();
 const subscribeRateLimit = new Map<string, number[]>(); // ip → array of timestamps (last hour)
 
-// These three lines must appear verbatim at the start of every generated prayer
-const REQUIRED_PRAYER_OPENING = `Oh Mighty God, Creator of Life,\nWe ask that we may be used as Channels\nFor thy vibrant Healing Power to flow through us`;
+// Opening lines prepended when the AI omits them
+const REQUIRED_PRAYER_OPENING = `Oh Mighty God, Creator of Life,\nWe humbly raise our hearts to Thee`;
 
 function ensurePrayerOpening(prayer: string): string {
   const trimmed = prayer.trim();
-  // If the AI already started with "Oh Mighty God" (any capitalisation), trust it
-  if (/^oh mighty god/i.test(trimmed)) return trimmed;
+  // Accept any prayer that opens with an "Oh [X]" divine address
+  if (/^oh\b/i.test(trimmed)) return trimmed;
   // Otherwise prepend the required opening
   return REQUIRED_PRAYER_OPENING + '\n' + trimmed;
 }
@@ -735,84 +735,82 @@ ${currentPrayer}
 User's instructions for changes:
 ${instructions}
 
-Please revise the prayer incorporating these changes while maintaining the sacred, structured format with four stanzas. Keep it under 100 words. Always end with "May Thy Will be Done."
+Please revise the prayer incorporating these changes while maintaining the sacred, lyrical format with five stanzas. Keep it under 100 words. Always end with "May Divine Will be done."
 
-MANDATORY: Your response MUST begin with EXACTLY these three lines verbatim:
-Oh Mighty God, Creator of Life,
-We ask that we may be used as Channels
-For thy vibrant Healing Power to flow through us`
+MANDATORY: Your response MUST open with an "Oh [Divine Name]" invocation (e.g. "Oh Wondrous God," or "Oh Mighty God, Creator of Life,") followed on the next line by "We humbly raise our hearts to Thee".`
         : `Write a beautiful, structured prayer for a community to recite together for: ${title}
 ${description ? `Context: ${description}` : ''}
 
 You MUST closely follow this exact prayer template, using similar terminology and phrases:
 
 ---
-Oh Mighty God, Creator of Life,
-We ask that we may be used as Channels for
-Thy vibrant Healing Power to flow through us
-In a living stream of radiant loving energy
-To bring peace and harmony to Ukraine
-And healing and protection to
-All the people who are injured and suffering in this
-War-torn country.
+Oh Wondrous God, Oh Mighty God, Oh God,
+We humbly raise our hearts to Thee
+In prayer for [place/cause]
+Caught in darkness and in need.
 
-Oh Divine Father of Life,
-May Thy wondrous power flood this country now
-Bringing hope wherever it touches,
-Healing to the sick and wounded,
-And strength to those who have suffered great loss.
-Oh God, May they all be comforted by Thy Presence.
+Oh Mighty God, may the radiant Light of Divine Love
+Descend now upon this place,
+Bringing wisdom and steadfast courage
+To all who face this hour.
 
-We pray that Thy Loving power flows to all
-Who are helping to bring peace,
-To inspire them in their difficult work
-With clarity, wisdom, love, understanding.
+We hold in our hearts the wounded and the grieving,
+The frightened and the lost —
+Oh God, surround them with Thy boundless Love,
+Comfort them with Thy Presence.
 
-Oh Divine Creator,
-May much-needed aid of every kind flow now
-From every corner of our world
-In the realization that we are one human family,
-Sharing in our grief and in our joy.
-Oh God, we thank you for this opportunity to be of Service.
-May Thy Will be Done.
+Oh Wondrous God, we pray for the leaders,
+Those who hold power in this time —
+May the Light of Peace descend upon their minds,
+Illuminating the noble vision of freedom and peace
+That lives within each human heart.
+
+Oh God, may this be the hour
+When Thy children choose unity and love for all humanity,
+When, guided by Thy boundless Love,
+We step together into a new era of Love and Understanding.
+May Divine Will be done.
 ---
 
 CRITICAL INSTRUCTIONS - Follow these EXACTLY:
 
 1. USE THESE EXACT PHRASES (adapt to context):
-   - "We ask that we may be used as Channels"
-   - "Thy vibrant Healing Power to flow through us"
-   - "In a living stream of radiant loving energy"
-   - "May Thy wondrous power flood" 
-   - "Bringing hope wherever it touches"
-   - "May they all be comforted by Thy Presence"
-   - "We pray that Thy Loving power flows to all"
-   - "With clarity, wisdom, love, understanding"
-   - "In the realization that we are one human family"
-   - "Sharing in our grief and in our joy"
-   - "we thank you for this opportunity to be of Service"
-   - "May Thy Will be Done"
+   - "we humbly raise our hearts to Thee"
+   - "radiant Light of Divine Love"
+   - "wisdom and steadfast courage"
+   - "the wounded and the grieving"
+   - "the frightened and the lost"
+   - "boundless Love"
+   - "Light of Peace descend"
+   - "noble vision of freedom and peace"
+   - "unity and love for all humanity"
+   - "new era of Love and Understanding"
+   - "May Divine Will be done"
 
-2. USE THESE DIVINE ADDRESSES:
-   - "Oh Mighty God, Creator of Life" (first stanza)
-   - "Oh Divine Father of Life" (second stanza)
-   - "Oh Divine Creator" (final stanza)
-   - "Oh God" can be used within stanzas
+2. USE THESE DIVINE ADDRESSES (choose appropriate ones per stanza):
+   - "Oh Wondrous God"
+   - "Oh Mighty God"
+   - "Oh God"
+   - "Oh Divine Father"
+   - "Oh Divine Creator"
+   Do NOT use deity-specific names such as "Brahma", "Allah", "Jesus", "Krishna", etc.
 
-3. STRUCTURE: Exactly 4 stanzas following the template structure
+3. STRUCTURE: Exactly 5 stanzas following this template:
+   - Stanza 1: Invocation — address God, raise hearts in prayer for the specific topic
+   - Stanza 2: Light and wisdom — invoke radiant Light of Divine Love, wisdom and courage for those affected
+   - Stanza 3: Compassion — hold in prayer the wounded, grieving, frightened, and lost
+   - Stanza 4: Leaders / those in power — Light of Peace, noble vision of freedom and peace
+   - Stanza 5: Unity and new era — boundless Love, unity, new era of Love and Understanding, ending with "May Divine Will be done."
 
 4. FORMAT: Each new sentence or phrase that starts with a capital letter should be on its own line
 
 5. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
 
-6. Always end with "May Thy Will be Done."
+6. Always end with "May Divine Will be done."
 
 7. WORD LIMIT: Your response must be 100 words or fewer. Keep each stanza tight and focused.
 
-8. MANDATORY OPENING: Your response MUST begin with EXACTLY these three lines verbatim — no substitutions, no paraphrasing:
-   Oh Mighty God, Creator of Life,
-   We ask that we may be used as Channels
-   For thy vibrant Healing Power to flow through us
+8. MANDATORY OPENING: Your response MUST begin with an "Oh [Divine Name]" invocation on the first line, followed by "We humbly raise our hearts to Thee" on the second line.
 
 Do NOT include a title.`;
 
@@ -1377,84 +1375,82 @@ ${prayer.recitablePrayer}
 User's instructions for changes:
 ${instructions}
 
-Please revise the prayer incorporating these changes while maintaining the sacred, structured format with four stanzas. Keep it under 100 words. Always end with "May Thy Will be Done."
+Please revise the prayer incorporating these changes while maintaining the sacred, lyrical format with five stanzas. Keep it under 100 words. Always end with "May Divine Will be done."
 
-MANDATORY: Your response MUST begin with EXACTLY these three lines verbatim:
-Oh Mighty God, Creator of Life,
-We ask that we may be used as Channels
-For thy vibrant Healing Power to flow through us`
+MANDATORY: Your response MUST open with an "Oh [Divine Name]" invocation (e.g. "Oh Wondrous God," or "Oh Mighty God, Creator of Life,") followed on the next line by "We humbly raise our hearts to Thee".`
           : `Write a beautiful, structured prayer for a community to recite together for: ${prayer.title}
 ${prayer.description ? `Context: ${prayer.description}` : ''}
 
 You MUST closely follow this exact prayer template, using similar terminology and phrases:
 
 ---
-Oh Mighty God, Creator of Life,
-We ask that we may be used as Channels for
-Thy vibrant Healing Power to flow through us
-In a living stream of radiant loving energy
-To bring peace and harmony to Ukraine
-And healing and protection to
-All the people who are injured and suffering in this
-War-torn country.
+Oh Wondrous God, Oh Mighty God, Oh God,
+We humbly raise our hearts to Thee
+In prayer for [place/cause]
+Caught in darkness and in need.
 
-Oh Divine Father of Life,
-May Thy wondrous power flood this country now
-Bringing hope wherever it touches,
-Healing to the sick and wounded,
-And strength to those who have suffered great loss.
-Oh God, May they all be comforted by Thy Presence.
+Oh Mighty God, may the radiant Light of Divine Love
+Descend now upon this place,
+Bringing wisdom and steadfast courage
+To all who face this hour.
 
-We pray that Thy Loving power flows to all
-Who are helping to bring peace,
-To inspire them in their difficult work
-With clarity, wisdom, love, understanding.
+We hold in our hearts the wounded and the grieving,
+The frightened and the lost —
+Oh God, surround them with Thy boundless Love,
+Comfort them with Thy Presence.
 
-Oh Divine Creator,
-May much-needed aid of every kind flow now
-From every corner of our world
-In the realization that we are one human family,
-Sharing in our grief and in our joy.
-Oh God, we thank you for this opportunity to be of Service.
-May Thy Will be Done.
+Oh Wondrous God, we pray for the leaders,
+Those who hold power in this time —
+May the Light of Peace descend upon their minds,
+Illuminating the noble vision of freedom and peace
+That lives within each human heart.
+
+Oh God, may this be the hour
+When Thy children choose unity and love for all humanity,
+When, guided by Thy boundless Love,
+We step together into a new era of Love and Understanding.
+May Divine Will be done.
 ---
 
 CRITICAL INSTRUCTIONS - Follow these EXACTLY:
 
 1. USE THESE EXACT PHRASES (adapt to context):
-   - "We ask that we may be used as Channels"
-   - "Thy vibrant Healing Power to flow through us"
-   - "In a living stream of radiant loving energy"
-   - "May Thy wondrous power flood" 
-   - "Bringing hope wherever it touches"
-   - "May they all be comforted by Thy Presence"
-   - "We pray that Thy Loving power flows to all"
-   - "With clarity, wisdom, love, understanding"
-   - "In the realization that we are one human family"
-   - "Sharing in our grief and in our joy"
-   - "we thank you for this opportunity to be of Service"
-   - "May Thy Will be Done"
+   - "we humbly raise our hearts to Thee"
+   - "radiant Light of Divine Love"
+   - "wisdom and steadfast courage"
+   - "the wounded and the grieving"
+   - "the frightened and the lost"
+   - "boundless Love"
+   - "Light of Peace descend"
+   - "noble vision of freedom and peace"
+   - "unity and love for all humanity"
+   - "new era of Love and Understanding"
+   - "May Divine Will be done"
 
-2. USE THESE DIVINE ADDRESSES:
-   - "Oh Mighty God, Creator of Life" (first stanza)
-   - "Oh Divine Father of Life" (second stanza)
-   - "Oh Divine Creator" (final stanza)
-   - "Oh God" can be used within stanzas
+2. USE THESE DIVINE ADDRESSES (choose appropriate ones per stanza):
+   - "Oh Wondrous God"
+   - "Oh Mighty God"
+   - "Oh God"
+   - "Oh Divine Father"
+   - "Oh Divine Creator"
+   Do NOT use deity-specific names such as "Brahma", "Allah", "Jesus", "Krishna", etc.
 
-3. STRUCTURE: Exactly 4 stanzas following the template structure
+3. STRUCTURE: Exactly 5 stanzas following this template:
+   - Stanza 1: Invocation — address God, raise hearts in prayer for the specific topic
+   - Stanza 2: Light and wisdom — invoke radiant Light of Divine Love, wisdom and courage for those affected
+   - Stanza 3: Compassion — hold in prayer the wounded, grieving, frightened, and lost
+   - Stanza 4: Leaders / those in power — Light of Peace, noble vision of freedom and peace
+   - Stanza 5: Unity and new era — boundless Love, unity, new era of Love and Understanding, ending with "May Divine Will be done."
 
 4. FORMAT: Each new sentence or phrase that starts with a capital letter should be on its own line
 
 5. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
 
-6. Always end with "May Thy Will be Done."
+6. Always end with "May Divine Will be done."
 
 7. WORD LIMIT: Your response must be 100 words or fewer. Keep each stanza tight and focused.
 
-8. MANDATORY OPENING: Your response MUST begin with EXACTLY these three lines verbatim — no substitutions, no paraphrasing:
-   Oh Mighty God, Creator of Life,
-   We ask that we may be used as Channels
-   For thy vibrant Healing Power to flow through us
+8. MANDATORY OPENING: Your response MUST begin with an "Oh [Divine Name]" invocation on the first line, followed by "We humbly raise our hearts to Thee" on the second line.
 
 Do NOT include a title.`;
 
