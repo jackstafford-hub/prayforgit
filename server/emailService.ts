@@ -309,8 +309,11 @@ function buildCrisisPrayerHtml(
 ): string {
   const unsubscribeUrl = `${siteUrl}/api/unsubscribe?token=${subscriber.unsubscribeToken}`;
 
-  const imageSection = prayer.imageUrl
-    ? `<tr><td style="padding:0;"><img src="${escapeHtml(prayer.imageUrl)}" alt="" style="display:block;width:100%;max-width:600px;height:auto;border-radius:6px 6px 0 0;" /></td></tr>`
+  const absoluteImageUrl = prayer.imageUrl
+    ? (prayer.imageUrl.startsWith('http') ? prayer.imageUrl : `${siteUrl}${prayer.imageUrl}`)
+    : null;
+  const imageSection = absoluteImageUrl
+    ? `<tr><td style="padding:0;"><img src="${escapeHtml(absoluteImageUrl)}" alt="" style="display:block;width:100%;max-width:600px;height:auto;border-radius:6px 6px 0 0;" /></td></tr>`
     : '';
 
   const issueSection = prayer.description
@@ -373,6 +376,14 @@ export async function sendCrisisPrayerApprovalEmail(
   try {
     const { client, fromEmail } = await getUncachableSendGridClient();
 
+    const siteUrl = process.env.SITE_URL || 'https://prayforchange.org';
+    const absoluteImageUrl = prayer.imageUrl
+      ? (prayer.imageUrl.startsWith('http') ? prayer.imageUrl : `${siteUrl}${prayer.imageUrl}`)
+      : null;
+    const imageSection = absoluteImageUrl
+      ? `<tr><td style="padding:0;"><img src="${escapeHtml(absoluteImageUrl)}" alt="" style="display:block;width:100%;max-width:600px;height:auto;border-radius:6px 6px 0 0;" /></td></tr>`
+      : '';
+
     const descriptionSection = prayer.description
       ? `<div style="margin:0 0 24px;">
            <p style="font-size:13px;font-weight:600;letter-spacing:0.06em;color:#9ca3af;text-transform:uppercase;margin:0 0 8px;">The Issue</p>
@@ -399,6 +410,7 @@ export async function sendCrisisPrayerApprovalEmail(
     <tr>
       <td align="center">
         <table width="100%" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          ${imageSection}
           <tr>
             <td style="padding:36px 40px 32px;">
               <p style="font-size:13px;font-weight:600;letter-spacing:0.08em;color:#9ca3af;text-transform:uppercase;margin:0 0 12px;">Daily Crisis Prayer — Approval Required</p>
