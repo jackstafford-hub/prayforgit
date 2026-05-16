@@ -68,9 +68,9 @@ Preferred communication style: Simple, everyday language.
 - **OpenAI API**: Generates AI summaries and recitable prayers from user submissions (requires `OPENAI_API_KEY`)
 - **SendGrid**: Transactional emails (welcome, prayer saved, daily digest) via Replit connector integration
 - **Anthropic API**: Drafts interfaith crisis prayers via Claude (`ANTHROPIC_API_KEY` — **required** for daily pipeline)
-- **Replicate**: Generates prayer images via Flux Schnell (`REPLICATE_API_TOKEN` — recommended; Unsplash fallback used if absent)
-- **Unsplash**: Stock photo fallback for prayer images (`UNSPLASH_ACCESS_KEY` — recommended fallback)
-- **NewsAPI**: News fallback if GDELT is unavailable (`NEWSAPI_KEY` — optional)
+- **Replicate**: Generates prayer images via Flux Schnell (`REPLICATE_API_TOKEN` — optional; pipeline runs without it if Unsplash also unavailable)
+- **Unsplash**: Stock photo fallback for prayer images (`UNSPLASH_ACCESS_KEY` — optional fallback; prayer published without image if both unavailable)
+- **NewsAPI**: News fallback if GDELT is unavailable (`NEWSAPI_KEY` — optional; pipeline errors if both GDELT and NewsAPI fail)
 
 ### Autonomous Daily Crisis Prayer Pipeline
 The pipeline runs via `scripts/daily-prayer.ts` and must be set up as a **Scheduled Deployment** in the Replit Deployments UI:

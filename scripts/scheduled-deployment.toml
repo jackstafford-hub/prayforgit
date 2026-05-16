@@ -1,0 +1,32 @@
+# Scheduled Deployment Configuration for Daily Crisis Prayer Pipeline
+#
+# This file contains the TOML configuration block that should be added to the
+# Replit Deployments UI (or .replit) as a SECOND deployment alongside the
+# existing autoscale web app deployment.
+#
+# IMPORTANT: The agent cannot add this block to .replit automatically because
+# the platform's deployConfig tool replaces the primary [deployment] section,
+# which would break the web app. Instead, add this via:
+#
+#   Deployments UI → Create deployment → Scheduled
+#
+# ---
+# Schedule: 0 7 * * *   (07:00 UTC, daily)
+# Command:  npx tsx scripts/daily-prayer.ts
+# ---
+#
+# Required secrets (set in Deployments → Secrets before activating):
+#   ANTHROPIC_API_KEY      (required — pipeline aborts without it)
+#   REPLICATE_API_TOKEN    (optional — Unsplash fallback used if absent)
+#   UNSPLASH_ACCESS_KEY    (optional — prayer published without image if absent)
+#   NEWSAPI_KEY            (optional — GDELT is primary; NewsAPI is fallback)
+#   DATABASE_URL           (required — same value as web app)
+#   SESSION_SECRET         (required — same value as web app)
+#   SITE_URL               (required — e.g. https://prayforchange.org)
+#   SENDGRID_API_KEY       (required — for approval + error emails)
+
+[[deployments]]
+name = "Daily Prayer Runner"
+deploymentTarget = "scheduled"
+schedule = "0 7 * * *"
+run = ["npx", "tsx", "scripts/daily-prayer.ts"]

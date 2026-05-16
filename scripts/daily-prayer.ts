@@ -153,20 +153,23 @@ async function fetchFromNewsAPI(): Promise<CrisisCandidate[]> {
 async function fetchTopCrisis(recentCrises: string[]): Promise<CrisisCandidate | null> {
   let candidates: CrisisCandidate[] = [];
 
+  let gdeltError: string | null = null;
   try {
     candidates = await fetchFromGDELT();
     console.log(`[GDELT] Retrieved ${candidates.length} articles`);
   } catch (err: any) {
-    console.warn('[GDELT] Failed, trying NewsAPI fallback:', err.message);
+    gdeltError = err.message;
+    console.warn('[GDELT] Failed, trying NewsAPI fallback:', gdeltError);
     try {
       candidates = await fetchFromNewsAPI();
       console.log(`[NewsAPI] Retrieved ${candidates.length} articles`);
     } catch (err2: any) {
-      console.error('[NewsAPI] Also failed:', err2.message);
-      return null;
+      // Both news sources failed — this is an infrastructure outage, not a normal "no crisis" day
+      throw new Error(`News fetch failed — GDELT: ${gdeltError}; NewsAPI: ${err2.message}`);
     }
   }
 
+  // Genuine case: sources responded but no articles passed our quality/crisis filters
   if (!candidates.length) return null;
 
   const DEDUP_THRESHOLD = 0.4;
