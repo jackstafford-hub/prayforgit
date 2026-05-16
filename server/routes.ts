@@ -21,6 +21,17 @@ if (process.env.OPENAI_API_KEY) {
 const embedPrayRateLimit = new Map<string, number>();
 const subscribeRateLimit = new Map<string, number[]>(); // ip → array of timestamps (last hour)
 
+// These three lines must appear verbatim at the start of every generated prayer
+const REQUIRED_PRAYER_OPENING = `Oh Mighty God, Creator of Life,\nWe ask that we may be used as Channels\nFor thy vibrant Healing Power to flow through us`;
+
+function ensurePrayerOpening(prayer: string): string {
+  const trimmed = prayer.trim();
+  // If the AI already started with "Oh Mighty God" (any capitalisation), trust it
+  if (/^oh mighty god/i.test(trimmed)) return trimmed;
+  // Otherwise prepend the required opening
+  return REQUIRED_PRAYER_OPENING + '\n' + trimmed;
+}
+
 function escapeHtmlEmbed(str: string): string {
   return str
     .replace(/&/g, "&amp;")
@@ -702,7 +713,12 @@ ${currentPrayer}
 User's instructions for changes:
 ${instructions}
 
-Please revise the prayer incorporating these changes while maintaining the sacred, structured format with four stanzas. Keep it under 100 words. Always end with "May Thy Will be Done." Start directly with "Oh Mighty God, Creator of Life,"`
+Please revise the prayer incorporating these changes while maintaining the sacred, structured format with four stanzas. Keep it under 100 words. Always end with "May Thy Will be Done."
+
+MANDATORY: Your response MUST begin with EXACTLY these three lines verbatim:
+Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels
+For thy vibrant Healing Power to flow through us`
         : `Write a beautiful, structured prayer for a community to recite together for: ${title}
 ${description ? `Context: ${description}` : ''}
 
@@ -771,7 +787,12 @@ CRITICAL INSTRUCTIONS - Follow these EXACTLY:
 
 7. WORD LIMIT: Your response must be 100 words or fewer. Keep each stanza tight and focused.
 
-Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
+8. MANDATORY OPENING: Your response MUST begin with EXACTLY these three lines verbatim — no substitutions, no paraphrasing:
+   Oh Mighty God, Creator of Life,
+   We ask that we may be used as Channels
+   For thy vibrant Healing Power to flow through us
+
+Do NOT include a title.`;
 
       const categoryPrompt = `Classify this prayer request into exactly one of these categories: Health, Family, Employment, World Peace, Community, Faith, Education, Gratitude, General.
 
@@ -800,7 +821,7 @@ Respond with ONLY the category name, nothing else.`;
       ]);
 
       const aiSummary = summaryResponse.choices[0].message.content || "";
-      const recitablePrayer = prayerResponse.choices[0].message.content || "";
+      const recitablePrayer = ensurePrayerOpening(prayerResponse.choices[0].message.content || "");
 
       const refusalPattern = /^I'?m sorry|^I can'?t assist|^I cannot assist|^I'?m unable to|^I'?m not able to|^Sorry,? but/i;
       if (refusalPattern.test(aiSummary.trim()) || refusalPattern.test(recitablePrayer.trim())) {
@@ -1327,7 +1348,12 @@ ${prayer.recitablePrayer}
 User's instructions for changes:
 ${instructions}
 
-Please revise the prayer incorporating these changes while maintaining the sacred, structured format with four stanzas. Keep it under 100 words. Always end with "May Thy Will be Done." Start directly with "Oh Mighty God, Creator of Life,"`
+Please revise the prayer incorporating these changes while maintaining the sacred, structured format with four stanzas. Keep it under 100 words. Always end with "May Thy Will be Done."
+
+MANDATORY: Your response MUST begin with EXACTLY these three lines verbatim:
+Oh Mighty God, Creator of Life,
+We ask that we may be used as Channels
+For thy vibrant Healing Power to flow through us`
           : `Write a beautiful, structured prayer for a community to recite together for: ${prayer.title}
 ${prayer.description ? `Context: ${prayer.description}` : ''}
 
@@ -1396,7 +1422,12 @@ CRITICAL INSTRUCTIONS - Follow these EXACTLY:
 
 7. WORD LIMIT: Your response must be 100 words or fewer. Keep each stanza tight and focused.
 
-Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
+8. MANDATORY OPENING: Your response MUST begin with EXACTLY these three lines verbatim — no substitutions, no paraphrasing:
+   Oh Mighty God, Creator of Life,
+   We ask that we may be used as Channels
+   For thy vibrant Healing Power to flow through us
+
+Do NOT include a title.`;
 
         const prayerResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
@@ -1404,7 +1435,7 @@ Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
           temperature: 0.7,
         });
 
-        updates.recitablePrayer = prayerResponse.choices[0].message.content || "";
+        updates.recitablePrayer = ensurePrayerOpening(prayerResponse.choices[0].message.content || "");
       }
 
       const updatedPrayer = await storage.updatePrayerContent(req.params.id, updates);
