@@ -70,6 +70,7 @@ export interface IStorage {
   logDailyPrayerRun(data: Omit<InsertDailyPrayerRun, 'id'>): Promise<DailyPrayerRun>;
   updateDailyPrayerRun(id: string, data: Partial<InsertDailyPrayerRun>): Promise<void>;
   getRecentDailyCrisisPrayers(days: number): Promise<string[]>;
+  getPublishedDailyCrisisPrayers(limit: number): Promise<Prayer[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -456,6 +457,15 @@ export class DatabaseStorage implements IStorage {
       .from(dailyPrayerRuns)
       .where(and(gte(dailyPrayerRuns.runAt, cutoff), sql`${dailyPrayerRuns.crisisChosen} IS NOT NULL`));
     return rows.map(r => r.crisisChosen as string);
+  }
+
+  async getPublishedDailyCrisisPrayers(limit: number): Promise<Prayer[]> {
+    return db
+      .select()
+      .from(prayers)
+      .where(and(eq(prayers.isDailyCrisisPrayer, true), eq(prayers.approvalStatus, 'published')))
+      .orderBy(desc(prayers.createdAt))
+      .limit(limit);
   }
 }
 
