@@ -1,6 +1,6 @@
 import { pool, db } from "../server/db";
 import { prayers, users } from "../shared/schema";
-import { eq, or, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 const TARGET_EMAIL = "jackstaffmail@gmail.com";
 
