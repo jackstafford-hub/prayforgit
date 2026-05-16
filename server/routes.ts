@@ -1028,6 +1028,7 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
         goal: isCrisisPrayerAccount ? 10000 : 100,
         count: isCrisisPrayerAccount ? crisisSeedCount : validatedData.count,
         authorId: userId || null,
+        isDailyCrisisPrayer: isCrisisPrayerAccount,
       };
       
       const prayer = await storage.createPrayer(prayerData);

@@ -76,7 +76,6 @@ export const insertPrayerSchema = createInsertSchema(prayers).omit({
   approvalStatus: true,
   approvalToken: true,
   approvalTokenExpiry: true,
-  isDailyCrisisPrayer: true,
   createdByEmail: true,
 });
 

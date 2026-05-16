@@ -12,9 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
-import { pool, db } from '../server/db.js';
-import { prayers } from '../shared/schema.js';
-import { eq } from 'drizzle-orm';
+import { pool } from '../server/db.js';
 import { storage } from '../server/storage.js';
 import { sendDailyPrayerApprovalEmail, sendDailyPrayerErrorEmail, sendNoPrayerDraftedEmail } from '../server/emailService.js';
 
@@ -420,7 +418,7 @@ async function run() {
     if (imageResult?.attribution) descriptionParts.push(`\n\n${imageResult.attribution}`);
     const description = descriptionParts.join('');
 
-    const slug = generateBaseSlug(draft.slug || draft.title);
+    const crisisSeedCount = Math.floor(Math.random() * (6505 - 2303 + 1)) + 2303;
 
     const createdPrayer = await storage.createPrayer({
       title: draft.title,
@@ -429,16 +427,12 @@ async function run() {
       recitablePrayer: draft.body,
       imageUrl: imageResult?.serveUrl ?? null,
       author: 'Daily Crisis Prayer',
-      count: 1,
-      goal: 100,
+      count: crisisSeedCount,
+      goal: 10000,
       topic: 'World Peace',
       flaggedForReview: false,
+      isDailyCrisisPrayer: true,
     });
-
-    await db
-      .update(prayers)
-      .set({ isDailyCrisisPrayer: true, createdByEmail: 'system@prayforchange.org' })
-      .where(eq(prayers.id, createdPrayer.id));
 
     const pendingPrayer = await storage.setPrayerPendingApproval(createdPrayer.id, token, expiry);
 
