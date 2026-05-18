@@ -1564,7 +1564,7 @@ Do NOT include a title.`;
   });
 
   // RSS feed — Daily Crisis Prayers
-  app.get("/rss/daily-crisis.xml", async (req, res) => {
+  app.get("/rss/daily-crisis", async (req, res) => {
     console.log("[RSS] Route hit, starting generation");
     try {
       const SITE_URL = process.env.SITE_URL || 'https://prayforchange.org';
@@ -1636,7 +1636,7 @@ Do NOT include a title.`;
     <description>Every morning, an interfaith prayer for the world&#39;s most urgent crisis.</description>
     <language>en-us</language>
     <ttl>360</ttl>
-    <atom:link href="${SITE_URL}/rss/daily-crisis.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="${SITE_URL}/rss/daily-crisis" rel="self" type="application/rss+xml" />
 ${items}
   </channel>
 </rss>`;

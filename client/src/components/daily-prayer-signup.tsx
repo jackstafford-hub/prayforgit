@@ -99,7 +99,7 @@ export function DailyPrayerSignup({ variant = "standalone" }: DailyPrayerSignupP
           )}
           <p className="mt-4 text-xs text-muted-foreground/70">
             <a
-              href="/rss/daily-crisis.xml"
+              href="/rss/daily-crisis"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 hover:text-muted-foreground transition-colors"
