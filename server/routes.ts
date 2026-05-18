@@ -1565,38 +1565,50 @@ Do NOT include a title.`;
 
   // RSS feed — Daily Crisis Prayers
   app.get("/rss/daily-crisis.xml", async (req, res) => {
+    console.log("[RSS] Route hit, starting generation");
     try {
       const SITE_URL = process.env.SITE_URL || 'https://prayforchange.org';
+      console.log("[RSS] Fetching prayers from storage");
       const prayers = await storage.getPublishedDailyCrisisPrayers(50);
+      console.log("[RSS] Got", prayers.length, "prayers");
 
-      const escapeXml = (s: string) =>
-        s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+      const escapeXml = (s: string | null | undefined): string => {
+        if (s == null) return '';
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&apos;');
+      };
 
       const toAbsoluteUrl = (url: string) =>
         url.startsWith('http') ? url : `${SITE_URL}${url}`;
 
-      const items = prayers.map(p => {
-        const link = `${SITE_URL}/prayer/${p.slug || p.id}`;
-        const pubDate = p.createdAt ? new Date(p.createdAt).toUTCString() : new Date().toUTCString();
-        const description = p.aiSummary || p.description || '';
-        const imageUrl = p.imageUrl ? toAbsoluteUrl(p.imageUrl) : null;
+      const items = prayers.map((p, i) => {
+        try {
+          console.log(`[RSS] Mapping prayer ${i}: ${p.id}`);
+          const link = `${SITE_URL}/prayer/${p.slug || p.id}`;
+          const pubDate = p.createdAt ? new Date(p.createdAt).toUTCString() : new Date().toUTCString();
+          const description = p.aiSummary || p.description || '';
+          const imageUrl = p.imageUrl ? toAbsoluteUrl(p.imageUrl) : null;
 
-        const enclosure = imageUrl
-          ? `<enclosure url="${escapeXml(imageUrl)}" type="image/jpeg" length="0" />`
-          : '';
+          const enclosure = imageUrl
+            ? `<enclosure url="${escapeXml(imageUrl)}" type="image/jpeg" length="0" />`
+            : '';
 
-        const mediaThumbnail = imageUrl
-          ? `<media:thumbnail url="${escapeXml(imageUrl)}" />`
-          : '';
+          const mediaThumbnail = imageUrl
+            ? `<media:thumbnail url="${escapeXml(imageUrl)}" />`
+            : '';
 
-        const content = [
-          imageUrl ? `<img src="${escapeXml(imageUrl)}" alt="${escapeXml(p.title)}" style="max-width:100%;display:block;margin-bottom:16px;" />` : '',
-          description ? `<p>${escapeXml(description)}</p>` : '',
-          p.recitablePrayer ? `<blockquote><em>${escapeXml(p.recitablePrayer)}</em></blockquote>` : '',
-          `<p><a href="${escapeXml(link)}">Pray with the community →</a></p>`,
-        ].filter(Boolean).join('\n');
+          const content = [
+            imageUrl ? `<img src="${escapeXml(imageUrl)}" alt="${escapeXml(p.title)}" style="max-width:100%;display:block;margin-bottom:16px;" />` : '',
+            description ? `<p>${escapeXml(description)}</p>` : '',
+            p.recitablePrayer ? `<blockquote><em>${escapeXml(p.recitablePrayer)}</em></blockquote>` : '',
+            `<p><a href="${escapeXml(link)}">Pray with the community →</a></p>`,
+          ].filter(Boolean).join('\n');
 
-        return `    <item>
+          return `    <item>
       <title>${escapeXml(p.title)}</title>
       <link>${escapeXml(link)}</link>
       <guid isPermaLink="true">${escapeXml(link)}</guid>
@@ -1606,7 +1618,12 @@ Do NOT include a title.`;
       ${enclosure}
       ${mediaThumbnail}
     </item>`;
-      }).join('\n');
+        } catch (itemErr: any) {
+          console.error(`[RSS] Error mapping prayer ${i} (${p.id}):`, itemErr?.message, itemErr?.stack);
+          return '';
+        }
+      }).filter(Boolean).join('\n');
+      console.log("[RSS] Map complete, building XML");
 
       const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"
@@ -1627,9 +1644,9 @@ ${items}
       res.setHeader('Content-Type', 'application/rss+xml; charset=utf-8');
       res.setHeader('Cache-Control', 'public, max-age=3600');
       res.send(xml);
-    } catch (error) {
-      console.error("Error generating RSS feed:", error);
-      res.status(500).send('<?xml version="1.0"?><error>Failed to generate feed</error>');
+    } catch (error: any) {
+      console.error("Error generating RSS feed:", error?.message || error, error?.stack);
+      res.status(500).set('Content-Type', 'application/rss+xml').send(`<?xml version="1.0"?><error>${error?.message || 'Unknown error'}</error>`);
     }
   });
 
