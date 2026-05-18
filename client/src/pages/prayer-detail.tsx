@@ -816,7 +816,7 @@ export default function PrayerDetail() {
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold text-rose-600 uppercase tracking-wider">Daily Crisis Prayer</p>
                   <a
-                    href="/rss/daily-crisis"
+                    href="/api/rss/daily-crisis.xml"
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Subscribe via RSS"
