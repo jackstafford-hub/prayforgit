@@ -214,18 +214,25 @@ function buildApprovalErrorPage(message: string): string {
 const uploadsDir = path.resolve(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
+const ALLOWED_IMAGE_MIMES: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+};
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, uploadsDir),
     filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase() || ".jpg";
+      const ext = ALLOWED_IMAGE_MIMES[file.mimetype] ?? ".jpg";
       cb(null, `${randomUUID()}${ext}`);
     },
   }),
   limits: { fileSize: 8 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    if (file.mimetype.startsWith("image/")) cb(null, true);
-    else cb(new Error("Only image files are allowed"));
+    if (ALLOWED_IMAGE_MIMES[file.mimetype]) cb(null, true);
+    else cb(new Error("Only JPEG, PNG, WebP, or GIF images are allowed"));
   },
 });
 
