@@ -8,7 +8,9 @@ import { setupAuth, isAuthenticated } from "./auth";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import express from "express";
 import path from "path";
-import { randomBytes } from "node:crypto";
+import fs from "fs";
+import multer from "multer";
+import { randomBytes, randomUUID } from "node:crypto";
 import { sendPrayerSavedEmail, sendAdminPrayerCopyEmail, sendModerationEmail, sendCrisisPrayerEmailBatch, sendCrisisPrayerApprovalEmail } from "./emailService";
 
 let openai: OpenAI | null = null;
@@ -209,6 +211,24 @@ function buildApprovalErrorPage(message: string): string {
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Error - PrayForChange</title><style>${APPROVAL_PAGE_STYLE}</style></head><body><div class="card"><h1>PrayForChange</h1><h2>Unable to process request</h2><p>${message}</p></div></body></html>`;
 }
 
+const uploadsDir = path.resolve(process.cwd(), "uploads");
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, uploadsDir),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase() || ".jpg";
+      cb(null, `${randomUUID()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 8 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) cb(null, true);
+    else cb(new Error("Only image files are allowed"));
+  },
+});
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -217,6 +237,16 @@ export async function registerRoutes(
   // Serve static assets from attached_assets/generated_images
   const assetsPath = path.resolve(process.cwd(), "attached_assets/generated_images");
   app.use("/assets", express.static(assetsPath));
+
+  // Serve user-uploaded images (under /api/ prefix to bypass CDN static interception)
+  app.use("/api/uploads", express.static(uploadsDir));
+
+  // Image upload endpoint
+  app.post("/api/upload-image", upload.single("image"), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: "No image provided" });
+    const url = `/api/uploads/${req.file.filename}`;
+    return res.json({ url });
+  });
   
   // Setup authentication
   await setupAuth(app);

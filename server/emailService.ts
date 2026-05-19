@@ -309,8 +309,9 @@ function buildCrisisPrayerHtml(
 ): string {
   const unsubscribeUrl = `${siteUrl}/api/unsubscribe?token=${subscriber.unsubscribeToken}`;
 
-  const absoluteImageUrl = prayer.imageUrl
-    ? (prayer.imageUrl.startsWith('http') ? prayer.imageUrl : `${siteUrl}${prayer.imageUrl}`)
+  const rawImageUrl = prayer.imageUrl && !prayer.imageUrl.startsWith('data:') ? prayer.imageUrl : null;
+  const absoluteImageUrl = rawImageUrl
+    ? (rawImageUrl.startsWith('http') ? rawImageUrl : `${siteUrl}${rawImageUrl}`)
     : null;
   const imageSection = absoluteImageUrl
     ? `<tr><td style="padding:0;"><img src="${escapeHtml(absoluteImageUrl)}" alt="" style="display:block;width:100%;max-width:600px;height:auto;border-radius:6px 6px 0 0;" /></td></tr>`
@@ -377,8 +378,9 @@ export async function sendCrisisPrayerApprovalEmail(
     const { client, fromEmail } = await getUncachableSendGridClient();
 
     const siteUrl = process.env.SITE_URL || 'https://prayforchange.org';
-    const absoluteImageUrl = prayer.imageUrl
-      ? (prayer.imageUrl.startsWith('http') ? prayer.imageUrl : `${siteUrl}${prayer.imageUrl}`)
+    const rawImageUrl2 = prayer.imageUrl && !prayer.imageUrl.startsWith('data:') ? prayer.imageUrl : null;
+    const absoluteImageUrl = rawImageUrl2
+      ? (rawImageUrl2.startsWith('http') ? rawImageUrl2 : `${siteUrl}${rawImageUrl2}`)
       : null;
     const imageSection = absoluteImageUrl
       ? `<tr><td style="padding:0;"><img src="${escapeHtml(absoluteImageUrl)}" alt="" style="display:block;width:100%;max-width:600px;height:auto;border-radius:6px 6px 0 0;" /></td></tr>`
@@ -550,8 +552,9 @@ export async function sendDailyPrayerApprovalEmail(
        </div>`
     : '';
 
-  const imageSection = prayer.imageUrl
-    ? `<div style="margin:0 0 24px;"><img src="${escapeHtml(prayer.imageUrl.startsWith('http') ? prayer.imageUrl : `${PIPELINE_SITE_URL}${prayer.imageUrl}`)}" alt="" style="display:block;width:100%;max-width:520px;height:auto;border-radius:6px;" /></div>`
+  const rawImageUrl3 = prayer.imageUrl && !prayer.imageUrl.startsWith('data:') ? prayer.imageUrl : null;
+  const imageSection = rawImageUrl3
+    ? `<div style="margin:0 0 24px;"><img src="${escapeHtml(rawImageUrl3.startsWith('http') ? rawImageUrl3 : `${PIPELINE_SITE_URL}${rawImageUrl3}`)}" alt="" style="display:block;width:100%;max-width:520px;height:auto;border-radius:6px;" /></div>`
     : '';
 
   const html = `<!DOCTYPE html>

@@ -252,25 +252,24 @@ export default function CreatePrayer() {
     setIsEditingPrayer(false);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 8 * 1024 * 1024) {
-        toast({ title: "Image must be under 8MB", variant: "destructive" });
-        e.target.value = "";
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        setFormData(prev => ({ ...prev, imageUrl: result }));
-      };
-      reader.onerror = () => {
-        toast({ title: "Failed to read image file", variant: "destructive" });
-      };
-      reader.readAsDataURL(file);
-    }
     e.target.value = "";
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast({ title: "Image must be under 8MB", variant: "destructive" });
+      return;
+    }
+    try {
+      const formPayload = new FormData();
+      formPayload.append("image", file);
+      const res = await fetch("/api/upload-image", { method: "POST", body: formPayload });
+      if (!res.ok) throw new Error("Upload failed");
+      const { url } = await res.json();
+      setFormData(prev => ({ ...prev, imageUrl: url }));
+    } catch {
+      toast({ title: "Failed to upload image", variant: "destructive" });
+    }
   };
 
   const handleStoryContinue = (e: React.FormEvent) => {
