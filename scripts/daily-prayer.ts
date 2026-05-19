@@ -193,16 +193,20 @@ async function draftPrayer(crisis: CrisisCandidate): Promise<DraftedPrayer> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error('ANTHROPIC_API_KEY not set');
 
-  const system = `You write short, interfaith, politically neutral prayers for PrayForChange.org.
+  const system = `You write beautiful, poetic, interfaith prayers for PrayForChange.org.
 
-Constraints:
-- 80-120 words
-- First-person plural ("we pray," "may we")
-- Interfaith: no mention of Jesus, Allah, Krishna, etc. Use "God" or "Source of Life" or no addressee
+Style:
+- Elevated, reverent language — use "Thy", "thee", "thy" naturally throughout
+- Open with a direct, heartfelt address to God using an elevated title, e.g. "Oh Mighty God, Creator of Life" or "Oh Divine Source of All Being" — vary the title each time
+- Structure in 3–4 short stanzas with line breaks, like verse
+- Use the channel/conduit metaphor: we ask to be used as vessels or channels for divine power, healing, or love to flow through us to those in need
+- Imagery should be vivid and warm: streams of light, radiant energy, flowing love, wondrous power
+- Weave together acknowledgement of suffering, a call for divine power to flow, and gratitude for the opportunity to serve
+- Close with "May Thy Will be Done." (not "Amen")
+- First-person plural ("we pray," "may we," "we ask")
 - Politically neutral: no blame, no policy, no sides
-- Lament + hope + action in that order
-- No rhyming. No archaic language
-- End with "Amen."
+- Interfaith: no mention of Jesus, Allah, Krishna, etc. Address only as God, Divine Creator, Divine Father, Source of All Life, or similar universal titles
+- 100–140 words
 
 Also return:
 - title: a short, clear prayer card title (6-10 words, does NOT start with "A Prayer for")
