@@ -249,10 +249,23 @@ export async function registerRoutes(
   app.use("/api/uploads", express.static(uploadsDir));
 
   // Image upload endpoint
-  app.post("/api/upload-image", upload.single("image"), (req, res) => {
-    if (!req.file) return res.status(400).json({ error: "No image provided" });
-    const url = `/api/uploads/${req.file.filename}`;
-    return res.json({ url });
+  // Note: served under /api/uploads/ (not /uploads/) so Replit's CDN static-asset
+  // interception (publicDir) does not intercept image requests and return 500.
+  app.post("/api/upload-image", (req, res) => {
+    upload.single("image")(req, res, (err) => {
+      if (err instanceof multer.MulterError) {
+        if (err.code === "LIMIT_FILE_SIZE") {
+          return res.status(413).json({ error: "Image must be under 8MB" });
+        }
+        return res.status(400).json({ error: err.message });
+      }
+      if (err) {
+        return res.status(400).json({ error: err instanceof Error ? err.message : "Upload failed" });
+      }
+      if (!req.file) return res.status(400).json({ error: "No image provided" });
+      const url = `/api/uploads/${req.file.filename}`;
+      return res.json({ url });
+    });
   });
   
   // Setup authentication
