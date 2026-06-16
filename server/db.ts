@@ -288,6 +288,9 @@ export async function ensureTablesExist(): Promise<void> {
         error TEXT
       )
     `);
+    // Additive migrations for columns added after initial table creation
+    await pool.query(`ALTER TABLE daily_prayer_runs ADD COLUMN IF NOT EXISTS tier INTEGER`);
+    await pool.query(`ALTER TABLE daily_prayer_runs ADD COLUMN IF NOT EXISTS confirmed_outlets TEXT[]`);
     console.log("[DB] Daily prayer runs table ensured");
   } catch (error: any) {
     console.error("[DB] Daily prayer runs table error:", error?.message);
