@@ -1,0 +1,145 @@
+REPLIT AGENT PROMPT — Autonomous Daily Prayer Poster for PrayForChange.org
+
+Paste everything below this line into Replit Agent.
+
+====================================================================
+
+Build me a self-running server app that posts one daily crisis prayer to
+PrayForChange.org automatically, with no dependency on my local machine, my
+browser, or me being logged in anywhere. It must run entirely on Replit on a
+daily schedule and finish on its own.
+
+GOAL
+Once per day the app should: find the most pressing global humanitarian /
+crisis news story from a fixed list of approved news sources, draft a short
+interfaith prayer about it, avoid repeating any story it has covered in the
+last 14 days, attach a real news photo, publish it to prayforchange.org, and
+email me a confirmation. If publishing fails, it should email me the full
+drafted prayer so I can post it manually.
+
+ARCHITECTURE / STACK
+- Python.
+- Scheduling: use Replit's scheduled-deployment (cron) capability to run the
+  job once per day at 07:00 Europe/Rome. The job should run to completion and
+  exit — do NOT build an always-on server. (Make the run time easy to change.)
+- Persistence: a small SQLite file (or Replit DB) to store the history of
+  posted stories so duplicates can be detected across runs.
+- LLM: call the Anthropic API (Claude) for story selection and prayer drafting.
+- Posting: see POSTING below — prefer an API, fall back to headless Playwright.
+- All credentials live in Replit Secrets, never in code.
+
+SECRETS THE APP NEEDS (set these in the Secrets tab)
+- ANTHROPIC_API_KEY
+- PFC_EMAIL + PFC_PASSWORD   (the app logs in to the website itself — no API)
+- NOTIFY_EMAIL_TO        (where confirmations go)
+- SMTP_HOST / SMTP_USER / SMTP_PASS / SMTP_PORT   (for sending the email; a
+  Gmail app password is fine, or use a transactional email service)
+
+THE DAILY JOB — run these steps in order:
+
+STEP 1 — FIND TODAY'S STORY (approved sources ONLY, no web search)
+Do NOT use any web-search API. Fetch directly from these approved domains only:
+reuters.com, apnews.com, france24.com, cnn.com, nytimes.com,
+washingtonpost.com, npr.org, cbsnews.com, abcnews.go.com, bbc.com,
+theguardian.com, news.sky.com, channelnewsasia.com, abc.net.au, smh.com.au,
+aljazeera.com, news.un.org, who.int, unicef.org, dw.com.
+
+Fetch the world/news section pages of at least 3 of these (use RSS feeds where
+the outlet offers them, otherwise fetch and parse the section HTML). Start with
+Reuters world, AP world news, and BBC world. Extract the current headlines and
+article links. Pass the collected headlines to Claude and ask it to pick the
+single most pressing global crisis or humanitarian story, prioritising:
+natural disasters, humanitarian crises (outbreaks, famine, refugees), mass
+casualty events, health and climate emergencies.
+
+AVOID politically partisan stories, elections, political scandals, culture-war
+topics, and celebrity news — the platform must stay neutral and welcoming to
+all faiths and political views. If nothing major is breaking, pick a NEW
+development in an ongoing crisis (a fresh angle / latest update), not a generic
+repeat. The only exception for revisiting a war is major peace talks.
+
+STEP 2 — MULTI-MARKET VALIDATION (record the tier)
+Confirm the chosen story appears on the approved sites across markets:
+- Tier 1 (preferred): appears in at least 3 of these 4 groups — Wire (Reuters,
+  AP), US (CNN, NYT, WaPo, NPR, CBS, ABC), UK (BBC, Guardian, Sky),
+  Asia-Pacific (CNA, ABC AU, SMH). Prefer Tier 1.
+- Tier 2 (allowed): on at least 2 wire services or UN agencies.
+- Tier 3 (skip): only one outlet.
+Verify by fetching the relevant approved sites. Store which outlets confirmed it.
+
+STEP 3 — DE-DUPLICATE
+Load the last 14 days of posted stories from the database. If today's candidate
+is the same topic as anything in that window, discard it and go back to the next
+best candidate from Step 1. (Store a canonical topic tag per story, e.g.
+"sudan-famine", and compare on that, not just the headline.)
+
+STEP 4 — DRAFT THE PRAYER (Claude)
+TITLE: starts with "Pray for...", under 60 characters.
+STORY: exactly 3 paragraphs, 100-150 words total.
+  - Para 1: what happened — specific facts, numbers, location, scale.
+  - Para 2: why it matters — human impact, one or two sentences.
+  - Para 3: the prayer — name the people affected (families, health workers,
+    volunteers, communities); end with hope.
+STYLE: dignified not dramatic; specific not abstract; interfaith — must work for
+Christians, Muslims, Jews, Hindus, Buddhists and secular-spiritual readers, so
+use "we pray", never "Dear Lord" or tradition-specific language; never take a
+political side; lead with facts, not emotion.
+
+STEP 5 — GET A REAL NEWS PHOTO
+Fetch the chosen article from Reuters or AP (server-side fetch has no CORS
+problem) and extract the main article image URL, then download the image bytes
+for upload. If that article has no usable image, try the same story on BBC or
+CNN. Never use an AI-generated image.
+
+  >> LICENSING NOTE FOR JACK (read once, then decide):
+  Auto-downloading and republishing wire-service photos every day is a real
+  copyright exposure on a public site. Safer options if you'd rather not risk
+  it: (1) use outlets/agencies that publish freely-licensed imagery, (2) pull
+  from a licensed stock/Creative-Commons source, (3) take a proper wire licence,
+  or (4) allow the platform's own image generation. Tell me which and I'll
+  swap this step. Leaving the Reuters/AP behaviour in for now as in the original.
+
+STEP 6 — PUBLISH (see POSTING below)
+
+STEP 7 — VERIFY & RECORD
+Confirm the prayer is live (capture the published page URL and a screenshot).
+Save to the database: date, title, canonical topic tag, source links, tier,
+published URL.
+
+STEP 8 — NOTIFY ME (email to NOTIFY_EMAIL_TO)
+Send an email containing:
+- the news source(s) with links (approved list only)
+- the prayer title and the link to the published page
+- the tier (1 or 2) and which approved outlets confirmed the story
+- the embed code:
+  <iframe src="https://prayforchange.org/embed/[slug]" width="100%" height="200" frameborder="0"></iframe>
+- attach or link the screenshot of the live page
+
+POSTING (no API — fully self-contained on Replit)
+Use headless Playwright (Chromium, installed and running on Replit's own
+servers — nothing runs on my computer). Log in with PFC_EMAIL / PFC_PASSWORD,
+then replay the existing create flow exactly as a person would:
+  1. Go to https://prayforchange.org/create
+  2. Enter the title in the first field, click Continue
+  3. Enter the story text in the story textarea
+  4. Click "Generate Prayer", wait for generation
+  5. Upload the news image to the file input on the page
+  6. Verify the correct image shows (screenshot); retry with another image URL
+     from the same article if it's wrong
+  7. Click "Looks Good" / proceed through to publish
+  8. Capture the published URL and screenshot
+
+FAILURE HANDLING
+If any step fails (login expired, site error, no story found, image failure),
+do NOT silently die. Email me at NOTIFY_EMAIL_TO with: a clear description of
+what failed, the error, and the FULL drafted prayer (title + 3 paragraphs) plus
+the source links, so I can post it manually at https://prayforchange.org/create.
+Add basic retry (e.g. 2 attempts with a short backoff) on network/posting steps.
+
+ACCEPTANCE TEST
+Give me a "Run once now" entry point I can trigger manually so I can test the
+whole pipeline end to end before the daily schedule takes over. On that test run
+it should either publish a real prayer or email me the drafted one with a clear
+reason it couldn't publish.
+
+====================================================================
