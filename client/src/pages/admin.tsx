@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
-import { Loader2, Shield, Flag, AlertTriangle, Check, Trash2, Eye, ExternalLink, Search, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
+import { Loader2, Shield, Flag, AlertTriangle, Check, Trash2, Eye, ExternalLink, Search, ChevronLeft, ChevronRight, BookOpen, Play } from "lucide-react";
 import type { Prayer, Report } from "@shared/schema";
 
 type AdminStats = {
@@ -128,6 +128,21 @@ export default function AdminDashboard() {
     },
   });
 
+  const runPipelineMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/admin/run-daily-prayer");
+    },
+    onSuccess: () => {
+      toast({
+        title: "Pipeline Started",
+        description: "The daily prayer pipeline is running in the background. Check your email in a few minutes for the approval link.",
+      });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to start the pipeline. Check the server logs.", variant: "destructive" });
+    },
+  });
+
   if (authLoading || adminCheckLoading) {
     return (
       <div className="bg-background">
@@ -170,6 +185,23 @@ export default function AdminDashboard() {
             </h1>
             <p className="text-muted-foreground mt-1">Manage prayers and review reports</p>
           </div>
+          <Button
+            data-testid="button-run-daily-prayer"
+            onClick={() => {
+              if (confirm("Start the daily crisis prayer pipeline now? This will fetch news, draft a prayer, and email you the approval link.")) {
+                runPipelineMutation.mutate();
+              }
+            }}
+            disabled={runPipelineMutation.isPending}
+            className="gap-2 shrink-0"
+          >
+            {runPipelineMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
+            Run Daily Prayer Now
+          </Button>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3 mb-8">

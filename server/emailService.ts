@@ -527,7 +527,8 @@ const PIPELINE_SITE_URL = process.env.SITE_URL || 'https://prayforchange.org';
 export async function sendDailyPrayerApprovalEmail(
   prayer: Prayer,
   approveUrl: string,
-  rejectUrl: string
+  rejectUrl: string,
+  tierInfo?: { tier: number; confirmedOutlets: string[] }
 ): Promise<void> {
   const { client, fromEmail } = await getUncachableSendGridClient();
 
@@ -557,6 +558,20 @@ export async function sendDailyPrayerApprovalEmail(
     ? `<div style="margin:0 0 24px;"><img src="${escapeHtml(rawImageUrl3.startsWith('http') ? rawImageUrl3 : `${PIPELINE_SITE_URL}${rawImageUrl3}`)}" alt="" style="display:block;width:100%;max-width:520px;height:auto;border-radius:6px;" /></div>`
     : '';
 
+  const tierColors: Record<number, { bg: string; border: string; text: string; label: string }> = {
+    1: { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534', label: 'Tier 1 — confirmed across 3+ regional outlet groups' },
+    2: { bg: '#eff6ff', border: '#bfdbfe', text: '#1d4ed8', label: 'Tier 2 — confirmed across 2 outlet groups' },
+    3: { bg: '#fefce8', border: '#fde68a', text: '#92400e', label: 'Tier 3 — limited cross-market confirmation' },
+  };
+  const tc = tierInfo ? (tierColors[tierInfo.tier] ?? tierColors[3]) : null;
+  const tierSection = tierInfo && tc
+    ? `<div style="margin:0 0 20px;padding:12px 16px;background:${tc.bg};border-radius:6px;border:1px solid ${tc.border};">
+         <p style="font-size:13px;font-weight:600;letter-spacing:0.06em;color:${tc.text};text-transform:uppercase;margin:0 0 4px;">Story Validation</p>
+         <p style="font-size:14px;color:${tc.text};margin:0 0 4px;">${tc.label}</p>
+         ${tierInfo.confirmedOutlets.length ? `<p style="font-size:13px;color:${tc.text};margin:0;">Confirmed by: ${escapeHtml(tierInfo.confirmedOutlets.join(', '))}</p>` : ''}
+       </div>`
+    : '';
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Daily Crisis Prayer Approval</title></head>
@@ -567,6 +582,7 @@ export async function sendDailyPrayerApprovalEmail(
         <tr><td style="padding:36px 40px 32px;">
           <p style="font-size:13px;font-weight:600;letter-spacing:0.08em;color:#9ca3af;text-transform:uppercase;margin:0 0 12px;">Automated Daily Crisis Prayer</p>
           <h1 style="font-family:'Georgia',serif;font-size:24px;font-weight:700;color:#111827;line-height:1.35;margin:0 0 16px;">${escapeHtml(prayer.title)}</h1>
+          ${tierSection}
           ${summarySection}
           ${imageSection}
           ${descriptionSection}

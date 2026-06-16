@@ -1613,6 +1613,34 @@ Do NOT include a title.`;
     }
   });
 
+  // Admin: manually trigger the daily crisis prayer pipeline
+  app.post("/api/admin/run-daily-prayer", isAuthenticated, async (req: any, res) => {
+    try {
+      const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+      const userRecord = await storage.getUser(req.session.userId);
+      const isAdmin = userRecord?.email ? adminEmails.includes(userRecord.email.toLowerCase()) : false;
+      if (!isAdmin) {
+        return res.status(403).json({ error: "Forbidden: Admin access required" });
+      }
+
+      const { runPipeline } = await import("../scripts/daily-prayer.js");
+
+      runPipeline().then(() => {
+        console.log("[ADMIN RUN-NOW] Pipeline completed");
+      }).catch((err: any) => {
+        console.error("[ADMIN RUN-NOW] Pipeline failed:", err?.message || err);
+      });
+
+      return res.json({
+        status: "started",
+        message: "Daily prayer pipeline started. It will run in the background — check your email for the approval link in a few minutes.",
+      });
+    } catch (err: any) {
+      console.error("[admin/run-daily-prayer] Failed to start pipeline:", err);
+      return res.status(500).json({ error: "Failed to start pipeline: " + (err?.message || "unknown error") });
+    }
+  });
+
   // RSS feed — Daily Crisis Prayers
   app.get("/api/rss/daily-crisis.xml", async (req, res) => {
     console.log("[RSS] Route hit, starting generation");

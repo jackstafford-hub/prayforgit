@@ -2,15 +2,17 @@
  * Daily Crisis Prayer Pipeline
  * Runs at 07:00 UTC daily via Replit Scheduled Deployment.
  * 1. Fetch top global crisis from GDELT (NewsAPI fallback)
- * 2. Draft interfaith prayer via Claude
- * 3. Source image via Replicate Flux Schnell (Unsplash fallback)
- * 4. Save as pending_approval draft
- * 5. Email jackstaffmail@gmail.com with approve/reject links
- * 6. Log everything to daily_prayer_runs table
+ * 2. Validate story tier against multi-market news outlet RSS feeds
+ * 3. Draft interfaith prayer via Claude
+ * 4. Source image via Replicate Flux Schnell (Unsplash fallback)
+ * 5. Save as pending_approval draft
+ * 6. Email jackstaffmail@gmail.com with approve/reject links
+ * 7. Log everything to daily_prayer_runs table
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { randomBytes } from 'node:crypto';
 import { pool } from '../server/db.js';
 import { storage } from '../server/storage.js';
@@ -46,6 +48,90 @@ interface ImageResult {
   attribution?: string;
 }
 
+interface TierResult {
+  tier: 1 | 2 | 3;
+  confirmedOutlets: string[];
+}
+
+interface FetchCrisisResult {
+  crisis: CrisisCandidate;
+  tierResult: TierResult;
+}
+
+// ── Multi-Market Validation ──────────────────────────────────────────────────
+
+const OUTLET_GROUPS: Array<{ name: string; group: string; rssUrl: string }> = [
+  { name: 'Reuters', group: 'Wire', rssUrl: 'https://feeds.reuters.com/reuters/worldNews' },
+  { name: 'BBC', group: 'UK', rssUrl: 'https://feeds.bbci.co.uk/news/world/rss.xml' },
+  { name: 'The Guardian', group: 'UK', rssUrl: 'https://www.theguardian.com/world/rss' },
+  { name: 'NPR', group: 'US', rssUrl: 'https://feeds.npr.org/1004/rss.xml' },
+  { name: 'ABC Australia', group: 'AsiaPacific', rssUrl: 'https://www.abc.net.au/news/feed/10719014/rss.xml' },
+];
+
+const STOPWORDS = new Set([
+  'about', 'after', 'amid', 'also', 'again', 'being', 'could', 'during', 'every',
+  'first', 'found', 'given', 'going', 'have', 'here', 'just', 'like', 'made',
+  'make', 'more', 'most', 'need', 'only', 'over', 'said', 'some', 'such', 'than',
+  'that', 'their', 'them', 'then', 'there', 'this', 'those', 'through', 'under',
+  'upon', 'used', 'very', 'what', 'when', 'where', 'which', 'while', 'will',
+  'with', 'would', 'your', 'says', 'from', 'into', 'were', 'they', 'killed',
+  'dead', 'people', 'world', 'news', 'year', 'years', 'days',
+]);
+
+async function fetchRssTitles(url: string): Promise<string[]> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) return [];
+    const xml = await res.text();
+    const matches = xml.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/gi) || [];
+    return matches.slice(1).map(m =>
+      m.replace(/<!\[CDATA\[|\]\]>/g, '').replace(/<[^>]+>/g, '').trim()
+    );
+  } catch {
+    return [];
+  }
+}
+
+function storyMatchesHeadlines(storyTitle: string, headlines: string[]): boolean {
+  const keywords = storyTitle
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 4 && !STOPWORDS.has(w));
+
+  if (keywords.length === 0) return false;
+  const headlinesText = headlines.join(' ').toLowerCase();
+  const matchCount = keywords.filter(kw => headlinesText.includes(kw)).length;
+  return matchCount / keywords.length >= 0.25;
+}
+
+async function validateStoryTier(story: CrisisCandidate): Promise<TierResult> {
+  const results = await Promise.allSettled(
+    OUTLET_GROUPS.map(async outlet => {
+      const titles = await fetchRssTitles(outlet.rssUrl);
+      const matches = storyMatchesHeadlines(story.title, titles);
+      return { outlet, matches };
+    })
+  );
+
+  const confirmedOutlets: string[] = [];
+  const confirmedGroups = new Set<string>();
+
+  for (const result of results) {
+    if (result.status === 'fulfilled' && result.value.matches) {
+      confirmedOutlets.push(result.value.outlet.name);
+      confirmedGroups.add(result.value.outlet.group);
+    }
+  }
+
+  let tier: 1 | 2 | 3;
+  if (confirmedGroups.size >= 3) tier = 1;
+  else if (confirmedGroups.size >= 2) tier = 2;
+  else tier = 3;
+
+  return { tier, confirmedOutlets };
+}
+
 // ── GDELT News Fetching ──────────────────────────────────────────────────────
 
 async function fetchFromGDELT(): Promise<CrisisCandidate[]> {
@@ -60,7 +146,6 @@ async function fetchFromGDELT(): Promise<CrisisCandidate[]> {
     String(d.getMinutes()).padStart(2, '0') +
     String(d.getSeconds()).padStart(2, '0');
 
-  // Use GDELT crisis-specific theme filters for more targeted results
   const themeFilter = [
     'theme:NATURAL_DISASTER',
     'theme:ARMEDCONFLICT',
@@ -87,7 +172,6 @@ async function fetchFromGDELT(): Promise<CrisisCandidate[]> {
   };
   if (!data.articles?.length) return [];
 
-  // Score = |tone| × volume_proxy (frequency of similar domain/story in batch)
   const articles = data.articles.filter(a => a.title && a.url);
   const domainCounts: Record<string, number> = {};
   for (const a of articles) {
@@ -95,13 +179,11 @@ async function fetchFromGDELT(): Promise<CrisisCandidate[]> {
     domainCounts[domain] = (domainCounts[domain] || 0) + 1;
   }
 
-  // Deduplicate by title prefix (first 6 words), keeping most-negative tone per group
   const seen = new Set<string>();
   const deduped: CrisisCandidate[] = [];
   for (const a of articles) {
     const tone = parseFloat(a.tone ?? '0');
     const negativeTone = Math.min(tone, 0);
-    // Skip articles with tone better than -1 (not genuinely crisis-level)
     if (negativeTone > -1) continue;
 
     const titleKey = a.title!.split(' ').slice(0, 6).join(' ').toLowerCase();
@@ -148,7 +230,7 @@ async function fetchFromNewsAPI(): Promise<CrisisCandidate[]> {
     }));
 }
 
-async function fetchTopCrisis(recentCrises: string[]): Promise<CrisisCandidate | null> {
+async function fetchTopCrisis(recentCrises: string[]): Promise<FetchCrisisResult | null> {
   let candidates: CrisisCandidate[] = [];
 
   let gdeltError: string | null = null;
@@ -162,12 +244,10 @@ async function fetchTopCrisis(recentCrises: string[]): Promise<CrisisCandidate |
       candidates = await fetchFromNewsAPI();
       console.log(`[NewsAPI] Retrieved ${candidates.length} articles`);
     } catch (err2: any) {
-      // Both news sources failed — this is an infrastructure outage, not a normal "no crisis" day
       throw new Error(`News fetch failed — GDELT: ${gdeltError}; NewsAPI: ${err2.message}`);
     }
   }
 
-  // Genuine case: sources responded but no articles passed our quality/crisis filters
   if (!candidates.length) return null;
 
   const DEDUP_THRESHOLD = 0.4;
@@ -184,7 +264,31 @@ async function fetchTopCrisis(recentCrises: string[]): Promise<CrisisCandidate |
 
   const pool = novel.length > 0 ? novel : candidates;
   pool.sort((a, b) => b.score - a.score);
-  return pool[0];
+
+  // Try each candidate until we find one that's Tier 1 or Tier 2
+  let chosenCrisis: CrisisCandidate | null = null;
+  let tierResult: TierResult = { tier: 3, confirmedOutlets: [] };
+
+  for (const candidate of pool) {
+    const t = await validateStoryTier(candidate);
+    console.log(`[VALIDATION] "${candidate.title.slice(0, 70)}" → Tier ${t.tier}, outlets: ${t.confirmedOutlets.join(', ') || 'none'}`);
+    if (t.tier < 3) {
+      chosenCrisis = candidate;
+      tierResult = t;
+      break;
+    }
+  }
+
+  // Fall back to top-scored candidate if none passed Tier 1/2
+  if (!chosenCrisis) {
+    console.warn('[VALIDATION] No candidate reached Tier 1/2 — using top scored candidate at Tier 3');
+    chosenCrisis = pool[0];
+    // Re-run validation just to record the outlets for the run log
+    tierResult = await validateStoryTier(chosenCrisis);
+    tierResult = { ...tierResult, tier: 3 };
+  }
+
+  return { crisis: chosenCrisis, tierResult };
 }
 
 // ── Claude Prayer Drafting ───────────────────────────────────────────────────
@@ -373,28 +477,34 @@ function generateBaseSlug(text: string): string {
     .slice(0, 60) || 'daily-crisis-prayer';
 }
 
-// ── Main Pipeline ────────────────────────────────────────────────────────────
+// ── Core Pipeline (exported for in-process invocation) ───────────────────────
 
-async function run() {
+export async function runPipeline(): Promise<void> {
   console.log('[DAILY-PRAYER] Pipeline starting at', new Date().toISOString());
 
   let runLog = await storage.logDailyPrayerRun({});
 
   try {
-    // Step 1: Fetch top crisis
+    // Step 1: Fetch top crisis + validate tier
     console.log('[STEP 1] Fetching top crisis news...');
     const recentCrises = await storage.getRecentDailyCrisisPrayers(14);
-    const crisis = await fetchTopCrisis(recentCrises);
+    const fetchResult = await fetchTopCrisis(recentCrises);
 
-    if (!crisis) {
+    if (!fetchResult) {
       console.log('[STEP 1] No suitable crisis found — sending no-prayer email');
       await sendNoPrayerDraftedEmail();
       await storage.updateDailyPrayerRun(runLog.id, { error: 'no_crisis_found' });
       return;
     }
 
-    console.log(`[STEP 1] Selected crisis: "${crisis.title}" (score=${crisis.score.toFixed(2)})`);
-    await storage.updateDailyPrayerRun(runLog.id, { crisisChosen: crisis.title });
+    const { crisis, tierResult } = fetchResult;
+
+    console.log(`[STEP 1] Selected crisis: "${crisis.title}" (score=${crisis.score.toFixed(2)}, tier=${tierResult.tier}, outlets: ${tierResult.confirmedOutlets.join(', ') || 'none'})`);
+    await storage.updateDailyPrayerRun(runLog.id, {
+      crisisChosen: crisis.title,
+      tier: tierResult.tier,
+      confirmedOutlets: tierResult.confirmedOutlets,
+    });
 
     // Step 2: Draft prayer via Claude
     console.log('[STEP 2] Drafting prayer via Claude...');
@@ -449,7 +559,7 @@ async function run() {
     const approveUrl = `${SITE_URL}/api/prayers/${pendingPrayer.id}/approve?token=${token}`;
     const rejectUrl = `${SITE_URL}/api/prayers/${pendingPrayer.id}/reject?token=${token}`;
 
-    await sendDailyPrayerApprovalEmail(pendingPrayer, approveUrl, rejectUrl);
+    await sendDailyPrayerApprovalEmail(pendingPrayer, approveUrl, rejectUrl, tierResult);
     const emailSentAt = new Date();
     await storage.updateDailyPrayerRun(runLog.id, { emailSentAt });
 
@@ -461,16 +571,27 @@ async function run() {
     await storage.updateDailyPrayerRun(runLog.id, { error: errorMessage });
     await sendDailyPrayerErrorEmail(errorMessage, 'pipeline');
     process.exitCode = 1;
-  } finally {
-    await pool.end();
   }
 }
 
-run().catch(async (err) => {
-  console.error('[DAILY-PRAYER] Unhandled error:', err);
+// ── Standalone entry point (cron / npx tsx scripts/daily-prayer.ts) ──────────
+
+async function runStandalone() {
   try {
-    await sendDailyPrayerErrorEmail(err?.message || String(err), 'unhandled');
-  } catch {}
-  await pool.end().catch(() => {});
-  process.exit(1);
-});
+    await runPipeline();
+  } catch (err: any) {
+    console.error('[DAILY-PRAYER] Unhandled error:', err);
+    try {
+      await sendDailyPrayerErrorEmail(err?.message || String(err), 'unhandled');
+    } catch {}
+    process.exit(1);
+  } finally {
+    await pool.end().catch(() => {});
+  }
+}
+
+// Only auto-execute when run directly as a script
+const __filename = fileURLToPath(import.meta.url);
+if (process.argv[1] === __filename || process.argv[1]?.endsWith('/scripts/daily-prayer.ts') || process.argv[1]?.endsWith('/scripts/daily-prayer.js')) {
+  runStandalone();
+}

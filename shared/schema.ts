@@ -165,6 +165,8 @@ export const dailyPrayerRuns = pgTable("daily_prayer_runs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   runAt: timestamp("run_at", { withTimezone: true }).notNull().defaultNow(),
   crisisChosen: text("crisis_chosen"),
+  tier: integer("tier"),
+  confirmedOutlets: text("confirmed_outlets").array(),
   llmLatencyMs: integer("llm_latency_ms"),
   imageSource: text("image_source"),
   imageLatencyMs: integer("image_latency_ms"),
