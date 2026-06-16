@@ -41,6 +41,18 @@ type AdminPrayersResponse = {
 
 type Tab = "prayers" | "flagged" | "reports";
 
+type PipelineResult = {
+  status: "success" | "no_crisis" | "error";
+  crisisTitle?: string;
+  tier?: number;
+  confirmedOutlets?: string[];
+  prayerTitle?: string;
+  prayerId?: string;
+  approveUrl?: string;
+  rejectUrl?: string;
+  error?: string;
+};
+
 export default function AdminDashboard() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [, navigate] = useLocation();
@@ -49,6 +61,7 @@ export default function AdminDashboard() {
   const [prayersPage, setPrayersPage] = useState(1);
   const [prayersSearch, setPrayersSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [pipelineResult, setPipelineResult] = useState<PipelineResult | null>(null);
 
   const { data: adminCheck, isLoading: adminCheckLoading } = useQuery<{ isAdmin: boolean } | null>({
     queryKey: ["/api/admin/check"],
@@ -129,17 +142,22 @@ export default function AdminDashboard() {
   });
 
   const runPipelineMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/admin/run-daily-prayer");
+    mutationFn: async (): Promise<PipelineResult> => {
+      const res = await apiRequest("POST", "/api/admin/run-daily-prayer");
+      return res.json();
     },
-    onSuccess: () => {
-      toast({
-        title: "Pipeline Started",
-        description: "The daily prayer pipeline is running in the background. Check your email in a few minutes for the approval link.",
-      });
+    onSuccess: (result: PipelineResult) => {
+      setPipelineResult(result);
+      if (result.status === "success") {
+        toast({ title: "Pipeline complete", description: `Draft created: "${result.prayerTitle}"` });
+      } else if (result.status === "no_crisis") {
+        toast({ title: "No crisis found", description: "No suitable story was found today.", variant: "destructive" });
+      } else {
+        toast({ title: "Pipeline error", description: result.error || "Unknown error", variant: "destructive" });
+      }
     },
     onError: () => {
-      toast({ title: "Error", description: "Failed to start the pipeline. Check the server logs.", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to run the pipeline. Check server logs.", variant: "destructive" });
     },
   });
 
@@ -188,7 +206,8 @@ export default function AdminDashboard() {
           <Button
             data-testid="button-run-daily-prayer"
             onClick={() => {
-              if (confirm("Start the daily crisis prayer pipeline now? This will fetch news, draft a prayer, and email you the approval link.")) {
+              if (confirm("Start the daily crisis prayer pipeline now? This will fetch news, validate story tier, draft a prayer via AI, and email you the approval link. This may take 2–3 minutes.")) {
+                setPipelineResult(null);
                 runPipelineMutation.mutate();
               }
             }}
@@ -200,9 +219,133 @@ export default function AdminDashboard() {
             ) : (
               <Play className="w-4 h-4" />
             )}
-            Run Daily Prayer Now
+            {runPipelineMutation.isPending ? "Running…" : "Run Daily Prayer Now"}
           </Button>
         </div>
+
+        {/* Pipeline running spinner */}
+        {runPipelineMutation.isPending && (
+          <div
+            data-testid="status-pipeline-running"
+            className="mb-6 rounded-xl border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30 px-5 py-4 flex items-center gap-3 text-blue-700 dark:text-blue-300"
+          >
+            <Loader2 className="w-5 h-5 animate-spin shrink-0" />
+            <p className="text-sm font-medium">
+              Pipeline running — fetching news, validating story tier, drafting prayer via AI, sourcing image…
+              This takes 2–3 minutes. Please keep this page open.
+            </p>
+          </div>
+        )}
+
+        {/* Pipeline result card */}
+        {pipelineResult && !runPipelineMutation.isPending && (
+          <div
+            data-testid="card-pipeline-result"
+            className={`mb-6 rounded-xl border px-5 py-4 ${
+              pipelineResult.status === "success"
+                ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30"
+                : pipelineResult.status === "no_crisis"
+                ? "border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30"
+                : "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30"
+            }`}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                {pipelineResult.status === "success" && (
+                  <>
+                    <p className="text-sm font-semibold text-green-800 dark:text-green-300 mb-1">
+                      Pipeline complete — prayer draft created
+                    </p>
+                    <p className="text-sm font-medium mb-1">
+                      <span className="text-muted-foreground">Story: </span>
+                      {pipelineResult.crisisTitle}
+                    </p>
+                    <p className="text-sm mb-1">
+                      <span className="text-muted-foreground">Prayer title: </span>
+                      <strong>{pipelineResult.prayerTitle}</strong>
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <span
+                        data-testid="badge-pipeline-tier"
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          pipelineResult.tier === 1
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : pipelineResult.tier === 2
+                            ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                            : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                        }`}
+                      >
+                        Tier {pipelineResult.tier}
+                      </span>
+                      {pipelineResult.confirmedOutlets && pipelineResult.confirmedOutlets.length > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                          Confirmed by: {pipelineResult.confirmedOutlets.join(", ")}
+                        </span>
+                      )}
+                      {pipelineResult.confirmedOutlets?.length === 0 && (
+                        <span className="text-xs text-muted-foreground">No outlets confirmed</span>
+                      )}
+                    </div>
+                    <div className="flex gap-3 mt-3">
+                      {pipelineResult.approveUrl && (
+                        <a
+                          data-testid="link-pipeline-approve"
+                          href={pipelineResult.approveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition-colors"
+                        >
+                          Approve &amp; Publish
+                        </a>
+                      )}
+                      {pipelineResult.rejectUrl && (
+                        <a
+                          data-testid="link-pipeline-reject"
+                          href={pipelineResult.rejectUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-md border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 transition-colors dark:text-red-400 dark:border-red-700"
+                        >
+                          Reject
+                        </a>
+                      )}
+                      {pipelineResult.prayerId && (
+                        <a
+                          data-testid="link-pipeline-prayer"
+                          href={`/prayer/${pipelineResult.prayerId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
+                        >
+                          View Draft
+                        </a>
+                      )}
+                    </div>
+                  </>
+                )}
+                {pipelineResult.status === "no_crisis" && (
+                  <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                    No suitable crisis story found today — no draft was created.
+                  </p>
+                )}
+                {pipelineResult.status === "error" && (
+                  <>
+                    <p className="text-sm font-semibold text-red-800 dark:text-red-300 mb-1">Pipeline failed</p>
+                    <p className="text-xs text-red-700 dark:text-red-400 font-mono break-all">{pipelineResult.error}</p>
+                  </>
+                )}
+              </div>
+              <button
+                data-testid="button-dismiss-pipeline-result"
+                onClick={() => setPipelineResult(null)}
+                className="text-muted-foreground hover:text-foreground shrink-0 mt-0.5"
+                aria-label="Dismiss"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="grid gap-4 md:grid-cols-3 mb-8">
           <button

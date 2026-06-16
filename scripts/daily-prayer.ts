@@ -53,6 +53,18 @@ interface TierResult {
   confirmedOutlets: string[];
 }
 
+export interface PipelineResult {
+  status: 'success' | 'no_crisis' | 'error';
+  crisisTitle?: string;
+  tier?: number;
+  confirmedOutlets?: string[];
+  prayerTitle?: string;
+  prayerId?: string;
+  approveUrl?: string;
+  rejectUrl?: string;
+  error?: string;
+}
+
 interface FetchCrisisResult {
   crisis: CrisisCandidate;
   tierResult: TierResult;
@@ -60,12 +72,26 @@ interface FetchCrisisResult {
 
 // ── Multi-Market Validation ──────────────────────────────────────────────────
 
+// group: 'Wire' | 'US' | 'UK' | 'AsiaPacific' | 'UN'
+// Tier 1 = confirmed in 3+ of the 4 regional groups (Wire, US, UK, AsiaPacific)
+// Tier 2 = confirmed in 2+ Wire/UN outlets
+// Tier 3 = anything less
 const OUTLET_GROUPS: Array<{ name: string; group: string; rssUrl: string }> = [
+  // Wire
   { name: 'Reuters', group: 'Wire', rssUrl: 'https://feeds.reuters.com/reuters/worldNews' },
+  { name: 'AP', group: 'Wire', rssUrl: 'https://apnews.com/hub/world-news' },
+  // UK
   { name: 'BBC', group: 'UK', rssUrl: 'https://feeds.bbci.co.uk/news/world/rss.xml' },
   { name: 'The Guardian', group: 'UK', rssUrl: 'https://www.theguardian.com/world/rss' },
+  // US
   { name: 'NPR', group: 'US', rssUrl: 'https://feeds.npr.org/1004/rss.xml' },
+  { name: 'CNN', group: 'US', rssUrl: 'https://rss.cnn.com/rss/edition_world.rss' },
+  // Asia-Pacific
   { name: 'ABC Australia', group: 'AsiaPacific', rssUrl: 'https://www.abc.net.au/news/feed/10719014/rss.xml' },
+  { name: 'CNA', group: 'AsiaPacific', rssUrl: 'https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6511' },
+  // UN agencies (contribute to Tier 2 wire/UN count, not to the 4 regional groups)
+  { name: 'UN News', group: 'UN', rssUrl: 'https://news.un.org/feed/subscribe/en/news/all/rss.xml' },
+  { name: 'WHO', group: 'UN', rssUrl: 'https://www.who.int/rss-feeds/news-english.xml' },
 ];
 
 const STOPWORDS = new Set([
@@ -80,7 +106,10 @@ const STOPWORDS = new Set([
 
 async function fetchRssTitles(url: string): Promise<string[]> {
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(10000),
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; PrayForChange/1.0)' },
+    });
     if (!res.ok) return [];
     const xml = await res.text();
     const matches = xml.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/gi) || [];
@@ -115,19 +144,30 @@ async function validateStoryTier(story: CrisisCandidate): Promise<TierResult> {
   );
 
   const confirmedOutlets: string[] = [];
-  const confirmedGroups = new Set<string>();
+  const confirmedRegionalGroups = new Set<string>(); // Wire | US | UK | AsiaPacific
+  let wireUNConfirmedCount = 0;
 
   for (const result of results) {
     if (result.status === 'fulfilled' && result.value.matches) {
-      confirmedOutlets.push(result.value.outlet.name);
-      confirmedGroups.add(result.value.outlet.group);
+      const { outlet } = result.value;
+      confirmedOutlets.push(outlet.name);
+      if (outlet.group !== 'UN') {
+        confirmedRegionalGroups.add(outlet.group);
+      }
+      if (outlet.group === 'Wire' || outlet.group === 'UN') {
+        wireUNConfirmedCount++;
+      }
     }
   }
 
   let tier: 1 | 2 | 3;
-  if (confirmedGroups.size >= 3) tier = 1;
-  else if (confirmedGroups.size >= 2) tier = 2;
-  else tier = 3;
+  if (confirmedRegionalGroups.size >= 3) {
+    tier = 1;
+  } else if (wireUNConfirmedCount >= 2) {
+    tier = 2;
+  } else {
+    tier = 3;
+  }
 
   return { tier, confirmedOutlets };
 }
@@ -262,14 +302,14 @@ async function fetchTopCrisis(recentCrises: string[]): Promise<FetchCrisisResult
     });
   });
 
-  const pool = novel.length > 0 ? novel : candidates;
-  pool.sort((a, b) => b.score - a.score);
+  const candidatePool = novel.length > 0 ? novel : candidates;
+  candidatePool.sort((a, b) => b.score - a.score);
 
-  // Try each candidate until we find one that's Tier 1 or Tier 2
+  // Try candidates in score order; pick first one that reaches Tier 1 or 2
   let chosenCrisis: CrisisCandidate | null = null;
   let tierResult: TierResult = { tier: 3, confirmedOutlets: [] };
 
-  for (const candidate of pool) {
+  for (const candidate of candidatePool) {
     const t = await validateStoryTier(candidate);
     console.log(`[VALIDATION] "${candidate.title.slice(0, 70)}" → Tier ${t.tier}, outlets: ${t.confirmedOutlets.join(', ') || 'none'}`);
     if (t.tier < 3) {
@@ -279,13 +319,13 @@ async function fetchTopCrisis(recentCrises: string[]): Promise<FetchCrisisResult
     }
   }
 
-  // Fall back to top-scored candidate if none passed Tier 1/2
+  // Fallback: use the top-scored candidate even if Tier 3
   if (!chosenCrisis) {
     console.warn('[VALIDATION] No candidate reached Tier 1/2 — using top scored candidate at Tier 3');
-    chosenCrisis = pool[0];
-    // Re-run validation just to record the outlets for the run log
-    tierResult = await validateStoryTier(chosenCrisis);
-    tierResult = { ...tierResult, tier: 3 };
+    chosenCrisis = candidatePool[0];
+    // Re-run just to get confirmed outlets for logging; force tier 3
+    const fallbackTier = await validateStoryTier(chosenCrisis);
+    tierResult = { ...fallbackTier, tier: 3 };
   }
 
   return { crisis: chosenCrisis, tierResult };
@@ -465,7 +505,7 @@ async function sourceImage(imagePrompt: string, imageKeywords: string[]): Promis
   }
 }
 
-// ── Slug deduplication helper ────────────────────────────────────────────────
+// ── Slug helper ──────────────────────────────────────────────────────────────
 
 function generateBaseSlug(text: string): string {
   return text
@@ -479,7 +519,7 @@ function generateBaseSlug(text: string): string {
 
 // ── Core Pipeline (exported for in-process invocation) ───────────────────────
 
-export async function runPipeline(): Promise<void> {
+export async function runPipeline(): Promise<PipelineResult> {
   console.log('[DAILY-PRAYER] Pipeline starting at', new Date().toISOString());
 
   let runLog = await storage.logDailyPrayerRun({});
@@ -494,7 +534,7 @@ export async function runPipeline(): Promise<void> {
       console.log('[STEP 1] No suitable crisis found — sending no-prayer email');
       await sendNoPrayerDraftedEmail();
       await storage.updateDailyPrayerRun(runLog.id, { error: 'no_crisis_found' });
-      return;
+      return { status: 'no_crisis' };
     }
 
     const { crisis, tierResult } = fetchResult;
@@ -549,9 +589,7 @@ export async function runPipeline(): Promise<void> {
     });
 
     const pendingPrayer = await storage.setPrayerPendingApproval(createdPrayer.id, token, expiry);
-
     await storage.updateDailyPrayerRun(runLog.id, { draftId: pendingPrayer.id });
-
     console.log(`[STEP 4] Draft saved as prayer ID: ${pendingPrayer.id}`);
 
     // Step 5: Send approval email
@@ -565,33 +603,56 @@ export async function runPipeline(): Promise<void> {
 
     console.log('[DAILY-PRAYER] Pipeline completed successfully at', new Date().toISOString());
 
+    return {
+      status: 'success',
+      crisisTitle: crisis.title,
+      tier: tierResult.tier,
+      confirmedOutlets: tierResult.confirmedOutlets,
+      prayerTitle: draft.title,
+      prayerId: pendingPrayer.id,
+      approveUrl,
+      rejectUrl,
+    };
+
   } catch (err: any) {
     const errorMessage = err?.message || String(err);
     console.error('[DAILY-PRAYER] Pipeline failed:', errorMessage);
-    await storage.updateDailyPrayerRun(runLog.id, { error: errorMessage });
-    await sendDailyPrayerErrorEmail(errorMessage, 'pipeline');
-    process.exitCode = 1;
+    await storage.updateDailyPrayerRun(runLog.id, { error: errorMessage }).catch(() => {});
+    try {
+      await sendDailyPrayerErrorEmail(errorMessage, 'pipeline');
+    } catch {}
+    return { status: 'error', error: errorMessage };
   }
 }
 
 // ── Standalone entry point (cron / npx tsx scripts/daily-prayer.ts) ──────────
 
 async function runStandalone() {
+  let result: PipelineResult;
   try {
-    await runPipeline();
+    result = await runPipeline();
   } catch (err: any) {
     console.error('[DAILY-PRAYER] Unhandled error:', err);
     try {
       await sendDailyPrayerErrorEmail(err?.message || String(err), 'unhandled');
     } catch {}
-    process.exit(1);
-  } finally {
     await pool.end().catch(() => {});
+    process.exit(1);
+  }
+
+  await pool.end().catch(() => {});
+
+  if (result!.status === 'error') {
+    process.exit(1);
   }
 }
 
 // Only auto-execute when run directly as a script
 const __filename = fileURLToPath(import.meta.url);
-if (process.argv[1] === __filename || process.argv[1]?.endsWith('/scripts/daily-prayer.ts') || process.argv[1]?.endsWith('/scripts/daily-prayer.js')) {
+if (
+  process.argv[1] === __filename ||
+  process.argv[1]?.endsWith('/scripts/daily-prayer.ts') ||
+  process.argv[1]?.endsWith('/scripts/daily-prayer.js')
+) {
   runStandalone();
 }

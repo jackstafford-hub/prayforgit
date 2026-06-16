@@ -1613,7 +1613,7 @@ Do NOT include a title.`;
     }
   });
 
-  // Admin: manually trigger the daily crisis prayer pipeline
+  // Admin: manually trigger the daily crisis prayer pipeline (awaited — may take 2-3 min)
   app.post("/api/admin/run-daily-prayer", isAuthenticated, async (req: any, res) => {
     try {
       const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
@@ -1625,19 +1625,14 @@ Do NOT include a title.`;
 
       const { runPipeline } = await import("../scripts/daily-prayer.js");
 
-      runPipeline().then(() => {
-        console.log("[ADMIN RUN-NOW] Pipeline completed");
-      }).catch((err: any) => {
-        console.error("[ADMIN RUN-NOW] Pipeline failed:", err?.message || err);
-      });
+      console.log("[ADMIN RUN-NOW] Starting pipeline...");
+      const result = await runPipeline();
+      console.log("[ADMIN RUN-NOW] Pipeline finished:", result.status);
 
-      return res.json({
-        status: "started",
-        message: "Daily prayer pipeline started. It will run in the background — check your email for the approval link in a few minutes.",
-      });
+      return res.json(result);
     } catch (err: any) {
-      console.error("[admin/run-daily-prayer] Failed to start pipeline:", err);
-      return res.status(500).json({ error: "Failed to start pipeline: " + (err?.message || "unknown error") });
+      console.error("[admin/run-daily-prayer] Unexpected error:", err);
+      return res.status(500).json({ status: "error", error: "Failed to run pipeline: " + (err?.message || "unknown error") });
     }
   });
 
