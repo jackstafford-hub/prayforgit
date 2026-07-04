@@ -619,7 +619,7 @@ export default function PrayerDetail() {
                 </div>
                 <div className="text-sm text-muted-foreground mb-6 p-4 bg-background/50 rounded-lg border border-dashed">
                   <p className="font-medium mb-2">Instructions for Prayer:</p>
-                  <p>Breathe slowly and deeply, and visualise white light descending through you. Let love and compassion fill your whole being. Raise your hands and send that loving white light from your palms and heart center to the focal point of your prayer.</p>
+                  <p>Breathe slowly and deeply, and visualise white light descending through you. Let love and compassion fill your whole being. Raise your hands and send that loving white light from your palms and heart center to the focal point of your prayer. Make your visualisations positive! Picture the healed version of this situation, already peaceful and whole.</p>
                 </div>
                 
                 {isEditingPrayer ? (
