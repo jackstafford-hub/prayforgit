@@ -18,7 +18,10 @@ import { pool } from '../server/db.js';
 import { storage } from '../server/storage.js';
 import { sendDailyPrayerApprovalEmail, sendDailyPrayerErrorEmail, sendNoPrayerDraftedEmail } from '../server/emailService.js';
 
-const SITE_URL = process.env.SITE_URL || 'https://prayforchange.org';
+// In dev (Replit workspace), use the proxied dev domain so approve links work without deploying
+const SITE_URL = process.env.REPLIT_DEV_DOMAIN
+  ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+  : (process.env.SITE_URL || 'https://prayforchange.org');
 const IMAGES_DIR = path.resolve(process.cwd(), 'attached_assets/generated_images');
 
 // ── Types ───────────────────────────────────────────────────────────────────
