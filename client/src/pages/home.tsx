@@ -152,6 +152,21 @@ export default function Home() {
 
       <DailyPrayerSignup />
 
+      {/* How to Pray Teaser */}
+      <div className="border-t py-14 bg-muted/20">
+        <div className="container mx-auto px-4 md:px-6 max-w-3xl text-center">
+          <h2 className="text-2xl font-serif font-bold mb-3">New to prayer?</h2>
+          <p className="text-muted-foreground mb-6 leading-relaxed max-w-xl mx-auto">
+            Our guide walks you through how to pray with intention — whether you are new to faith or returning after a long time away.
+          </p>
+          <Link href="/how-to-pray">
+            <Button variant="outline" className="rounded-full px-8" data-testid="link-how-to-pray-homepage">
+              Read the guide
+            </Button>
+          </Link>
+        </div>
+      </div>
+
       {/* FAQ Section */}
       <div className="border-t py-16 bg-background">
         <div className="container mx-auto px-4 md:px-6 max-w-3xl">
