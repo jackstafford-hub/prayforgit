@@ -85,12 +85,13 @@ The pipeline runs via `scripts/daily-prayer.ts` and must be set up as a **Schedu
 **Pipeline flow:**
 1. Fetch top global crisis from GDELT (theme-filtered, scored by |tone| × volume; NewsAPI fallback)
 2. Deduplicate against last 14 days of prayed crises
-3. Draft interfaith prayer via Claude (80–120 words, lament/hope/action)
-4. Source image via Replicate Flux Schnell (Unsplash fallback; continues without image if both fail)
-5. Save as `pending_approval` with `isDailyCrisisPrayer=true`
-6. Email `jackstaffmail@gmail.com` with approve/reject links (48hr expiry)
-7. On approval → publishes prayer, sends subscriber newsletter, updates `daily_prayer_runs` row
-8. All run metadata logged to `daily_prayer_runs` table for observability
+3. Validate story tier against 10 RSS feeds across 5 outlet groups (Wire/UK/US/Asia-Pacific/UN); skip Tier 3 stories
+4. Draft interfaith prayer via Claude (80–120 words, lament/hope/action)
+5. Source image — chain: **real news photo** (og:image from article URL on approved domains) → Replicate Flux Schnell (AI) → Unsplash (stock) → no image
+6. Save as `pending_approval` with `isDailyCrisisPrayer=true`
+7. Email `jackstaffmail@gmail.com` with approve/reject links (48hr expiry), tier badge, confirmed outlets
+8. On approval → publishes prayer, sends subscriber newsletter, updates `daily_prayer_runs` row
+9. All run metadata logged to `daily_prayer_runs` table (tier, confirmedOutlets, imageSource, llmLatencyMs, etc.)
 
 ### Database
 - **PostgreSQL**: Primary database (requires `DATABASE_URL` environment variable)

@@ -401,10 +401,87 @@ Write an interfaith prayer for this crisis.`;
 // ── Image Sourcing ───────────────────────────────────────────────────────────
 
 async function downloadImage(imageUrl: string): Promise<Buffer> {
-  const res = await fetch(imageUrl, { signal: AbortSignal.timeout(30000) });
+  const res = await fetch(imageUrl, {
+    signal: AbortSignal.timeout(30000),
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; PrayForChange/1.0)' },
+  });
   if (!res.ok) throw new Error(`Failed to download image: ${res.status}`);
   const buf = await res.arrayBuffer();
   return Buffer.from(buf);
+}
+
+// Approved news domains whose og:image photos we'll accept
+const APPROVED_NEWS_DOMAINS = [
+  'reuters.com', 'apnews.com', 'bbc.com', 'bbc.co.uk',
+  'theguardian.com', 'npr.org', 'cnn.com',
+  'channelnewsasia.com', 'abc.net.au', 'un.org', 'who.int',
+];
+
+function isApprovedDomain(url: string): boolean {
+  try {
+    const { hostname } = new URL(url);
+    return APPROVED_NEWS_DOMAINS.some(d => hostname === d || hostname.endsWith('.' + d));
+  } catch {
+    return false;
+  }
+}
+
+async function sourceImageFromArticle(articleUrl: string): Promise<ImageResult> {
+  if (!isApprovedDomain(articleUrl)) {
+    throw new Error(`Article domain not on approved list: ${articleUrl}`);
+  }
+
+  const res = await fetch(articleUrl, {
+    signal: AbortSignal.timeout(15000),
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (compatible; PrayForChange/1.0; +https://prayforchange.org)',
+      'Accept': 'text/html,application/xhtml+xml',
+    },
+  });
+  if (!res.ok) throw new Error(`Article fetch error ${res.status}`);
+
+  const html = await res.text();
+
+  // Try og:image first, then twitter:image
+  const ogMatch =
+    html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ||
+    html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i) ||
+    html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i) ||
+    html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
+
+  if (!ogMatch?.[1]) throw new Error('No og:image found in article');
+
+  let imageUrl = ogMatch[1].trim();
+  // Handle protocol-relative URLs
+  if (imageUrl.startsWith('//')) imageUrl = 'https:' + imageUrl;
+  if (!imageUrl.startsWith('http')) throw new Error(`og:image URL invalid: ${imageUrl}`);
+
+  // Skip tiny placeholder/logo images
+  if (imageUrl.includes('logo') || imageUrl.includes('placeholder') || imageUrl.includes('default')) {
+    throw new Error(`og:image looks like a logo/placeholder: ${imageUrl}`);
+  }
+
+  console.log(`[IMAGE] Found og:image: ${imageUrl}`);
+  const imageBuffer = await downloadImage(imageUrl);
+
+  // Must be at least 10KB to be a real photo
+  if (imageBuffer.length < 10_000) throw new Error(`og:image too small (${imageBuffer.length} bytes) — likely a placeholder`);
+
+  const ext = imageUrl.match(/\.(jpe?g|png|webp|gif)/i)?.[1]?.toLowerCase() ?? 'jpg';
+  const filename = `daily-prayer-${new Date().toISOString().split('T')[0]}-${randomBytes(4).toString('hex')}.${ext}`;
+  if (!fs.existsSync(IMAGES_DIR)) fs.mkdirSync(IMAGES_DIR, { recursive: true });
+  const localPath = path.join(IMAGES_DIR, filename);
+  fs.writeFileSync(localPath, imageBuffer);
+
+  // Extract source name for attribution
+  const sourceName = new URL(articleUrl).hostname.replace(/^www\./, '');
+
+  return {
+    localPath,
+    serveUrl: `/assets/${filename}`,
+    source: 'news_article',
+    attribution: `Photo via ${sourceName}`,
+  };
 }
 
 async function sourceImageFromReplicate(imagePrompt: string): Promise<ImageResult> {
@@ -491,17 +568,35 @@ async function sourceImageFromUnsplash(keywords: string[]): Promise<ImageResult>
   return { localPath, serveUrl: `/assets/${filename}`, source: 'unsplash', attribution };
 }
 
-async function sourceImage(imagePrompt: string, imageKeywords: string[]): Promise<ImageResult | null> {
+async function sourceImage(
+  imagePrompt: string,
+  imageKeywords: string[],
+  articleUrl?: string,
+): Promise<ImageResult | null> {
+  // Step 1: Try real news photo from the article (og:image)
+  if (articleUrl) {
+    try {
+      const result = await sourceImageFromArticle(articleUrl);
+      console.log(`[IMAGE] Using real news photo from ${result.attribution}`);
+      return result;
+    } catch (err: any) {
+      console.warn('[IMAGE] Article og:image failed, trying Replicate:', err.message);
+    }
+  }
+
+  // Step 2: AI-generated image via Replicate
   try {
     return await sourceImageFromReplicate(imagePrompt);
   } catch (err: any) {
     console.warn('[IMAGE] Replicate failed, trying Unsplash:', err.message);
-    try {
-      return await sourceImageFromUnsplash(imageKeywords);
-    } catch (err2: any) {
-      console.warn('[IMAGE] Unsplash also failed:', err2.message);
-      return null;
-    }
+  }
+
+  // Step 3: Stock photo via Unsplash
+  try {
+    return await sourceImageFromUnsplash(imageKeywords);
+  } catch (err2: any) {
+    console.warn('[IMAGE] Unsplash also failed:', err2.message);
+    return null;
   }
 }
 
@@ -557,7 +652,7 @@ export async function runPipeline(): Promise<PipelineResult> {
     // Step 3: Source image
     console.log('[STEP 3] Sourcing image...');
     const imageStart = Date.now();
-    const imageResult = await sourceImage(draft.imagePrompt, draft.imageKeywords);
+    const imageResult = await sourceImage(draft.imagePrompt, draft.imageKeywords, crisis.url);
     const imageLatencyMs = Date.now() - imageStart;
     const imageSource = imageResult?.source ?? 'none';
     console.log(`[STEP 3] Image sourced from ${imageSource} (${imageLatencyMs}ms)`);
