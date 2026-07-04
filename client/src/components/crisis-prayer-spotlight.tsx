@@ -40,66 +40,66 @@ export function CrisisPrayerSpotlight() {
               </span>
             </div>
 
-            <div className="flex flex-col sm:flex-row bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden">
-              {prayer.imageUrl && (
-                <div
-                  className="sm:w-56 h-48 sm:h-auto shrink-0 bg-muted"
-                  style={{
-                    backgroundImage: `url(${prayer.imageUrl})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                  data-testid="img-crisis-prayer"
-                />
-              )}
+            <Link href={`/prayer/${prayer.slug || prayer.id}`}>
+              <div className="flex flex-col sm:flex-row bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200">
+                {prayer.imageUrl && (
+                  <div
+                    className="sm:w-56 h-48 sm:h-auto shrink-0 bg-muted"
+                    style={{
+                      backgroundImage: `url(${prayer.imageUrl})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                    data-testid="img-crisis-prayer"
+                  />
+                )}
 
-              <div className="flex flex-col justify-between p-6 flex-1 min-w-0">
-                <div>
-                  <h2
-                    className="font-serif text-2xl font-bold leading-tight mb-3 text-foreground"
-                    data-testid="text-crisis-prayer-title"
-                  >
-                    {prayer.title}
-                  </h2>
-                  {firstSentence && (
-                    <p
-                      className="text-muted-foreground text-sm leading-relaxed mb-4 line-clamp-3"
-                      data-testid="text-crisis-prayer-summary"
+                <div className="flex flex-col justify-between p-6 flex-1 min-w-0">
+                  <div>
+                    <h2
+                      className="font-serif text-2xl font-bold leading-tight mb-3 text-foreground"
+                      data-testid="text-crisis-prayer-title"
                     >
-                      {firstSentence}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-bold text-foreground" data-testid="text-crisis-prayer-count">
-                        {prayer.count.toLocaleString()}{" "}
-                        <span className="font-normal text-muted-foreground">prayers</span>
-                      </span>
-                      <span className="text-muted-foreground text-xs">
-                        {prayer.goal.toLocaleString()} goal
-                      </span>
-                    </div>
-                    <Progress
-                      value={percentage}
-                      className="h-2 bg-amber-100"
-                      indicatorClassName="bg-amber-500"
-                    />
+                      {prayer.title}
+                    </h2>
+                    {firstSentence && (
+                      <p
+                        className="text-muted-foreground text-sm leading-relaxed mb-4 line-clamp-3"
+                        data-testid="text-crisis-prayer-summary"
+                      >
+                        {firstSentence}
+                      </p>
+                    )}
                   </div>
 
-                  <Link href={`/prayer/${prayer.slug || prayer.id}`}>
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-bold text-foreground" data-testid="text-crisis-prayer-count">
+                          {prayer.count.toLocaleString()}{" "}
+                          <span className="font-normal text-muted-foreground">prayers</span>
+                        </span>
+                        <span className="text-muted-foreground text-xs">
+                          {prayer.goal.toLocaleString()} goal
+                        </span>
+                      </div>
+                      <Progress
+                        value={percentage}
+                        className="h-2 bg-amber-100"
+                        indicatorClassName="bg-amber-500"
+                      />
+                    </div>
+
                     <Button
                       className="bg-amber-600 hover:bg-amber-700 text-white rounded-full px-6"
                       data-testid="button-crisis-pray-now"
                     >
                       Pray Now
                     </Button>
-                  </Link>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Email signup panel — hidden for authenticated users */}
