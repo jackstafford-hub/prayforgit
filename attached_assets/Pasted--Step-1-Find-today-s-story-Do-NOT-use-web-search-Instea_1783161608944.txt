@@ -1,0 +1,86 @@
+## Step 1: Find today's story.
+
+Do NOT use web search. Instead, go directly to the wire services and scan their front pages for breaking crisis news:
+
+1. First, navigate to https://reuters.com/world — scan headlines for the biggest crisis story
+2. Then navigate to https://apnews.com/world-news — cross-check what's breaking
+3. If needed, check https://www.bbc.com/news/world — for a third perspective
+
+Pick the most pressing global crisis or humanitarian story. Focus on:
+
+- Natural disasters (earthquakes, floods, hurricanes, wildfires)
+- Humanitarian crises (disease outbreaks, famine, refugee situations)
+- Mass casualty events
+- Health emergencies, climate disasters
+
+AVOID politically partisan stories, elections, political scandals, culture war topics, and celebrity news. The platform must remain neutral and welcoming to all faiths and political perspectives. If no major crisis is breaking today, look for ongoing crises that deserve continued attention. But find a new angle to it... a latest update. Try to find breaking news... if it's an ongoing crisis find what's new in it. Narrow it down. Also make sure you haven't written about this story before. REPEAT: Don't write about a story you've written about in the last two weeks. Only if there is major peace talks in a war. Search for NEW events. e.g. don't keep repeating stories on Sudan
+
+**Multi-market validation (required):** After picking a candidate story, verify it appears on at least 2 other approved sites from different markets:
+
+- **Tier 1 (preferred):** Story appears on outlets in at least 3 of these 4 groups: Wire (Reuters, AP, AFP), US (CNN, NYT, WaPo, NPR, CBS, ABC), UK (BBC, Guardian, Sky), Asia-Pacific (CNA, ABC AU, SMH). Pick Tier 1 stories first.
+- **Tier 2 (allowed):** Story on at least 2 wire services or UN agencies, even if not front-page everywhere.
+- **Tier 3 (avoid):** Story only on one outlet — skip it.
+
+Navigate directly to the approved sites to confirm. Note the tier in Step 4.
+
+## Step 2: Draft the prayer.
+
+TITLE: Short, clear, starting with "Pray for..." (under 60 characters). Example: "Pray for the Children of Bangladesh"
+
+STORY (3 paragraphs, 100-150 words total):
+
+- Paragraph 1: What happened. Specific facts — numbers, location, scale.
+- Paragraph 2: Why it matters. Human impact in one or two sentences.
+- Paragraph 3: The prayer. Name the people affected — families, health workers, volunteers, communities. End with hope.
+
+Style rules:
+
+- Dignified, not dramatic
+- Specific, not abstract — name real places, real numbers
+- Interfaith — must work for Christians, Muslims, Jews, Hindus, Buddhists, and secular-spiritual readers. Use "we pray" not "Dear Lord" or tradition-specific language
+- Never pick a political side
+- Lead with facts, not emotion
+
+## Step 3: Post to PrayForChange.org using Chrome browser tools.
+
+1. Navigate to https://prayforchange.org/create
+2. Enter the prayer title in the first field and click Continue
+3. Enter the story text in the story textarea
+4. Click "Generate Prayer" and wait for it to generate
+5. IMPORTANT — Add a REAL news photo, NOT an AI-generated image. Source the image ONLY from Reuters or AP (they have the best photos and fewest CORS issues). Do this:
+   a. Open the Reuters or AP article about the story in a new tab
+   b. Use JavaScript on that tab to find the main article image URLs (look for img tags related to the story)
+   c. Switch back to the prayer page tab and use JavaScript to fetch the image, create a File from the blob, set it on the hidden file input, and dispatch a change event:
+      ```js
+      (async function() {
+        const response = await fetch('IMAGE_URL_FROM_REUTERS_OR_AP');
+        const blob = await response.blob();
+        const file = new File([blob], 'news-image.jpg', { type: 'image/jpeg' });
+        const fileInput = document.querySelector('input[type="file"]');
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+      })();
+      ```
+   d. Wait a few seconds and take a screenshot to verify the correct image is showing
+   e. If it shows the wrong image (e.g. a logo or ad), try another image URL from the same article
+   f. If CORS blocks the fetch, try BBC or CNN for the same story — but ONLY approved domains
+   g. Don't worry about copyright — news images are fine for this purpose
+   h. NEVER use "Generate with AI" — always use a real photo from the news coverage
+6. Review the generated content
+7. Click "Looks Good" or equivalent to proceed through to publishing
+8. Complete any login/auth steps if needed (user should already be logged in via Chrome)
+9. Take a screenshot of the published prayer page to confirm it's live
+
+## Step 4: Report back to Jack.
+
+Include in your notification:
+
+- The news source(s) with links (must be from the approved list)
+- The prayer title and link to the published page
+- A screenshot confirming it's live
+- The story's tier (Tier 1 or Tier 2) and which approved outlets confirmed the story
+- The embed code: <iframe src="https://prayforchange.org/embed/[slug]" width="100%" height="200" frameborder="0"></iframe>
+
+If anything fails during posting (login expired, site error, etc.), draft the full prayer content and ask Jack to post it manually via https://prayforchange.org/create.
