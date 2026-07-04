@@ -249,17 +249,33 @@ async function fetchFromNewsAPI(): Promise<CrisisCandidate[]> {
   const key = process.env.NEWSAPI_KEY;
   if (!key) throw new Error('NEWSAPI_KEY not set');
 
-  const keywords = 'crisis OR disaster OR war OR humanitarian OR refugees OR famine OR earthquake OR flood';
-  const url = `https://newsapi.org/v2/top-headlines?q=${encodeURIComponent(keywords)}&language=en&pageSize=10&apiKey=${key}`;
+  // OR-operator query restricted to approved wire/broadcast domains
+  const q = 'earthquake OR flood OR hurricane OR famine OR refugees OR "humanitarian crisis" OR "mass casualty" OR "disease outbreak" OR wildfire OR "armed conflict"';
+  const domains = 'reuters.com,apnews.com,bbc.com,theguardian.com,npr.org,cnn.com,abc.net.au,channelnewsasia.com,un.org,who.int';
+  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&domains=${domains}&language=en&pageSize=20&sortBy=publishedAt&apiKey=${key}`;
 
   const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-  if (!res.ok) throw new Error(`NewsAPI responded ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(`NewsAPI responded ${res.status}: ${body.slice(0, 200)}`);
+  }
 
-  const data = await res.json() as { articles?: Array<{ title?: string; description?: string; url?: string }> };
-  if (!data.articles?.length) return [];
+  const data = await res.json() as {
+    status?: string;
+    articles?: Array<{ title?: string; description?: string; url?: string; source?: { name?: string } }>
+  };
+  if (data.status !== 'ok' || !data.articles?.length) return [];
+
+  const CRISIS_TERMS = ['earthquake', 'flood', 'hurricane', 'typhoon', 'wildfire', 'famine',
+    'refugee', 'humanitarian', 'casualty', 'killed', 'dead', 'displaced', 'outbreak',
+    'disaster', 'crisis', 'war', 'conflict', 'airstrike', 'attack', 'drought', 'cyclone'];
 
   return data.articles
-    .filter(a => a.title && a.url)
+    .filter(a => {
+      if (!a.title || !a.url || a.title.includes('[Removed]')) return false;
+      const text = (a.title + ' ' + (a.description || '')).toLowerCase();
+      return CRISIS_TERMS.some(t => text.includes(t));
+    })
     .map(a => ({
       title: a.title!,
       summary: a.description || '',
@@ -279,12 +295,27 @@ async function fetchTopCrisis(recentCrises: string[]): Promise<FetchCrisisResult
     console.log(`[GDELT] Retrieved ${candidates.length} articles`);
   } catch (err: any) {
     gdeltError = err.message;
-    console.warn('[GDELT] Failed, trying NewsAPI fallback:', gdeltError);
-    try {
-      candidates = await fetchFromNewsAPI();
-      console.log(`[NewsAPI] Retrieved ${candidates.length} articles`);
-    } catch (err2: any) {
-      throw new Error(`News fetch failed — GDELT: ${gdeltError}; NewsAPI: ${err2.message}`);
+    // Retry once after a short wait (handles transient 429s)
+    if (gdeltError?.includes('429')) {
+      console.warn('[GDELT] Rate limited — waiting 20s before retry...');
+      await new Promise(r => setTimeout(r, 20000));
+      try {
+        candidates = await fetchFromGDELT();
+        console.log(`[GDELT] Retry succeeded — ${candidates.length} articles`);
+        gdeltError = null;
+      } catch (retryErr: any) {
+        gdeltError = retryErr.message;
+        console.warn('[GDELT] Retry also failed:', gdeltError);
+      }
+    }
+    if (gdeltError) {
+      console.warn('[GDELT] Falling back to NewsAPI:', gdeltError);
+      try {
+        candidates = await fetchFromNewsAPI();
+        console.log(`[NewsAPI] Retrieved ${candidates.length} articles`);
+      } catch (err2: any) {
+        throw new Error(`News fetch failed — GDELT: ${gdeltError}; NewsAPI: ${err2.message}`);
+      }
     }
   }
 
@@ -373,7 +404,7 @@ Write an interfaith prayer for this crisis.`;
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 1024,
       system,
       messages: [{ role: 'user', content: userMsg }],
