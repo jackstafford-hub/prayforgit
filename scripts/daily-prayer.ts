@@ -611,24 +611,34 @@ async function sourceImage(
       console.log(`[IMAGE] Using real news photo from ${result.attribution}`);
       return result;
     } catch (err: any) {
-      console.warn('[IMAGE] Article og:image failed, trying Replicate:', err.message);
+      console.warn('[IMAGE] Article og:image failed:', err.message);
     }
   }
 
-  // Step 2: AI-generated image via Replicate
-  try {
-    return await sourceImageFromReplicate(imagePrompt);
-  } catch (err: any) {
-    console.warn('[IMAGE] Replicate failed, trying Unsplash:', err.message);
+  // Step 2: AI-generated image via Replicate (only if key is configured)
+  if (process.env.REPLICATE_API_TOKEN) {
+    try {
+      return await sourceImageFromReplicate(imagePrompt);
+    } catch (err: any) {
+      console.warn('[IMAGE] Replicate failed, trying Unsplash:', err.message);
+    }
+  } else {
+    console.log('[IMAGE] REPLICATE_API_TOKEN not set — skipping');
   }
 
-  // Step 3: Stock photo via Unsplash
-  try {
-    return await sourceImageFromUnsplash(imageKeywords);
-  } catch (err2: any) {
-    console.warn('[IMAGE] Unsplash also failed:', err2.message);
-    return null;
+  // Step 3: Stock photo via Unsplash (only if key is configured)
+  if (process.env.UNSPLASH_ACCESS_KEY) {
+    try {
+      return await sourceImageFromUnsplash(imageKeywords);
+    } catch (err2: any) {
+      console.warn('[IMAGE] Unsplash also failed:', err2.message);
+    }
+  } else {
+    console.log('[IMAGE] UNSPLASH_ACCESS_KEY not set — skipping');
   }
+
+  console.log('[IMAGE] No image sourced — prayer will be published without one');
+  return null;
 }
 
 // ── Slug helper ──────────────────────────────────────────────────────────────
