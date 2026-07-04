@@ -756,7 +756,7 @@ export async function runPipeline(): Promise<PipelineResult> {
     const createdPrayer = await storage.createPrayer({
       title: draft.title,
       description,
-      aiSummary: draft.summary,
+      aiSummary: draft.description,
       recitablePrayer: draft.body,
       imageUrl: imageResult?.serveUrl ?? null,
       author: 'Daily Crisis Prayer',
