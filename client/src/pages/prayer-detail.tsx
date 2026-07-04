@@ -496,7 +496,12 @@ export default function PrayerDetail() {
               </div>
               <div className="text-sm">
                 <span className="font-bold block">{prayer.author}</span>
-                <span className="text-muted-foreground">started this prayer request</span>
+                <span className="text-muted-foreground">
+                  started this prayer request
+                  {prayer.createdAt && (
+                    <> · {new Date(prayer.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</>
+                  )}
+                </span>
               </div>
             </div>
 
