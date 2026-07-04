@@ -39,6 +39,7 @@ interface DraftedPrayer {
   title: string;
   summary: string;
   body: string;
+  description: string;
   slug: string;
   imagePrompt: string;
   imageKeywords: string[];
@@ -371,33 +372,72 @@ async function draftPrayer(crisis: CrisisCandidate): Promise<DraftedPrayer> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error('ANTHROPIC_API_KEY not set');
 
-  const system = `You write beautiful, poetic, interfaith prayers for PrayForChange.org.
+  const system = `You write beautiful, poetic, interfaith prayers for PrayForChange.org. You also write the story that accompanies the prayer.
 
-Style:
-- Elevated, reverent language — use "Thy", "thee", "thy" naturally throughout
-- Open with a direct, heartfelt address to God using an elevated title, e.g. "Oh Mighty God, Creator of Life" or "Oh Divine Source of All Being" — vary the title each time
-- Structure in 3–4 short stanzas with line breaks, like verse
-- Use the channel/conduit metaphor: we ask to be used as vessels or channels for divine power, healing, or love to flow through us to those in need
-- Imagery should be vivid and warm: streams of light, radiant energy, flowing love, wondrous power
-- Weave together acknowledgement of suffering, a call for divine power to flow, and gratitude for the opportunity to serve
-- Close with "May Thy Will be Done." (not "Amen")
-- First-person plural ("we pray," "may we," "we ask")
+════════════════════════════
+PRAYER FORMAT (follow this closely)
+════════════════════════════
+
+Structure: 4–5 stanzas, each separated by a blank line. Each stanza is 4–6 lines of verse (not prose). Total prayer length: 200–260 words.
+
+Stanza 1 — Address & Acknowledgement
+Open with "Oh [elevated title for God], [poetic descriptor]," — vary this every time (e.g. "Oh Mighty God, Creator of all Life," / "Oh Wondrous Source of all Being," / "Oh Divine Father, Light of the Universe,"). Then acknowledge the suffering in 3–5 lines, naming the real place and what is happening. End this stanza with a line of lament or cry for mercy.
+
+Stanza 2 — Prayer for the Suffering
+Begin with "May Thy radiant Light / Divine Energy / boundless Love fall upon..." then name specific groups of people affected: children, mothers, families, communities — be vivid and specific. Ask God to fill them with strength, hope, endurance.
+
+Stanza 3 — Prayer for the Helpers
+Begin with "Oh [another elevated title for God], may Thy [quality] flow to all those who bring aid —" then name helpers: aid workers, volunteers, emergency responders, neighbours. Ask that their hands be guided, their strength sustained.
+
+Stanza 4 — Prayer for Humanity's Awakening
+Call on the conscience of humanity to awaken to this suffering. Ask that people come together in compassion and action. Vision of a better world emerging.
+
+Stanza 5 — Gratitude & Closing
+Begin "We thank Thee, Oh [elevated title], / For allowing us to be channels / For Thy Divine Power and Love to flow out into our world." Close with: "May Thy Will always and forever be done."
+
+Style rules:
+- Use "Thee", "Thy", "Thou" throughout — never "you" or "your"
+- First-person plural: "we pray", "may we", "we ask", "we open our hearts"
 - Politically neutral: no blame, no policy, no sides
-- Interfaith: no mention of Jesus, Allah, Krishna, etc. Address only as God, Divine Creator, Divine Father, Source of All Life, or similar universal titles
-- 100–140 words
+- Interfaith: address God only with universal titles — never Jesus, Allah, Krishna, Christ, etc.
+- Vivid imagery: radiant light, boundless love, divine energy, streams of compassion, wondrous power
+- Line breaks within stanzas — each line is a breath, not a full sentence
+- Elevated, dignified tone — never dramatic or sensationalist
 
-Also return:
-- title: a short, clear prayer card title (6-10 words, does NOT start with "A Prayer for")
-- summary: a one-line summary (max 18 words) for the card/widget
-- slug: URL slug (lowercase, hyphenated, no stopwords, max 60 chars)
-- imagePrompt: 1 sentence describing a symbolic, hopeful image — no faces, no text, no logos
-- imageKeywords: 5-keyword array for image-search fallback
+════════════════════════════
+STORY FORMAT (the written description shown on the prayer page)
+════════════════════════════
 
-Return ONLY valid JSON with keys: title, summary, body, slug, imagePrompt, imageKeywords`;
+Write 2 short paragraphs, 150–200 words total.
 
-  const userMsg = `News headline: "${crisis.title}"${crisis.summary ? `\n\nBrief summary: ${crisis.summary}` : ''}
+Paragraph 1 (facts): What happened. Specific details — real place names, numbers of people affected, scale of the disaster, timeline. Draw on everything in the article. Be concrete and informative.
 
-Write an interfaith prayer for this crisis.`;
+Paragraph 2 (human impact + prayer call): Why it matters. Name the people: families, children, communities, responders. End with a sentence that bridges to the prayer — something like "We pray for every soul caught in this crisis."
+
+Style rules for story:
+- Dignified, not dramatic
+- Specific, not abstract — real numbers, real places
+- Compassionate but factual tone
+- No political sides, no blame
+
+════════════════════════════
+OUTPUT
+════════════════════════════
+
+Return ONLY valid JSON with these exact keys:
+- title: short prayer card title, 6–10 words, starts with "Pray for..." (e.g. "Pray for the Flood Survivors of South Australia")
+- summary: one sentence, max 20 words, for the prayer card widget
+- body: the full prayer text (200–260 words, stanzas separated by \\n\\n, lines within stanzas separated by \\n)
+- description: the full story text (150–200 words, two paragraphs separated by \\n\\n)
+- slug: URL slug, lowercase hyphenated, no stopwords, max 60 chars
+- imagePrompt: 1 sentence — a symbolic hopeful image, no faces, no text, no logos
+- imageKeywords: array of 5 keywords for image search fallback`;
+
+  const userMsg = `News headline: "${crisis.title}"
+${crisis.summary ? `\nArticle summary: ${crisis.summary}` : ''}
+Article URL: ${crisis.url}
+
+Write the prayer and story for this crisis. Use specific details from the headline and summary — real place names, people affected, scale of the event. Make both the prayer and story vivid and grounded in what actually happened.`;
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -408,7 +448,7 @@ Write an interfaith prayer for this crisis.`;
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 1024,
+      max_tokens: 2048,
       system,
       messages: [{ role: 'user', content: userMsg }],
     }),
@@ -707,7 +747,7 @@ export async function runPipeline(): Promise<PipelineResult> {
     const token = randomBytes(32).toString('hex');
     const expiry = new Date(Date.now() + 48 * 60 * 60 * 1000);
 
-    const descriptionParts = [crisis.summary || crisis.title];
+    const descriptionParts = [draft.description || crisis.summary || crisis.title];
     if (imageResult?.attribution) descriptionParts.push(`\n\n${imageResult.attribution}`);
     const description = descriptionParts.join('');
 
