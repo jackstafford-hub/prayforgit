@@ -212,4 +212,14 @@ router.delete("/reports/:id", requireAdmin, async (req: Request, res: Response) 
   }
 });
 
+router.get("/pipeline-status", requireAdmin, async (_req: Request, res: Response) => {
+  try {
+    const run = await storage.getLatestDailyPrayerRun();
+    res.json(run ?? null);
+  } catch (error) {
+    console.error("Error fetching pipeline status:", error);
+    res.status(500).json({ message: "Failed to fetch pipeline status" });
+  }
+});
+
 export default router;

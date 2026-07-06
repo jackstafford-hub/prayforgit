@@ -76,6 +76,9 @@ export interface IStorage {
   // Related prayers
   getRelatedPrayers(prayerId: string, topic: string, limit: number): Promise<Prayer[]>;
   getLatestCrisisPrayer(): Promise<Prayer | undefined>;
+
+  // Pipeline health
+  getLatestDailyPrayerRun(): Promise<DailyPrayerRun | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -507,6 +510,15 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(prayers.createdAt))
       .limit(1);
     return prayer;
+  }
+
+  async getLatestDailyPrayerRun(): Promise<DailyPrayerRun | undefined> {
+    const [row] = await db
+      .select()
+      .from(dailyPrayerRuns)
+      .orderBy(desc(dailyPrayerRuns.runAt))
+      .limit(1);
+    return row;
   }
 }
 

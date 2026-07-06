@@ -8,8 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
-import { Loader2, Shield, Flag, AlertTriangle, Check, Trash2, Eye, ExternalLink, Search, ChevronLeft, ChevronRight, BookOpen, Play } from "lucide-react";
-import type { Prayer, Report } from "@shared/schema";
+import { Loader2, Shield, Flag, AlertTriangle, Check, Trash2, Eye, ExternalLink, Search, ChevronLeft, ChevronRight, BookOpen, Play, Activity, Clock } from "lucide-react";
+import type { Prayer, Report, DailyPrayerRun } from "@shared/schema";
 
 type AdminStats = {
   totalPrayers: number;
@@ -94,6 +94,12 @@ export default function AdminDashboard() {
       return res.json();
     },
     enabled: !!adminCheck?.isAdmin,
+  });
+
+  const { data: pipelineStatus, isLoading: pipelineStatusLoading } = useQuery<DailyPrayerRun | null>({
+    queryKey: ["/api/admin/pipeline-status"],
+    enabled: !!adminCheck?.isAdmin,
+    refetchInterval: 5 * 60 * 1000,
   });
 
   const approveMutation = useMutation({
@@ -195,14 +201,143 @@ export default function AdminDashboard() {
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="font-serif text-3xl font-bold flex items-center gap-3">
-              <Shield className="w-8 h-8 text-primary" />
-              Admin Dashboard
-            </h1>
-            <p className="text-muted-foreground mt-1">Manage prayers and review reports</p>
+        <div className="mb-4">
+          <h1 className="font-serif text-3xl font-bold flex items-center gap-3">
+            <Shield className="w-8 h-8 text-primary" />
+            Admin Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-1">Manage prayers and review reports</p>
+        </div>
+
+        {/* Pipeline Status card */}
+        {!!adminCheck?.isAdmin && (
+          <div data-testid="card-pipeline-status" className={`mb-6 rounded-xl border px-5 py-4 ${
+            pipelineStatusLoading
+              ? "border-border bg-card"
+              : !pipelineStatus
+              ? "border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30"
+              : (() => {
+                  const hoursSince = (Date.now() - new Date(pipelineStatus.runAt).getTime()) / 3600000;
+                  const isOverdue = hoursSince > 26;
+                  if (pipelineStatus.error && pipelineStatus.error !== "rejected_by_approver") return "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30";
+                  if (isOverdue) return "border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30";
+                  return "border-border bg-card";
+                })()
+          }`}>
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <Activity className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <h3 className="text-sm font-semibold">Pipeline Status</h3>
+                  {pipelineStatusLoading ? (
+                    <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                  ) : !pipelineStatus ? (
+                    <span data-testid="badge-pipeline-overdue" className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                      No runs recorded
+                    </span>
+                  ) : (() => {
+                    const hoursSince = (Date.now() - new Date(pipelineStatus.runAt).getTime()) / 3600000;
+                    const isOverdue = hoursSince > 26;
+                    const hasError = !!pipelineStatus.error && pipelineStatus.error !== "rejected_by_approver";
+                    if (hasError) return (
+                      <span data-testid="badge-pipeline-error" className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                        Error
+                      </span>
+                    );
+                    if (isOverdue) return (
+                      <span data-testid="badge-pipeline-overdue" className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                        Overdue
+                      </span>
+                    );
+                    if (pipelineStatus.publishedAt) return (
+                      <span data-testid="badge-pipeline-ok" className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        Published
+                      </span>
+                    );
+                    if (pipelineStatus.draftId) return (
+                      <span data-testid="badge-pipeline-ok" className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        Pending Approval
+                      </span>
+                    );
+                    if (!pipelineStatus.crisisChosen) return (
+                      <span data-testid="badge-pipeline-no-crisis" className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                        No Crisis Found
+                      </span>
+                    );
+                    return (
+                      <span data-testid="badge-pipeline-ok" className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        OK
+                      </span>
+                    );
+                  })()}
+                </div>
+                {pipelineStatus && !pipelineStatusLoading && (
+                  <div className="space-y-1 text-sm">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="w-3.5 h-3.5 shrink-0" />
+                      <span>
+                        Last run:{" "}
+                        <span className="text-foreground font-medium">
+                          {new Date(pipelineStatus.runAt).toLocaleString("en-US", {
+                            month: "short", day: "numeric", year: "numeric",
+                            hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+                          })}
+                        </span>
+                        {" "}
+                        <span className="text-xs">
+                          ({Math.round((Date.now() - new Date(pipelineStatus.runAt).getTime()) / 3600000)}h ago)
+                        </span>
+                      </span>
+                    </div>
+                    {pipelineStatus.crisisChosen ? (
+                      <p className="text-muted-foreground">
+                        Crisis: <span className="text-foreground">{pipelineStatus.crisisChosen}</span>
+                        {pipelineStatus.tier != null && (
+                          <span className={`ml-2 inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-semibold ${
+                            pipelineStatus.tier === 1
+                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                              : pipelineStatus.tier === 2
+                              ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                              : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                          }`}>
+                            Tier {pipelineStatus.tier}
+                          </span>
+                        )}
+                      </p>
+                    ) : (
+                      <p className="text-muted-foreground">Crisis: <span className="text-foreground">None found</span></p>
+                    )}
+                    {pipelineStatus.confirmedOutlets && pipelineStatus.confirmedOutlets.length > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        Confirmed by: {pipelineStatus.confirmedOutlets.join(", ")}
+                      </p>
+                    )}
+                    {pipelineStatus.error && pipelineStatus.error !== "rejected_by_approver" && (
+                      <p className="text-xs text-red-700 dark:text-red-400 font-mono break-all mt-1">
+                        Error: {pipelineStatus.error}
+                      </p>
+                    )}
+                    {pipelineStatus.error === "rejected_by_approver" && (
+                      <p className="text-xs text-muted-foreground mt-1">Prayer was rejected by approver.</p>
+                    )}
+                    {pipelineStatus.newsletterRecipients != null && (
+                      <p className="text-xs text-muted-foreground">
+                        Sent to {pipelineStatus.newsletterRecipients.toLocaleString()} subscriber{pipelineStatus.newsletterRecipients !== 1 ? "s" : ""}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {!pipelineStatus && !pipelineStatusLoading && (
+                  <p className="text-sm text-muted-foreground">No pipeline runs have been recorded yet.</p>
+                )}
+              </div>
+            </div>
           </div>
+        )}
+
+        <div className="flex justify-end mb-6">
           <Button
             data-testid="button-run-daily-prayer"
             onClick={() => {
