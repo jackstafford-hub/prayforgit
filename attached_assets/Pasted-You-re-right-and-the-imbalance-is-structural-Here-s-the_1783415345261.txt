@@ -1,0 +1,33 @@
+You're right, and the imbalance is structural. Here's the diagnosis:
+
+**What's off**
+
+The prayer mentions fear, misinformation, stigma, lies, rejection, isolation, and division roughly a dozen times, but "healing" appears mostly in the framing, not the petitions. Count the actual asks: light for the grieving, love for aid workers, awakened conscience, bridges over stigma walls. Only one of those is about the virus itself. Nobody is asked to recover. The sick are barely present — the prayer is really about the *social response* to Ebola, not the disease.
+
+This also contradicts your own instructions block. You tell the person to "picture the healed version, already peaceful and whole" — then hand them a script full of shadows, cruel stigma, lies that divide, and walls. The visualisation guidance says positive; the text keeps re-invoking the negative. In the Aetherius framing especially, dwelling on the condition rather than the healed outcome is exactly what you don't want.
+
+Smaller issues: "hearts heavy" opens on the wrong note; "cruel stigma" and "lies would divide us" are journalism language, not prayer language; and there's no petition for the actual containment/end of the outbreak.
+
+**Prompt for Base44**
+
+---
+
+Update the prayer generation process with the following rules. Apply them to all future prayers and regenerate the current Ebola prayer accordingly.
+
+1. **Healing first, context second.** The prayer's petitions must centre on the primary suffering (in a disease outbreak: the sick, the dying, the recovery of patients, the end of the outbreak itself). Secondary themes like misinformation, stigma, or fear may appear at most once, briefly, and always resolved into a positive ("may truth and understanding prevail"), never dwelt upon.
+
+2. **Positive visualisation throughout.** The prayer must match the instruction to picture the situation already healed and whole. Never repeatedly name or describe the negative condition. Name the affliction once, early, then speak only in terms of the desired outcome: healing, wholeness, strength, recovery, protection, peace. Test: if you removed the opening lines, a reader should sense a prayer about healing and light, not a prayer about fear and lies.
+
+3. **Ratio rule.** At least 70% of the prayer's lines must be affirmative petitions or visualisations of the healed outcome. No more than 2 lines total may reference negative conditions (sickness, fear, stigma, misinformation), and each must pivot to the positive within the same line or the next.
+
+4. **Include the sick directly.** Every health-crisis prayer must contain an explicit petition for the recovery of those currently ill and for the outbreak to end — not only for the bereaved, the isolated, or the responders.
+
+5. **Uplifted opening.** Do not open with heaviness ("hearts heavy," "shadow spreads"). Open by invoking Divine healing power and light flowing to the region.
+
+6. **Language register.** Avoid news-report vocabulary (misinformation, stigma, crisis, containment) inside the prayer text itself; that belongs only in "The Issue" section. Prayer language should be devotional and timeless: light, healing, mercy, strength, truth, wholeness.
+
+7. **Keep the closing thanksgiving** ("We thank Thee... channels for Thy Divine Power...") as is — it already ends on the correct note.
+
+---
+
+Want me to also rewrite the Ebola prayer itself to those rules, so you have a corrected version to post today while Base44 regenerates going forward?

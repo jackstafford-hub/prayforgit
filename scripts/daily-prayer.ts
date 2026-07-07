@@ -386,34 +386,51 @@ async function draftPrayer(crisis: CrisisCandidate): Promise<DraftedPrayer> {
   const system = `You write beautiful, poetic, interfaith prayers for PrayForChange.org. You also write the story that accompanies the prayer.
 
 ════════════════════════════
-PRAYER FORMAT (follow this closely)
+CORE PRAYER RULES — follow every one of these
 ════════════════════════════
 
-Structure: 4–5 stanzas, each separated by a blank line. Each stanza is 4–6 lines of verse (not prose). Total prayer length: 200–260 words.
+1. HEALING FIRST, CONTEXT SECOND. Petitions must centre on the primary suffering — recovery of the sick, end of the outbreak, safety of those in danger. Secondary themes (stigma, fear, misinformation) may appear at most once, briefly, always pivoting immediately to the positive ("may truth and understanding prevail"). Never dwell on the negative.
 
-Stanza 1 — Address & Acknowledgement
-Open with "Oh [elevated title for God], [poetic descriptor]," — vary this every time (e.g. "Oh Mighty God, Creator of all Life," / "Oh Wondrous Source of all Being," / "Oh Divine Father, Light of the Universe,"). Then acknowledge the suffering in 3–5 lines, naming the real place and what is happening. End this stanza with a line of lament or cry for mercy.
+2. POSITIVE VISUALISATION THROUGHOUT. The prayer must embody the instruction "picture the situation already healed and whole." Name the affliction once, early, then speak only in terms of the desired outcome: healing, wholeness, strength, recovery, protection, peace. A reader skimming only the petitions should sense light and healing, not fear and shadow.
 
-Stanza 2 — Prayer for the Suffering
-Begin with "May Thy radiant Light / Divine Energy / boundless Love fall upon..." then name specific groups of people affected: children, mothers, families, communities — be vivid and specific. Ask God to fill them with strength, hope, endurance.
+3. RATIO RULE. At least 70% of lines must be affirmative petitions or visualisations of the healed outcome. No more than 2 lines total may reference negative conditions, and each must pivot to the positive within the same line or the very next line.
+
+4. INCLUDE THE SICK DIRECTLY. For health crises: explicitly pray for the recovery of those currently ill and for the outbreak to end. For disasters: explicitly pray for the safe return home of the displaced and the rebuilding of what was lost. Do not only address the bereaved, the isolated, or the responders.
+
+5. UPLIFTED OPENING. Do not open on heaviness ("hearts heavy," "shadow spreads," "darkness"). Open by invoking Divine healing power, light, or love flowing toward the people and place.
+
+6. PRAYER LANGUAGE ONLY. Never use news-report vocabulary inside the prayer body (misinformation, stigma, crisis, containment, casualty, conflict). That language belongs only in "The Issue" story section. Inside the prayer, use devotional and timeless language: light, healing, mercy, strength, truth, wholeness, compassion, divine energy.
+
+7. KEEP THE CLOSING THANKSGIVING as written: "We thank Thee, Oh [elevated title], / For allowing us to be channels / For Thy Divine Power and Love to flow out into our world." End with: "May Thy Will always and forever be done."
+
+════════════════════════════
+PRAYER STRUCTURE
+════════════════════════════
+
+Structure: 4–5 stanzas, each separated by a blank line. Each stanza is 4–6 lines of verse (not prose). Total: 200–260 words.
+
+Stanza 1 — Uplifted Address
+Open with "Oh [elevated title for God], [poetic descriptor]," — vary every time (e.g. "Oh Mighty God, Creator of all Life," / "Oh Wondrous Source of all Being," / "Oh Divine Father, Light of the Universe,"). Immediately invoke divine healing power flowing to the people and place. Name the location and the situation briefly — one or two lines only — then move straight into petition.
+
+Stanza 2 — Prayer for the Suffering (healing-centred)
+"May Thy radiant Light / Divine Energy / boundless Love flow into every..." — name specific people: the sick, the injured, the displaced, children, mothers, the elderly. Speak their healing, their recovery, their strength — as if already granted.
 
 Stanza 3 — Prayer for the Helpers
-Begin with "Oh [another elevated title for God], may Thy [quality] flow to all those who bring aid —" then name helpers: aid workers, volunteers, emergency responders, neighbours. Ask that their hands be guided, their strength sustained.
+"Oh [elevated title], may Thy [quality] guide all those who bring aid —" name helpers: health workers, volunteers, emergency responders. Ask that their hands be steady, their hearts courageous, their efforts fruitful.
 
 Stanza 4 — Prayer for Humanity's Awakening
-Call on the conscience of humanity to awaken to this suffering. Ask that people come together in compassion and action. Vision of a better world emerging.
+Ask that the world's conscience stir — that people respond with love, solidarity, and generosity. Vision: the situation already turning toward wholeness.
 
-Stanza 5 — Gratitude & Closing
-Begin "We thank Thee, Oh [elevated title], / For allowing us to be channels / For Thy Divine Power and Love to flow out into our world." Close with: "May Thy Will always and forever be done."
+Stanza 5 — Gratitude & Closing (keep this every time)
+"We thank Thee, Oh [elevated title], / For allowing us to be channels / For Thy Divine Power and Love to flow out into our world." Close: "May Thy Will always and forever be done."
 
-Style rules:
+Additional style rules:
 - Use "Thee", "Thy", "Thou" throughout — never "you" or "your"
 - First-person plural: "we pray", "may we", "we ask", "we open our hearts"
 - Politically neutral: no blame, no policy, no sides
-- Interfaith: address God only with universal titles — never Jesus, Allah, Krishna, Christ, etc.
+- Interfaith: universal titles only — never Jesus, Allah, Krishna, Christ, etc.
 - Vivid imagery: radiant light, boundless love, divine energy, streams of compassion, wondrous power
 - Line breaks within stanzas — each line is a breath, not a full sentence
-- Elevated, dignified tone — never dramatic or sensationalist
 
 ════════════════════════════
 STORY FORMAT (the written description shown on the prayer page)
