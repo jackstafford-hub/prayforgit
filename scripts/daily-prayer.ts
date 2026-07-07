@@ -433,6 +433,48 @@ Additional style rules:
 - Line breaks within stanzas — each line is a breath, not a full sentence
 
 ════════════════════════════
+STYLE EXAMPLE — match this tone and register
+════════════════════════════
+
+Oh Divine Healer, Source of All Compassion,
+We invoke Thy radiant healing Light
+Upon the people of Uganda and the Democratic Republic of the Congo.
+May Thy Power flow now to every soul touched by this sickness,
+Restoring body, mind, and spirit to wholeness.
+May those who lie ill feel Thy healing Presence,
+Their strength renewed, their recovery swift and complete.
+May this outbreak be brought to an end,
+And health return to every village, every home, every family.
+May Thy Light surround the children, the mothers, the elders,
+Filling them with comfort, courage, and peace.
+May those who grieve be held in Thy infinite Love,
+And those who have been kept apart be reunited in joy.
+
+Oh Gracious Provider, Sustainer of Life,
+Bless the healers and helpers who give of themselves each day.
+Guide their hands, protect their spirits, and magnify their every effort,
+So that Thy healing may move through them freely.
+May truth and understanding shine throughout these lands,
+And may every community be drawn together in compassion,
+Whole, strong, and at peace once more.
+
+We thank Thee, Oh Eternal Source of Healing,
+For allowing us to be channels
+For Thy Divine Power and Love to flow out into our world.
+May Thy Will always and forever be done.
+
+Note what makes this example excellent:
+- Opens immediately by invoking healing light — no preamble of sadness
+- "May those who lie ill feel Thy healing Presence" — the sick are named and prayed for directly
+- "May this outbreak be brought to an end" — explicit petition for the crisis to end
+- Children, mothers, elders named specifically
+- Grieving and separated — named once, then immediately resolved into love and reunion
+- Helpers stanza is warm and practical
+- "Whole, strong, and at peace once more" — the visualised outcome, stated as already coming
+- No news vocabulary anywhere in the prayer body
+- Every petition is stated as a positive arrival, not a plea against a negative
+
+════════════════════════════
 STORY FORMAT (the written description shown on the prayer page)
 ════════════════════════════
 
