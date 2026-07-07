@@ -3,6 +3,28 @@ import { db } from "../db";
 import { users, prayers } from "@shared/schema";
 import { eq, ilike, sql, count, or, desc } from "drizzle-orm";
 import { storage } from "../storage";
+import { sendPipelineOverdueAlertEmail } from "../emailService";
+
+const PIPELINE_OVERDUE_THRESHOLD_MS = 26 * 60 * 60 * 1000;
+const ALERT_THROTTLE_MS = 24 * 60 * 60 * 1000;
+const ALERT_SETTING_KEY = "last_pipeline_overdue_alert_sent_at";
+
+let lastOverdueAlertSentAt: number | null = null;
+let alertThrottleInitialized = false;
+
+async function initAlertThrottleFromDb(): Promise<void> {
+  if (alertThrottleInitialized) return;
+  alertThrottleInitialized = true;
+  try {
+    const stored = await storage.getAppSetting(ALERT_SETTING_KEY);
+    if (stored) {
+      const ms = parseInt(stored, 10);
+      if (!isNaN(ms)) lastOverdueAlertSentAt = ms;
+    }
+  } catch (err: any) {
+    console.error("[PIPELINE-STATUS] Could not load alert throttle from DB:", err?.message || err);
+  }
+}
 
 const router = Router();
 
@@ -216,6 +238,45 @@ router.get("/pipeline-status", requireAdmin, async (_req: Request, res: Response
   try {
     const run = await storage.getLatestDailyPrayerRun();
     res.json(run ?? null);
+
+    await initAlertThrottleFromDb();
+
+    const now = Date.now();
+    const lastRunAt: Date | null = run?.runAt ? new Date(run.runAt) : null;
+    const isOverdue =
+      !lastRunAt || now - lastRunAt.getTime() > PIPELINE_OVERDUE_THRESHOLD_MS;
+
+    if (!isOverdue) return;
+
+    const alertThrottled =
+      lastOverdueAlertSentAt !== null &&
+      now - lastOverdueAlertSentAt < ALERT_THROTTLE_MS;
+
+    if (alertThrottled) {
+      console.log('[PIPELINE-STATUS] Pipeline overdue but alert throttled (sent within last 24h)');
+      return;
+    }
+
+    // Optimistic in-memory lock — blocks concurrent requests from also sending
+    lastOverdueAlertSentAt = now;
+
+    const adminEmails = getAdminEmails();
+    const siteUrl = process.env.SITE_URL || 'https://prayforchange.org';
+    const dashboardUrl = `${siteUrl}/admin`;
+
+    sendPipelineOverdueAlertEmail(adminEmails, lastRunAt, dashboardUrl).then(async (sent) => {
+      if (sent) {
+        // Persist to DB so the throttle survives restarts
+        try {
+          await storage.setAppSetting(ALERT_SETTING_KEY, String(now));
+        } catch (err: any) {
+          console.error('[PIPELINE-STATUS] Could not persist alert timestamp to DB:', err?.message || err);
+        }
+      } else {
+        // Roll back the optimistic lock so a retry can happen next time
+        if (lastOverdueAlertSentAt === now) lastOverdueAlertSentAt = null;
+      }
+    });
   } catch (error) {
     console.error("Error fetching pipeline status:", error);
     res.status(500).json({ message: "Failed to fetch pipeline status" });

@@ -182,3 +182,11 @@ export type DailyPrayerRun = typeof dailyPrayerRuns.$inferSelect;
 export type InsertDailyPrayerRun = typeof dailyPrayerRuns.$inferInsert;
 
 export type CrisisPrayerSend = typeof crisisPrayerSends.$inferSelect;
+
+export const appSettings = pgTable("app_settings", {
+  key: varchar("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type AppSetting = typeof appSettings.$inferSelect;

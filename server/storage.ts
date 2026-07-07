@@ -1,5 +1,5 @@
 import { db, generateSlugFromTitle } from "./db";
-import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, type Subscriber, type CrisisPrayerSend, type DailyPrayerRun, type InsertDailyPrayerRun, users, prayers, reports, dailyPrayerCounts, prayerUpdates, subscribers, crisisPrayerSends, dailyPrayerRuns } from "@shared/schema";
+import { type User, type UpsertUser, type Prayer, type InsertPrayer, type Report, type InsertReport, type PrayerUpdate, type InsertPrayerUpdate, type Subscriber, type CrisisPrayerSend, type DailyPrayerRun, type InsertDailyPrayerRun, users, prayers, reports, dailyPrayerCounts, prayerUpdates, subscribers, crisisPrayerSends, dailyPrayerRuns, appSettings } from "@shared/schema";
 import { eq, desc, gte, and, sql, count as countFn, lte, ne } from "drizzle-orm";
 
 export interface IStorage {
@@ -80,6 +80,10 @@ export interface IStorage {
 
   // Pipeline health
   getLatestDailyPrayerRun(): Promise<DailyPrayerRun | undefined>;
+
+  // App settings (durable key-value flags)
+  getAppSetting(key: string): Promise<string | null>;
+  setAppSetting(key: string, value: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -525,6 +529,24 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(dailyPrayerRuns.runAt))
       .limit(1);
     return row;
+  }
+
+  async getAppSetting(key: string): Promise<string | null> {
+    const [row] = await db
+      .select()
+      .from(appSettings)
+      .where(eq(appSettings.key, key));
+    return row?.value ?? null;
+  }
+
+  async setAppSetting(key: string, value: string): Promise<void> {
+    await db
+      .insert(appSettings)
+      .values({ key, value, updatedAt: new Date() })
+      .onConflictDoUpdate({
+        target: appSettings.key,
+        set: { value, updatedAt: new Date() },
+      });
   }
 }
 

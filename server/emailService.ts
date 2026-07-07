@@ -233,6 +233,61 @@ export async function sendPasswordResetEmail(toEmail: string, resetUrl: string) 
 
 const ADMIN_EMAIL = 'support@prayforchange.org';
 
+export async function sendPipelineOverdueAlertEmail(
+  adminEmails: string[],
+  lastRunAt: Date | null,
+  dashboardUrl: string
+): Promise<boolean> {
+  if (adminEmails.length === 0) return false;
+
+  try {
+    const { client, fromEmail } = await getUncachableSendGridClient();
+
+    const lastRunText = lastRunAt
+      ? `Last run: <strong>${lastRunAt.toUTCString()}</strong>`
+      : `No pipeline run has ever been recorded.`;
+
+    const html = `
+      <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #b45309; text-align: center;">⚠ Daily Pipeline Overdue</h1>
+        <p style="font-size: 16px; line-height: 1.6; color: #333;">
+          The daily crisis prayer pipeline has not run in over 26 hours.
+        </p>
+        <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0; border-radius: 4px;">
+          <p style="font-size: 15px; line-height: 1.6; color: #78350f; margin: 0;">
+            ${lastRunText}
+          </p>
+        </div>
+        <p style="font-size: 16px; line-height: 1.6; color: #333;">
+          Please check the pipeline and trigger a manual run if necessary.
+        </p>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${escapeHtml(dashboardUrl)}" style="display: inline-block; background-color: #c9a96e; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: bold;">
+            Go to Admin Dashboard
+          </a>
+        </div>
+        <p style="font-size: 13px; line-height: 1.6; color: #999; text-align: center;">
+          This alert is sent at most once every 24 hours.
+        </p>
+      </div>
+    `;
+
+    await client.send({
+      to: adminEmails,
+      from: { email: fromEmail, name: 'Pray For Change' },
+      subject: '⚠ Daily Pipeline Overdue — PrayForChange',
+      html,
+    });
+
+    console.log(`[EMAIL] Pipeline overdue alert sent to: ${adminEmails.join(', ')}`);
+    return true;
+  } catch (error: any) {
+    const detail = error?.response?.body ? JSON.stringify(error.response.body) : (error?.message || error);
+    console.error('[EMAIL] Failed to send pipeline overdue alert:', detail);
+    return false;
+  }
+}
+
 export async function sendModerationEmail(prayerTitle: string, prayerDescription: string, prayerContent: string, authorName: string, toneSuggestion?: string) {
   try {
     const { client, fromEmail } = await getUncachableSendGridClient();

@@ -296,6 +296,20 @@ export async function ensureTablesExist(): Promise<void> {
     console.error("[DB] Daily prayer runs table error:", error?.message);
   }
 
+  // App settings key-value table (used for durable server-side flags)
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS app_settings (
+        key VARCHAR PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+    console.log("[DB] App settings table ensured");
+  } catch (error: any) {
+    console.error("[DB] App settings table error:", error?.message);
+  }
+
   console.log("[DB] All required tables verified");
 }
 
