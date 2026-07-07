@@ -19,6 +19,7 @@ export interface IStorage {
   getPrayerBySlug(slug: string): Promise<Prayer | undefined>;
   getPrayerBySlugOrId(slugOrId: string): Promise<Prayer | undefined>;
   createPrayer(prayer: InsertPrayer): Promise<Prayer>;
+  createPrayerWithId(prayer: InsertPrayer & { id: string; slug: string; approvalStatus: string; createdAt: Date }): Promise<Prayer>;
   incrementPrayerCount(id: string): Promise<Prayer | undefined>;
   updatePrayerImage(id: string, imageUrl: string): Promise<Prayer | undefined>;
   updatePrayerContent(id: string, content: { aiSummary?: string; recitablePrayer?: string }): Promise<Prayer | undefined>;
@@ -187,6 +188,11 @@ export class DatabaseStorage implements IStorage {
   async createPrayer(insertPrayer: InsertPrayer): Promise<Prayer> {
     const slug = await this.generateUniqueSlug(insertPrayer.title);
     const [prayer] = await db.insert(prayers).values({ ...insertPrayer, slug }).returning();
+    return prayer;
+  }
+
+  async createPrayerWithId(insertPrayer: InsertPrayer & { id: string; slug: string; approvalStatus: string; createdAt: Date }): Promise<Prayer> {
+    const [prayer] = await db.insert(prayers).values(insertPrayer as any).returning();
     return prayer;
   }
 

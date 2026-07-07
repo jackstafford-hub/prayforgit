@@ -1636,6 +1636,74 @@ Do NOT include a title.`;
     }
   });
 
+  // One-time seed: insert dev-created crisis prayers into whichever DB this server is running against
+  // Protected by admin email check. Safe to call multiple times — skips duplicates by slug.
+  app.post("/api/admin/seed-crisis-prayers", async (req, res) => {
+    const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
+    const user = (req as any).user;
+    if (!user || !adminEmails.includes(user.email)) {
+      return res.status(403).json({ error: "Admin only" });
+    }
+
+    const seedPrayers = [
+      {
+        id: '63b71af4-c5bb-4124-8729-66b1f6e91981',
+        slug: 'pray-for-ugandas-ebola-frontline-communities',
+        title: "Pray for Uganda's Ebola Frontline Communities",
+        description: "Uganda is battling an Ebola outbreak that has also spread to the neighbouring Democratic Republic of the Congo. Health workers on the frontlines are confronting not only a deadly virus but also the invisible forces of fear, misinformation, and social stigma that threaten to tear communities apart. Families affected by Ebola face isolation and rejection, making recovery and containment even more challenging.\n\nBehind every case are mothers, children, health workers, and entire villages navigating grief, uncertainty, and the courage required to care for the sick. We pray for every soul caught in this crisis—for healing, for truth to overcome fear, and for communities to be made whole again.\n\nPhoto via news.un.org",
+        aiSummary: "In July 2026, brave health workers recommenced their work in western Uganda, where efforts to recover from an Ebola outbreak were gaining momentum. They returned to stricken villages, offering essential support to survivors and marching forward in a compassionate effort to rebuild trust among families and neighbours. UN News and WHO confirmed substantial progress being made in the region's recovery endeavours.\n\nThe impact of these efforts is profound — health workers and volunteers are breathing life back into affected areas. Their compassionate presence ignites hope and fortifies the spirit of resilience within individuals and communities. By helping families rebuild bonds and encouraging collective healing, these interventions lay the foundation for a brighter tomorrow. Inspired by their determination, we gather in prayer, embracing the Divine spirit to envelop all those steadfastly working toward wholeness and peace.",
+        recitablePrayer: "Oh Divine Healer, Source of All Compassion,\nWe invoke Thy radiant healing Light\nUpon the people of Uganda and the Democratic Republic of the Congo.\nMay Thy Power flow now to every soul touched by this sickness,\nRestoring body, mind, and spirit to wholeness.\nMay those who lie ill feel Thy healing Presence,\nTheir strength renewed, their recovery swift and complete.\nMay this outbreak be brought to an end,\nAnd health return to every village, every home, every family.\nMay Thy Light surround the children, the mothers, the elders,\nFilling them with comfort, courage, and peace.\nMay those who grieve be held in Thy infinite Love,\nAnd those who have been kept apart be reunited in joy.\n\nOh Gracious Provider, Sustainer of Life,\nBless the healers and helpers who give of themselves each day.\nGuide their hands, protect their spirits, and magnify their every effort,\nSo that Thy healing may move through them freely.\nMay truth and understanding shine throughout these lands,\nAnd may every community be drawn together in compassion,\nWhole, strong, and at peace once more.\n\nWe thank Thee, Oh Eternal Source of Healing,\nFor allowing us to be channels\nFor Thy Divine Power and Love to flow out into our world.\nMay Thy Will always and forever be done.",
+        imageUrl: '/assets/daily-prayer-2026-07-07-16c4d5d4.jpg',
+        count: 5579,
+        createdAt: new Date('2026-07-07T08:55:53.587Z'),
+      },
+      {
+        id: '49338fd3-dd38-46a8-9024-8804fbccb23e',
+        slug: 'for-those-affected-by-floods-in-south-australia',
+        title: "For Those Affected by Floods in South Australia",
+        description: "Severe storms and flash flooding swept South Australia in July 2026, prompting hundreds of emergency rescues and widespread clean-up efforts across the state.",
+        aiSummary: "In early July 2026, severe storms unleashed flash flooding across South Australia, with low-lying areas particularly devastated as floodwaters inundated streets and cut off communities. The State Emergency Service worked through the night, responding to hundreds of urgent calls for help. In one dramatic rescue operation, emergency workers saved a man from the roof of his vehicle after he had attempted to drive through rising floodwaters—a stark reminder of the danger these conditions pose.\n\nFamilies throughout the affected regions watched helplessly as their homes filled with water, while elderly residents and vulnerable community members faced frightening isolation. Yet amid the destruction, the human spirit shone through: volunteers waded into floodwaters, neighbours sheltered those who had lost everything, and emergency responders risked their lives repeatedly to save others. This prayer asks for divine light to shine upon all those affected by this disaster, and for strength to flow through every person offering aid and compassion.",
+        recitablePrayer: "Oh Eternal Source of Light, Creator of all that is,\nWe come before Thee with heavy hearts,\nAs severe storms and flash flooding sweep across South Australia,\nWashing away homes, roads, and the security of Thy children,\nLeaving families stranded, communities divided,\nAnd hearts trembling with fear and loss.\n\nMay Thy radiant Light fall upon the children,\nWhose eyes have witnessed waters rising in the night,\nUpon the families whose homes now stand in ruin,\nUpon the elderly, vulnerable and alone,\nAnd upon all those who have lost their shelter,\nTheir belongings, their sense of safety in this world.\n\nOh Compassionate One, may Thy strength flow to all those who bring aid—\nTo the State Emergency Service workers labouring through darkness,\nTo the volunteers wading through floodwaters to reach the stranded,\nTo the neighbours who open their doors to those with nowhere to go,\nAnd to the rescuers who pulled a man from his vehicle's roof,\nRisking their own lives that another might live.\n\nMay this crisis awaken in all humanity\nA deeper knowing of our sacred connection,\nThat we might reach across every boundary\nWith hands of compassion and hearts of service,\nSeeing in each flooded street a call to love more greatly,\nIn each rescue a reminder of our shared vulnerability and strength.\n\nWe thank Thee, Oh Divine Presence,\nFor allowing us to be channels\nFor Thy Divine Power and Love to flow out into our world,\nThat through our prayers, our actions, and our compassion,\nHealing may come to South Australia and all who suffer.\nMay Thy Will always and forever be done.",
+        imageUrl: '/assets/daily-prayer-2026-07-04-50cc2883.jpg',
+        count: 3569,
+        createdAt: new Date('2026-07-04T11:33:19.836Z'),
+      },
+    ];
+
+    const results: string[] = [];
+    for (const p of seedPrayers) {
+      try {
+        const existing = await storage.getPrayerBySlug(p.slug);
+        if (existing) {
+          results.push(`SKIPPED (already exists): ${p.title}`);
+          continue;
+        }
+        await storage.createPrayerWithId({
+          id: p.id,
+          slug: p.slug,
+          title: p.title,
+          description: p.description,
+          aiSummary: p.aiSummary,
+          recitablePrayer: p.recitablePrayer,
+          imageUrl: p.imageUrl,
+          author: 'Daily Crisis Prayer',
+          count: p.count,
+          goal: 10000,
+          topic: 'World Peace',
+          flaggedForReview: false,
+          isDailyCrisisPrayer: true,
+          approvalStatus: 'published',
+          createdAt: p.createdAt,
+        });
+        results.push(`INSERTED: ${p.title}`);
+      } catch (err: any) {
+        results.push(`ERROR for ${p.title}: ${err?.message}`);
+      }
+    }
+
+    return res.json({ results });
+  });
+
   // RSS feed — Daily Crisis Prayers
   app.get("/api/rss/daily-crisis.xml", async (req, res) => {
     console.log("[RSS] Route hit, starting generation");

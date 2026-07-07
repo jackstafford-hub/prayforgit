@@ -616,6 +616,75 @@ export async function sendDailyPrayerApprovalEmail(
   console.log(`[DAILY-PIPELINE] Approval email sent to ${DAILY_PIPELINE_RECIPIENT} for: ${prayer.title}`);
 }
 
+export async function sendDailyPrayerPublishedEmail(
+  prayer: Prayer,
+  prayerUrl: string,
+  tierInfo?: { tier: number; confirmedOutlets: string[] }
+): Promise<void> {
+  const { client, fromEmail } = await getUncachableSendGridClient();
+
+  const prayerSection = prayer.recitablePrayer
+    ? `<div style="border-left:4px solid #c9a96e;padding:16px 20px;margin:0 0 28px;background:#fafaf8;">
+         <p style="font-size:13px;font-weight:600;letter-spacing:0.06em;color:#9ca3af;text-transform:uppercase;margin:0 0 8px;">Prayer</p>
+         <p style="font-style:italic;font-size:15px;line-height:1.8;color:#4b5563;margin:0;white-space:pre-wrap;">${escapeHtml(prayer.recitablePrayer)}</p>
+       </div>`
+    : '';
+
+  const rawImageUrl = prayer.imageUrl && !prayer.imageUrl.startsWith('data:') ? prayer.imageUrl : null;
+  const imageSection = rawImageUrl
+    ? `<div style="margin:0 0 24px;"><img src="${escapeHtml(rawImageUrl.startsWith('http') ? rawImageUrl : `${PIPELINE_SITE_URL}${rawImageUrl}`)}" alt="" style="display:block;width:100%;max-width:520px;height:auto;border-radius:6px;" /></div>`
+    : '';
+
+  const tierColors: Record<number, { bg: string; border: string; text: string; label: string }> = {
+    1: { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534', label: 'Tier 1 — confirmed across 3+ regional outlet groups' },
+    2: { bg: '#eff6ff', border: '#bfdbfe', text: '#1d4ed8', label: 'Tier 2 — confirmed across 2 outlet groups' },
+    3: { bg: '#fefce8', border: '#fde68a', text: '#92400e', label: 'Tier 3 — limited cross-market confirmation' },
+  };
+  const tc = tierInfo ? (tierColors[tierInfo.tier] ?? tierColors[3]) : null;
+  const tierSection = tierInfo && tc
+    ? `<div style="margin:0 0 20px;padding:12px 16px;background:${tc.bg};border-radius:6px;border:1px solid ${tc.border};">
+         <p style="font-size:13px;font-weight:600;letter-spacing:0.06em;color:${tc.text};text-transform:uppercase;margin:0 0 4px;">Story Validation</p>
+         <p style="font-size:14px;color:${tc.text};margin:0 0 4px;">${tc.label}</p>
+         ${tierInfo.confirmedOutlets.length ? `<p style="font-size:13px;color:${tc.text};margin:0;">Confirmed by: ${escapeHtml(tierInfo.confirmedOutlets.join(', '))}</p>` : ''}
+       </div>`
+    : '';
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Daily Crisis Prayer Published</title></head>
+<body style="margin:0;padding:0;background:#f5f5f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f0;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="100%" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <tr><td style="padding:36px 40px 32px;">
+          <p style="font-size:13px;font-weight:600;letter-spacing:0.08em;color:#166534;text-transform:uppercase;margin:0 0 12px;">✓ Published — Daily Crisis Prayer</p>
+          <h1 style="font-family:'Georgia',serif;font-size:24px;font-weight:700;color:#111827;line-height:1.35;margin:0 0 16px;">${escapeHtml(prayer.title)}</h1>
+          ${tierSection}
+          ${imageSection}
+          ${prayerSection}
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 24px;" />
+          <a href="${escapeHtml(prayerUrl)}" style="display:inline-block;background-color:#166534;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 28px;border-radius:6px;margin-bottom:20px;">View Live Prayer →</a>
+          <p style="font-size:12px;color:#9ca3af;margin:0;">This prayer is now live and visible to the community on PrayForChange.org.</p>
+        </td></tr>
+        <tr><td style="border-top:1px solid #e5e7eb;padding:16px 40px;text-align:center;">
+          <p style="font-size:12px;color:#9ca3af;margin:0;">PrayForChange.org &mdash; Automated daily pipeline</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  await client.send({
+    to: DAILY_PIPELINE_RECIPIENT,
+    from: { email: fromEmail, name: 'PrayForChange.org' },
+    subject: `[Published] ${prayer.title}`,
+    html,
+  });
+
+  console.log(`[DAILY-PIPELINE] Published notification sent to ${DAILY_PIPELINE_RECIPIENT} for: ${prayer.title}`);
+}
+
 export async function sendDailyPrayerErrorEmail(errorMessage: string, stepName: string): Promise<void> {
   try {
     const { client, fromEmail } = await getUncachableSendGridClient();

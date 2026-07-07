@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { randomBytes } from 'node:crypto';
 import { pool } from '../server/db.js';
 import { storage } from '../server/storage.js';
-import { sendDailyPrayerApprovalEmail, sendDailyPrayerErrorEmail, sendNoPrayerDraftedEmail } from '../server/emailService.js';
+import { sendDailyPrayerPublishedEmail, sendDailyPrayerErrorEmail, sendNoPrayerDraftedEmail } from '../server/emailService.js';
 
 // In dev (Replit workspace), use the proxied dev domain so approve links work without deploying
 const SITE_URL = process.env.REPLIT_DEV_DOMAIN
@@ -812,10 +812,8 @@ export async function runPipeline(): Promise<PipelineResult> {
     console.log(`[STEP 3] Image sourced from ${imageSource} (${imageLatencyMs}ms)`);
     await storage.updateDailyPrayerRun(runLog.id, { imageSource, imageLatencyMs });
 
-    // Step 4: Save as pending_approval draft
-    console.log('[STEP 4] Saving prayer draft to database...');
-    const token = randomBytes(32).toString('hex');
-    const expiry = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    // Step 4: Save and publish directly
+    console.log('[STEP 4] Saving and publishing prayer to database...');
 
     const descriptionParts = [draft.description || crisis.summary || crisis.title];
     if (imageResult?.attribution) descriptionParts.push(`\n\n${imageResult.attribution}`);
@@ -837,16 +835,15 @@ export async function runPipeline(): Promise<PipelineResult> {
       isDailyCrisisPrayer: true,
     });
 
-    const pendingPrayer = await storage.setPrayerPendingApproval(createdPrayer.id, token, expiry);
-    await storage.updateDailyPrayerRun(runLog.id, { draftId: pendingPrayer.id });
-    console.log(`[STEP 4] Draft saved as prayer ID: ${pendingPrayer.id}`);
+    await storage.setPrayerApprovalStatus(createdPrayer.id, 'published');
+    await storage.updateDailyPrayerRun(runLog.id, { draftId: createdPrayer.id });
+    console.log(`[STEP 4] Prayer published with ID: ${createdPrayer.id}`);
 
-    // Step 5: Send approval email
-    console.log('[STEP 5] Sending approval email...');
-    const approveUrl = `${SITE_URL}/api/prayers/${pendingPrayer.id}/approve?token=${token}`;
-    const rejectUrl = `${SITE_URL}/api/prayers/${pendingPrayer.id}/reject?token=${token}`;
+    // Step 5: Send published notification email
+    console.log('[STEP 5] Sending published notification email...');
+    const prayerUrl = `${SITE_URL}/prayer/${createdPrayer.slug || createdPrayer.id}`;
 
-    await sendDailyPrayerApprovalEmail(pendingPrayer, approveUrl, rejectUrl, tierResult);
+    await sendDailyPrayerPublishedEmail(createdPrayer, prayerUrl, tierResult);
     const emailSentAt = new Date();
     await storage.updateDailyPrayerRun(runLog.id, { emailSentAt });
 
@@ -858,9 +855,8 @@ export async function runPipeline(): Promise<PipelineResult> {
       tier: tierResult.tier,
       confirmedOutlets: tierResult.confirmedOutlets,
       prayerTitle: draft.title,
-      prayerId: pendingPrayer.id,
-      approveUrl,
-      rejectUrl,
+      prayerId: createdPrayer.id,
+      prayerUrl,
     };
 
   } catch (err: any) {
