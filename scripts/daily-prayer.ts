@@ -323,6 +323,17 @@ async function fetchTopCrisis(recentCrises: string[]): Promise<FetchCrisisResult
     }
   }
 
+  // Also fall back to NewsAPI when GDELT returns 0 results (not just on error)
+  if (!candidates.length) {
+    console.warn('[GDELT] Returned 0 articles — falling back to NewsAPI');
+    try {
+      candidates = await fetchFromNewsAPI();
+      console.log(`[NewsAPI] Retrieved ${candidates.length} articles`);
+    } catch (err2: any) {
+      console.warn('[NewsAPI] Also failed:', err2.message);
+    }
+  }
+
   if (!candidates.length) return null;
 
   const DEDUP_THRESHOLD = 0.4;
