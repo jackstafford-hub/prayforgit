@@ -97,7 +97,7 @@ export function Navbar() {
             <Link href="/auth">
               <Button 
                 variant="ghost" 
-                className="hidden md:flex gap-2 text-sm font-medium cursor-pointer"
+                className="flex gap-2 text-sm font-medium cursor-pointer"
                 data-testid="button-login"
               >
                 Log in
