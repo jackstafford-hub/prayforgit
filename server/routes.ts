@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertPrayerSchema, insertReportSchema } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
+import { PRAYER_SYSTEM_PROMPT, buildPrayerUserContent, finalizePrayerText } from "./prayerPrompt";
 import { setupAuth, isAuthenticated } from "./auth";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import express from "express";
@@ -52,74 +53,6 @@ IMPORTANT: Do NOT include a title or heading at the start. Jump straight into th
 
 Write in first person. Be compassionate, authentic, and inspiring. Use a tone similar to Change.org petitions but focused on spiritual support.`;
 
-      const prayerPrompt = `Write a beautiful, structured prayer for a community to recite together for: ${title}
-${description ? `Context: ${description}` : ''}
-
-You MUST closely follow this exact prayer template, using similar terminology and phrases:
-
----
-Oh Mighty God, Creator of Life,
-We ask that we may be used as Channels for
-Thy vibrant Healing Power to flow through us
-In a living stream of radiant loving energy
-To bring peace and harmony to Ukraine
-And healing and protection to
-All the people who are injured and suffering in this
-War-torn country.
-
-Oh Divine Father of Life,
-May Thy wondrous power flood this country now
-Bringing hope wherever it touches,
-Healing to the sick and wounded,
-And strength to those who have suffered great loss.
-Oh God, May they all be comforted by Thy Presence.
-
-We pray that Thy Loving power flows to all
-Who are helping to bring peace,
-To inspire them in their difficult work
-With clarity, wisdom, love, understanding.
-
-Oh Divine Creator,
-May much-needed aid of every kind flow now
-From every corner of our world
-In the realization that we are one human family,
-Sharing in our grief and in our joy.
-Oh God, we thank you for this opportunity to be of Service.
-May Thy Will be Done.
----
-
-CRITICAL INSTRUCTIONS - Follow these EXACTLY:
-
-1. USE THESE EXACT PHRASES (adapt to context):
-   - "We ask that we may be used as Channels"
-   - "Thy vibrant Healing Power to flow through us"
-   - "In a living stream of radiant loving energy"
-   - "May Thy wondrous power flood" 
-   - "Bringing hope wherever it touches"
-   - "May they all be comforted by Thy Presence"
-   - "We pray that Thy Loving power flows to all"
-   - "With clarity, wisdom, love, understanding"
-   - "In the realization that we are one human family"
-   - "Sharing in our grief and in our joy"
-   - "we thank you for this opportunity to be of Service"
-   - "May Thy Will be Done"
-
-2. USE THESE DIVINE ADDRESSES:
-   - "Oh Mighty God, Creator of Life" (first stanza)
-   - "Oh Divine Father of Life" (second stanza)
-   - "Oh Divine Creator" (final stanza)
-   - "Oh God" can be used within stanzas
-
-3. STRUCTURE: Exactly 4 stanzas following the template structure
-
-4. FORMAT: Each new sentence or phrase that starts with a capital letter should be on its own line
-
-5. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
-
-6. Always end with "May Thy Will be Done."
-
-Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
-
       // Run both GPT calls in parallel for speed
       const [summaryResponse, prayerResponse] = await Promise.all([
         openai.chat.completions.create({
@@ -129,13 +62,16 @@ Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
         }),
         openai.chat.completions.create({
           model: "gpt-4o-mini",
-          messages: [{ role: "user", content: prayerPrompt }],
+          messages: [
+            { role: "system", content: PRAYER_SYSTEM_PROMPT },
+            { role: "user", content: buildPrayerUserContent(title, description) },
+          ],
           temperature: 0.7,
         })
       ]);
 
       const aiSummary = summaryResponse.choices[0].message.content || "";
-      const recitablePrayer = prayerResponse.choices[0].message.content || "";
+      const recitablePrayer = finalizePrayerText(prayerResponse.choices[0].message.content || "");
 
       // Return text immediately without waiting for image
       res.json({
@@ -428,81 +364,16 @@ Write in first person. Be compassionate, authentic, and inspiring. Use a tone si
       }
 
       if (type === 'prayer' || type === 'both') {
-        const prayerPrompt = `Write a beautiful, structured prayer for a community to recite together for: ${prayer.title}
-${prayer.description ? `Context: ${prayer.description}` : ''}
-
-You MUST closely follow this exact prayer template, using similar terminology and phrases:
-
----
-Oh Mighty God, Creator of Life,
-We ask that we may be used as Channels for
-Thy vibrant Healing Power to flow through us
-In a living stream of radiant loving energy
-To bring peace and harmony to Ukraine
-And healing and protection to
-All the people who are injured and suffering in this
-War-torn country.
-
-Oh Divine Father of Life,
-May Thy wondrous power flood this country now
-Bringing hope wherever it touches,
-Healing to the sick and wounded,
-And strength to those who have suffered great loss.
-Oh God, May they all be comforted by Thy Presence.
-
-We pray that Thy Loving power flows to all
-Who are helping to bring peace,
-To inspire them in their difficult work
-With clarity, wisdom, love, understanding.
-
-Oh Divine Creator,
-May much-needed aid of every kind flow now
-From every corner of our world
-In the realization that we are one human family,
-Sharing in our grief and in our joy.
-Oh God, we thank you for this opportunity to be of Service.
-May Thy Will be Done.
----
-
-CRITICAL INSTRUCTIONS - Follow these EXACTLY:
-
-1. USE THESE EXACT PHRASES (adapt to context):
-   - "We ask that we may be used as Channels"
-   - "Thy vibrant Healing Power to flow through us"
-   - "In a living stream of radiant loving energy"
-   - "May Thy wondrous power flood" 
-   - "Bringing hope wherever it touches"
-   - "May they all be comforted by Thy Presence"
-   - "We pray that Thy Loving power flows to all"
-   - "With clarity, wisdom, love, understanding"
-   - "In the realization that we are one human family"
-   - "Sharing in our grief and in our joy"
-   - "we thank you for this opportunity to be of Service"
-   - "May Thy Will be Done"
-
-2. USE THESE DIVINE ADDRESSES:
-   - "Oh Mighty God, Creator of Life" (first stanza)
-   - "Oh Divine Father of Life" (second stanza)
-   - "Oh Divine Creator" (final stanza)
-   - "Oh God" can be used within stanzas
-
-3. STRUCTURE: Exactly 4 stanzas following the template structure
-
-4. FORMAT: Each new sentence or phrase that starts with a capital letter should be on its own line
-
-5. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
-
-6. Always end with "May Thy Will be Done."
-
-Do NOT include a title. Start directly with "Oh Mighty God, Creator of Life,"`;
-
         const prayerResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
-          messages: [{ role: "user", content: prayerPrompt }],
+          messages: [
+            { role: "system", content: PRAYER_SYSTEM_PROMPT },
+            { role: "user", content: buildPrayerUserContent(prayer.title, prayer.description) },
+          ],
           temperature: 0.7,
         });
 
-        updates.recitablePrayer = prayerResponse.choices[0].message.content || "";
+        updates.recitablePrayer = finalizePrayerText(prayerResponse.choices[0].message.content || "");
       }
 
       const updatedPrayer = await storage.updatePrayerContent(req.params.id, updates);
