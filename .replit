@@ -51,3 +51,7 @@ integrations = ["stripe:2.0.0", "javascript_database:1.0.0"]
 
 [userenv.production]
 SEED_DB = "true"
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 180000
