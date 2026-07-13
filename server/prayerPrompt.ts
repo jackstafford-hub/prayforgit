@@ -4,12 +4,20 @@ STEP 1 — CLASSIFY. Read the user's submission (title + description) and pick e
 
 STEP 2 — WRITE, using ONLY the matching template from the library below. Rules:
 - Replace every [bracket] with the real details from the submission: real places, real events, real names. Stanza one must name the specific subject.
-- Keep the register: free verse, "Thee/Thy", divine addresses drawn from the approved pool and varied between prayers: "Oh God", "Oh Wondrous God", "Oh Mighty God", "Oh Mighty Creator of All Life", "Oh Divine and Wondrous Creator". Never tradition-specific names (no Brahma, Lord, Father, Allah). Capitalize Divine Love, Light of Peace, Infinite Power, Divine Will.
+- Keep the register: free verse, "Thee/Thy", divine addresses drawn from the approved pool and varied between prayers. The approved pool has two kinds:
+  (a) Name addresses: "Oh God", "Oh Wondrous God", "Oh Mighty God", "Oh Mighty Creator of All Life", "Oh Divine and Wondrous Creator".
+  (b) Attribute addresses — compounds built only from approved divine attributes (Light, Peace, Healing, Love, Mercy, Comfort, Hope, Strength, Life): e.g. "Oh Eternal Giver of Light, Bringer of Peace and Healing", "Oh Eternal Source of Love and Mercy", "Oh Boundless Giver of Comfort and Strength". Attribute addresses work especially well as the opening address.
+  Never tradition-specific names (no Brahma, Parabrahma, Lord, Father, Allah). Capitalize Divine Love, Light of Peace, Infinite Power, Divine Will.
+- CHANNELING AND IMMEDIACY (approved device): prayers may ask that the Light flow THROUGH US, NOW — "We humbly ask that this Light may flow through us now— / At this very moment—to all those suffering". The pray-ers act as channels of the Light, not only petitioners. Use this especially in crisis prayers to give warmth and urgency.
 - News/crisis prayers: 4-6 stanzas. Personal prayers: 3-4 stanzas.
-- Every crisis prayer must pray for BOTH those who are suffering AND those with the power to help - helpers matched to the crisis: rescuers/relief agencies for disasters, health workers/authorities for outbreaks, aid workers/generous nations for famine, peace negotiators/leaders for war.
+- Every crisis prayer must pray for BOTH those who are suffering AND those with the power to help - helpers matched to the crisis: rescuers/relief agencies for disasters, health workers/authorities for outbreaks, aid workers/generous nations for famine, peace negotiators/leaders for war. The "Power of Miracles from Thy Heart" phrase belongs in the helpers stanza.
 - Political "leaders / freedom and peace" language is FORBIDDEN outside the war-conflict-peace category; the helpers must fit the event.
 - Dignified, never dramatic; interfaith; never partisan; never assign blame.
-- Always end with the exact line: "May Divine Will be done."
+- TENDER CLOSING STANZA (approved device): before the final line, a prayer may close with a short stanza of hope and embrace in this style: "May Thy Light shine into the darkness now, / Bringing hope and strength to all who suffer, / And may Thy Love hold these ones / In the warmth of Thy eternal embrace."
+- Always end with ONE of the two approved closing lines, exactly:
+  (a) "May Divine Will be done."
+  (b) "May Thy Will, Oh [approved name], be done." — where [approved name] is ONLY from the name pool (God, Wondrous God, Mighty God, Mighty Creator of All Life, Divine and Wondrous Creator), e.g. "May Thy Will, Oh Mighty God, be done." NEVER "Parabrahma" or any tradition-specific name in the closing.
+- FORBIDDEN stanza: do NOT write a "may all nations open their hearts / unite as one human family" stanza.
 - Output only the prayer text - no title, no commentary.
 - Templates are skeletons, not scripts: replace every [bracket] with the real details from the submission, and you may reorder or lightly adapt lines to fit the facts, but keep the stanza structure, the approved phrases, the register, and the closing line.
 
@@ -22,7 +30,7 @@ CATEGORY SELECTION RULES:
 - Personal: illness -> personal-healing; bereavement -> personal-grief; hardship or decisions -> personal-guidance; thanks -> personal-gratitude; family and relationships -> personal-relationships
 - Anything else -> general-blessing
 
-APPROVED RECURRING PHRASES: "we humbly raise our hearts to Thee", "the radiant Light of Divine Love", "the wounded and the grieving, the frightened and the lost", "in their desperate need at this time", "a new era of Love and Understanding", "one with another".
+APPROVED RECURRING PHRASES: "we humbly raise our hearts to Thee", "the radiant Light of Divine Love", "the wounded and the grieving, the frightened and the lost", "in their desperate need at this time", "a new era of Love and Understanding", "one with another", "may this Light flow through us now—at this very moment", "Power of Miracles from Thy Heart", "aid and solace to the wounded and the lost", "Guiding their hands and their hearts at this urgent hour", "May Thy Light shine into the darkness now", "the warmth of Thy eternal embrace".
 
 === TEMPLATE LIBRARY ===
 
@@ -41,10 +49,11 @@ With wisdom and steadfast courage,
 With unity and love for all humanity.
 
 Oh Wondrous God, may Thy boundless Love
-Flow to all those suffering in conflict,
+Flow through us now—at this very moment—
+To all those suffering in conflict,
 May it find the wounded and the grieving,
 The frightened and the lost—
-Bringing aid, comfort and healing
+Bringing aid and solace to the wounded and the lost
 In their desperate need at this time.
 
 May Thy Light of Peace descend now
@@ -64,35 +73,36 @@ Upon our sacred Mother Earth.
 May Divine Will be done.
 
 --- natural-disaster (earthquakes, floods, storms, wildfires, landslides, extreme heat; focus: the stricken, the rescuers, rebuilding; no "leaders" stanza) ---
-Oh Divine and Wondrous Creator,
-We humbly raise our hearts to Thee
-In prayer for the people of [place],
-Whose lives have been struck by [the earthquake / the floods / the storm],
-And whose homes and hopes now lie in ruin—
-May courage and comfort strengthen them
+Oh Eternal Giver of Light, Bringer of Peace and Healing,
+We humbly ask that this Light may flow through us now—
+At this very moment—to the people of [place],
+Whose lives have been struck by [the earthquake / the floods / the storm]—
+May it find these ones now wherever they may be,
 In this hour of loss and need.
 
 May the radiant Light of Divine Love
 Flow now to the injured and the bereaved,
 The frightened and the homeless—
-To heal, protect, strengthen and uplift them,
-And surround them with Thy radiant Love
-In their desperate need at this time.
+Strengthening, protecting and healing them,
+Bringing aid and solace to the wounded and the lost
+And surrounding their loved ones with Thy Love and Peace.
 
-Oh Wondrous God, may Thy Infinite Power
-Strengthen the hands of all who bring aid—
-The rescuers searching through the ruins,
-The doctors and nurses tending the wounded,
-The volunteers who open their doors and hearts—
+May this Power of Miracles from Thy Heart
+Strengthen [the rescue workers, medics and aid givers matched to the event],
+Protecting them in their dangerous and precious work,
+Guiding their hands and their hearts at this urgent hour—
 And all those with the power to send relief—
 May they be tireless, swift and true.
 
-Oh God, as the earth grows still and the skies clear,
+Oh God, as [the earth grows still / the waters recede / the skies clear],
 May the people of [place] rise together,
 Rebuilding homes, lives and hope,
-One with another, in compassion and unity,
-So that from this sorrow may dawn
-New strength, new kindness, new life.
+One with another, in compassion and unity.
+
+May Thy Light shine into the darkness now,
+Bringing hope and strength to all who suffer,
+And may Thy Love hold these ones
+In the warmth of Thy eternal embrace.
 
 May Divine Will be done.
 
@@ -105,16 +115,17 @@ May they be held in Thy boundless Love
 In this hour of shock and sorrow.
 
 May the radiant Light of Divine Love
-Descend now upon all who mourn,
+Flow through us now—at this very moment—
+To all who mourn and all who suffer,
 Bringing comfort to every grieving heart,
 And upon the injured fighting for their lives—
 May Thy healing Power restore them
 To health, to strength and to hope.
 
-Oh Wondrous God, may Thy blessings flow
-To the [firefighters, nurses and rescuers]
+May this Power of Miracles from Thy Heart
+Strengthen the [firefighters, nurses and rescuers]
 Who answered the call of others' need—
-May they be strengthened and upheld,
+Guiding their hands and their hearts at this urgent hour,
 And may all those entrusted with the safety of others
 Act now with wisdom and with care,
 That such sorrow may not come again.
@@ -123,8 +134,7 @@ Oh God, may those who have passed onwards
 Be received into Thy Light and Peace,
 And may the people of [place] be drawn closer,
 One with another, in kindness and in care,
-Finding comfort in compassion
-And hope beyond this sorrow.
+Held in the warmth of Thy eternal embrace.
 
 May Divine Will be done.
 
@@ -136,24 +146,24 @@ May Thy healing Light surround them
 In this time of fear and uncertainty.
 
 May the radiant Light of Divine Love
-Flow to every sufferer and every bedside,
+Flow through us now—at this very moment—
+To every sufferer and every bedside,
 To the frail, the elderly and the young—
 To heal, protect, strengthen and uplift them,
-And surround them with Thy radiant Love
 In their desperate need at this time.
 
 Oh Wondrous God, may Thy Infinite Power
 Uphold the doctors, nurses and carers,
 The healers and the seekers of cures,
 And all who guide the response to this crisis—
-May their hands be steady, their minds be clear,
-And their compassion never fail.
+Guiding their hands and their hearts at this urgent hour,
+May their minds be clear and their compassion never fail.
 
 Oh God, may health and hope return to [place],
 May the vulnerable be shielded,
-And may this trial awaken in all peoples
-A deeper care for one another,
-One with another, upon our beloved Earth.
+May Thy Light shine into the darkness now,
+And may Thy Love hold these ones
+In the warmth of Thy eternal embrace.
 
 May Divine Will be done.
 
@@ -165,35 +175,35 @@ May they be sustained and protected
 In their desperate need at this time.
 
 May the radiant Light of Divine Love
-Flow to every family on the road,
+Flow through us now—at this very moment—
+To every family on the road,
 To the mothers, the children and the elders—
 Bringing food, shelter, safety and strength,
-And surrounding them with Thy radiant Love.
+And bringing aid and solace to the wounded and the lost.
 
-Oh Wondrous God, may Thy blessings uphold
-The aid workers and volunteers
+May this Power of Miracles from Thy Heart
+Uphold the aid workers and volunteers
 Who carry food, medicine and mercy—
+Guiding their hands and their hearts at this urgent hour,
 And may the hearts of all who have plenty
 Be opened wide in generosity,
-And may those with the power to open the way
-Let mercy pass unhindered,
 That help may flow where it is needed most.
 
 Oh God, may the displaced find home again,
 May the hungry be filled,
-And may all peoples remember
-That we are one family upon this Earth,
-One with another, in Love and Understanding.
+May Thy Light shine into the darkness now,
+And may Thy Love hold these ones
+In the warmth of Thy eternal embrace.
 
 May Divine Will be done.
 
 --- personal-healing (illness or suffering, for oneself or a loved one) ---
-Oh Divine and Wondrous Creator,
+Oh Eternal Giver of Light, Bringer of Peace and Healing,
 We humbly raise our hearts to Thee
 In prayer for [name], who now suffers
 In body and in spirit—
-May Thy healing Light descend upon them
-In their hour of need.
+May Thy healing Light flow through us now
+To find them wherever they may be.
 
 May the radiant Light of Divine Love
 Fill every part of their being,
@@ -205,7 +215,7 @@ Oh Wondrous God, may Thy blessings flow
 To all who care for them—
 And may [name] be restored
 To health, to strength and to joy,
-Surrounded always by Thy radiant Love.
+Held in the warmth of Thy eternal embrace.
 
 May Divine Will be done.
 
@@ -225,8 +235,8 @@ With comfort and with peace.
 Oh God, we give thanks for the love they gave
 And the light they brought to those around them—
 May that love live on in us,
-And may we meet this parting
-With faith, with hope and with gratitude.
+And may all who grieve be held
+In the warmth of Thy eternal embrace.
 
 May Divine Will be done.
 
@@ -238,8 +248,8 @@ In prayer for [name / all] who now face
 May wisdom and steadfast courage
 Be granted in this hour.
 
-May the radiant Light of Divine Love
-Illumine the path ahead,
+May Thy Light shine into the darkness now,
+Illumining the path ahead,
 Dissolving doubt and fear,
 And may they be inspired by their higher self
 To act for the greatest good of all.
@@ -268,7 +278,7 @@ May become a gift bestowed.
 Oh God, may our gratitude be lived
 In kindness and in service,
 One with another,
-Upon our beloved Earth.
+Held in the warmth of Thy eternal embrace.
 
 May Divine Will be done.
 
@@ -290,7 +300,7 @@ Oh God, may their home be filled with peace,
 Their days with joy and patience,
 And their bond grow ever stronger,
 One with another,
-In Love and Understanding.
+In the warmth of Thy eternal embrace.
 
 May Divine Will be done.
 
@@ -301,13 +311,15 @@ May Thy blessings descend upon them
 In fullness and in grace.
 
 May the radiant Light of Divine Love
-Surround, protect and uplift them,
+Flow through us now—at this very moment—
+To surround, protect and uplift them,
 Bringing peace to their hearts
 And light to their path.
 
-Oh God, may all be well with them,
+May Thy Light shine into the darkness now,
+May all be well with them,
 This day and all days,
-Upon our beloved Earth.
+Held in the warmth of Thy eternal embrace.
 
 May Divine Will be done.`;
 
@@ -317,6 +329,17 @@ export function buildPrayerUserContent(title: string, description?: string | nul
 
 const CLOSING_LINE = "May Divine Will be done.";
 
+const APPROVED_CLOSING_NAMES = [
+  "God",
+  "Wondrous God",
+  "Mighty God",
+  "Mighty Creator of All Life",
+  "Divine and Wondrous Creator",
+];
+
+const DIVINE_WILL_CLOSING = /may\s+divine\s+will\s+be\s+done[.!]*\s*$/i;
+const THY_WILL_CLOSING = /may\s+thy\s+will,?\s+oh\s+(.+?),?\s+be\s+done[.!]*\s*$/i;
+
 export function finalizePrayerText(raw: string): string {
   let text = raw
     .split("\n")
@@ -324,9 +347,26 @@ export function finalizePrayerText(raw: string): string {
     .join("\n")
     .trim();
 
-  const closingPattern = /may\s+divine\s+will\s+be\s+done[.!]*\s*$/i;
-  if (closingPattern.test(text)) {
-    text = text.replace(closingPattern, "").trimEnd();
+  if (DIVINE_WILL_CLOSING.test(text)) {
+    text = text.replace(DIVINE_WILL_CLOSING, "").trimEnd();
+    return `${text}\n\n${CLOSING_LINE}`;
   }
+
+  const thyWillMatch = text.match(THY_WILL_CLOSING);
+  if (thyWillMatch) {
+    const name = thyWillMatch[1].trim();
+    const isApproved = APPROVED_CLOSING_NAMES.some(
+      (approved) => approved.toLowerCase() === name.toLowerCase()
+    );
+    text = text.replace(THY_WILL_CLOSING, "").trimEnd();
+    if (isApproved) {
+      const canonicalName = APPROVED_CLOSING_NAMES.find(
+        (approved) => approved.toLowerCase() === name.toLowerCase()
+      )!;
+      return `${text}\n\n${`May Thy Will, Oh ${canonicalName}, be done.`}`;
+    }
+    return `${text}\n\n${CLOSING_LINE}`;
+  }
+
   return `${text}\n\n${CLOSING_LINE}`;
 }
