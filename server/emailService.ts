@@ -324,18 +324,41 @@ export async function sendModerationEmail(prayerTitle: string, prayerDescription
   }
 }
 
-export async function sendAdminPrayerCopyEmail(prayerTitle: string, prayerDescription: string, prayerContent: string, authorName: string) {
+export async function sendAdminPrayerCopyEmail(prayerTitle: string, prayerDescription: string, prayerContent: string, authorName: string, imageUrl?: string | null) {
   try {
     const { client, fromEmail } = await getUncachableSendGridClient();
+
+    // Build the image section. Prayer photos are stored as data URIs, which email
+    // clients block in <img> tags — so attach them inline with a content-id instead.
+    let imageTag = '';
+    const attachments: Array<{ content: string; filename: string; type: string; disposition: string; contentId: string }> = [];
+    if (imageUrl) {
+      const dataUriMatch = imageUrl.match(/^data:(image\/[a-z0-9.+-]+);base64,(.+)$/i);
+      if (dataUriMatch) {
+        attachments.push({
+          content: dataUriMatch[2],
+          filename: 'prayer-image.jpg',
+          type: dataUriMatch[1],
+          disposition: 'inline',
+          contentId: 'prayer-image',
+        });
+        imageTag = `<img src="cid:prayer-image" alt="Prayer image" style="display:block;width:100%;max-width:568px;height:auto;border-radius:6px;margin:0 0 16px;" />`;
+      } else {
+        const absolute = imageUrl.startsWith('http') ? imageUrl : `https://prayforchange.org${imageUrl}`;
+        imageTag = `<img src="${escapeHtml(absolute)}" alt="Prayer image" style="display:block;width:100%;max-width:568px;height:auto;border-radius:6px;margin:0 0 16px;" />`;
+      }
+    }
 
     await client.send({
       to: ADMIN_EMAIL,
       from: { email: fromEmail, name: 'Pray For Change' },
       subject: `New Prayer Created: ${prayerTitle}`,
+      ...(attachments.length ? { attachments } : {}),
       html: `
         <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #4a3728; text-align: center;">New Prayer Created</h1>
           <p style="font-size: 16px; line-height: 1.6; color: #333;">A new prayer has been submitted by <strong>${escapeHtml(authorName)}</strong>.</p>
+          ${imageTag}
           <div style="background-color: #f9f5f0; border-left: 4px solid #c9a96e; padding: 16px; margin: 20px 0; border-radius: 4px;">
             <h2 style="color: #4a3728; margin-top: 0;">${escapeHtml(prayerTitle)}</h2>
             <h3 style="color: #666; margin-top: 12px;">Original Description</h3>

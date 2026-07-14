@@ -201,6 +201,12 @@ let appReady = false;
             } catch (error: any) {
               console.error("[DB] Crisis prayer backfill failed:", error?.message || error);
             }
+            try {
+              const { fixLegacyDailyPrayerOwnership } = await import('./db');
+              await fixLegacyDailyPrayerOwnership();
+            } catch (error: any) {
+              console.error("[DB] Legacy prayer ownership fix failed:", error?.message || error);
+            }
           }
 
           appReady = true;

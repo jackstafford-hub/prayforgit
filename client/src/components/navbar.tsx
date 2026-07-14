@@ -112,9 +112,9 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <Link href="/auth">
-              <Button 
-                variant="ghost" 
-                className="hidden md:flex gap-2 text-sm font-medium cursor-pointer"
+              <Button
+                variant="ghost"
+                className="flex gap-2 text-sm font-medium cursor-pointer"
                 data-testid="button-login"
               >
                 Log in

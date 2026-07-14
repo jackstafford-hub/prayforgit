@@ -236,6 +236,44 @@ const upload = multer({
   },
 });
 
+
+// Approved Prayer Style Library prompt (Jack Stafford, July 2026) — category-aware, shared by
+// /api/generate-prayer and /api/prayers/:id/regenerate.
+function buildRecitablePrayerPrompt(title: string, description?: string | null): string {
+  return `Write a beautiful, structured prayer for a community to recite together for: ${title}
+${description ? `Context: ${description}` : ''}
+
+STEP 1 — CLASSIFY this request into exactly ONE category:
+- war-conflict: war, armed conflict, civil unrest, political crisis, peace talks
+- disaster: earthquake, flood, storm, wildfire, landslide, extreme weather
+- tragedy: fire, crash, collapse, attack, sudden mass loss of life
+- health: disease outbreak, health emergency, or personal illness and healing
+- hunger: famine, hunger, refugees, displacement
+- grief: bereavement and loss of a loved one
+- guidance: hardship, difficult decisions, anxiety, need for strength
+- gratitude: thanksgiving and answered prayers
+- relationships: family, marriage, friendship, community harmony
+- blessing: anything else
+
+STEP 2 — WRITE the prayer following ALL of these voice rules:
+1. Free verse, no rhyme. Crisis categories (war-conflict, disaster, tragedy, health, hunger): 4-5 stanzas of 5-7 short lines. Personal categories: 3-4 stanzas. Maximum 170 words.
+2. DIVINE ADDRESSES — vary them, rotating across stanzas, chosen ONLY from this pool: "Oh God", "Oh Wondrous God", "Oh Mighty God", "Oh Mighty Creator of All Life", "Oh Divine and Wondrous Creator". NEVER use tradition-specific names (no Brahma, Lord, Father, Allah, Jesus, Krishna, etc.).
+3. Register: "Thee", "Thy", "Thine". Capitalize Divine Love, Light of Peace, Infinite Power, Divine Will.
+4. Stanza 1 must name the real subject — the actual place, event or person from the request. Never generic.
+5. Pray for TWO groups: those who are suffering AND those with the power to help — matched to the category:
+   - disaster/tragedy: rescuers, firefighters, doctors, volunteers "and all those with the power to send relief"
+   - health: doctors, nurses and carers "and all who guide the response"
+   - hunger: aid workers, and "may the hearts of all who have plenty be opened wide in generosity"
+   - war-conflict ONLY: "the peacemakers and the negotiators, and all those in power", "inspired by their higher selves to act for the greatest good of all"
+   FORBIDDEN: mentioning leaders, those in power, or "freedom and peace" outside the war-conflict category. A fire or flood prayer blesses rescuers, never politicians.
+6. Weave in approved phrases where natural: "we humbly raise our hearts to Thee", "the radiant Light of Divine Love", "the wounded and the grieving, the frightened and the lost", "in their desperate need at this time", "a new era of Love and Understanding", "one with another".
+7. Category endings: disaster ends in rebuilding hope ("New strength, new kindness, new life"); tragedy includes "may those who have passed onwards be received into Thy Light and Peace"; hunger ends with "we are one family upon this Earth"; grief ends in comfort and sweet remembrance; gratitude ends with gifts received becoming gifts bestowed.
+8. Dignified, never dramatic. Interfaith. Never partisan, never assign blame.
+9. The final line must be exactly: "May Divine Will be done."
+
+FORMAT: Each phrase on its own line, blank line between stanzas. Output ONLY the prayer text with no title, no category name and no commentary, beginning with a divine address from the approved pool followed on the next line by "We humbly raise our hearts to Thee".`;
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -263,8 +301,28 @@ export async function registerRoutes(
         return res.status(400).json({ error: err instanceof Error ? err.message : "Upload failed" });
       }
       if (!req.file) return res.status(400).json({ error: "No image provided" });
-      const url = `/api/uploads/${req.file.filename}`;
-      return res.json({ url });
+      // Return a base64 data URI instead of a file path: production's filesystem is
+      // ephemeral (Replit autoscale), so files written to /uploads silently vanish.
+      // Data URIs live in the prayer record itself and survive redeploys.
+      const uploadedPath = req.file.path;
+      (async () => {
+        try {
+          const sharp = (await import("sharp")).default;
+          const resized = await sharp(uploadedPath)
+            .rotate()
+            .resize({ width: 1200, withoutEnlargement: true })
+            .jpeg({ quality: 80 })
+            .toBuffer();
+          fs.unlink(uploadedPath, () => {});
+          const url = `data:image/jpeg;base64,${resized.toString("base64")}`;
+          return res.json({ url });
+        } catch (e: any) {
+          console.error("upload-image processing failed:", e?.message || e);
+          fs.unlink(uploadedPath, () => {});
+          return res.status(500).json({ error: "Failed to process image" });
+        }
+      })();
+      return;
     });
   });
   
@@ -801,87 +859,10 @@ ${currentPrayer}
 User's instructions for changes:
 ${instructions}
 
-Please revise the prayer incorporating these changes while maintaining the sacred, lyrical format with five stanzas. Keep it under 100 words. Always end with "May Divine Will be done."
+Please revise the prayer incorporating these changes while maintaining the sacred, lyrical free-verse stanza format of the original. Keep it under 170 words. Always end with "May Divine Will be done."
 
 MANDATORY: Your response MUST open with an "Oh [Divine Name]" invocation (e.g. "Oh Wondrous God," or "Oh Mighty God, Creator of Life,") followed on the next line by "We humbly raise our hearts to Thee".`
-        : `Write a beautiful, structured prayer for a community to recite together for: ${title}
-${description ? `Context: ${description}` : ''}
-
-You MUST closely follow this exact prayer template, using similar terminology and phrases:
-
----
-Oh Wondrous God, Oh Mighty God, Oh God,
-We humbly raise our hearts to Thee
-In prayer for [place/cause]
-Caught in darkness and in need.
-
-Oh Mighty God, may the radiant Light of Divine Love
-Descend now upon this place,
-Bringing wisdom and steadfast courage
-To all who face this hour.
-
-We hold in our hearts the wounded and the grieving,
-The frightened and the lost —
-Oh God, surround them with Thy boundless Love,
-Comfort them with Thy Presence.
-
-Oh Wondrous God, we pray for the leaders,
-Those who hold power in this time —
-May the Light of Peace descend upon their minds,
-Illuminating the noble vision of freedom and peace
-That lives within each human heart.
-
-Oh God, may this be the hour
-When Thy children choose unity and love for all humanity,
-When, guided by Thy boundless Love,
-We step together into a new era of Love and Understanding.
-May Divine Will be done.
----
-
-CRITICAL INSTRUCTIONS - Follow these EXACTLY:
-
-1. USE THESE EXACT PHRASES (adapt to context):
-   - "we humbly raise our hearts to Thee"
-   - "radiant Light of Divine Love"
-   - "wisdom and steadfast courage"
-   - "the wounded and the grieving"
-   - "the frightened and the lost"
-   - "boundless Love"
-   - "Light of Peace descend now"
-   - "noble vision of freedom and peace"
-   - "unity and love for all humanity"
-   - "new era of Love and Understanding"
-   - "May Divine Will be done"
-
-2. USE THESE DIVINE ADDRESSES (choose appropriate ones per stanza):
-   - "Oh Wondrous God"
-   - "Oh Mighty God"
-   - "Oh God"
-   - "Oh Divine Father"
-   - "Oh Divine Creator"
-   Do NOT use deity-specific names such as "Brahma", "Allah", "Jesus", "Krishna", etc.
-
-3. STRUCTURE: Exactly 5 stanzas following this template:
-   - Stanza 1: Invocation — address God, raise hearts in prayer for the specific topic
-   - Stanza 2: Light and wisdom — invoke radiant Light of Divine Love, wisdom and courage for those affected
-   - Stanza 3: Compassion — hold in prayer the wounded, grieving, frightened, and lost
-   - Stanza 4: Leaders / those in power — Light of Peace, noble vision of freedom and peace
-   - Stanza 5: Unity and new era — boundless Love, unity, new era of Love and Understanding, ending with "May Divine Will be done."
-
-4. FORMAT: Each new sentence or phrase that starts with a capital letter should be on its own line
-
-5. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
-
-6. Always end with "May Divine Will be done."
-
-7. WORD LIMIT: Your response must be 100 words or fewer. Keep each stanza tight and focused.
-
-8. MANDATORY OPENING: Your response MUST begin with three lines:
-   Line 1: An "Oh [Divine Name]" invocation (e.g. "Oh Wondrous God, Oh Mighty God, Oh God,")
-   Line 2: "We humbly raise our hearts to Thee"
-   Line 3: "In prayer for [specific topic/place/cause]"
-
-Do NOT include a title.`;
+        : buildRecitablePrayerPrompt(title, description);
 
       const categoryPrompt = `Classify this prayer request into exactly one of these categories: Health, Family, Employment, World Peace, Community, Faith, Education, Gratitude, General.
 
@@ -1036,8 +1017,8 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
       const userPrayers = await storage.getPrayersByAuthor(userId);
       res.json(userPrayers);
     } catch (error: any) {
-      console.error("Error fetching user prayers:", error);
-      res.status(500).json({ error: "Failed to fetch user prayers" });
+      console.error("Error fetching user prayers:", error?.stack || error);
+      res.status(500).json({ error: "Failed to fetch user prayers", details: error?.message || String(error) });
     }
   });
 
@@ -1107,7 +1088,7 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
         if (prayer.flaggedForReview) {
           sendModerationEmail(prayer.title, prayer.description || '', prayerContent, authorName, toneSuggestion).catch(() => {});
         } else {
-          sendAdminPrayerCopyEmail(prayer.title, prayer.description || '', prayerContent, authorName).catch(() => {});
+          sendAdminPrayerCopyEmail(prayer.title, prayer.description || '', prayerContent, authorName, prayer.imageUrl).catch(() => {});
         }
       }
 
@@ -1445,87 +1426,10 @@ ${prayer.recitablePrayer}
 User's instructions for changes:
 ${instructions}
 
-Please revise the prayer incorporating these changes while maintaining the sacred, lyrical format with five stanzas. Keep it under 100 words. Always end with "May Divine Will be done."
+Please revise the prayer incorporating these changes while maintaining the sacred, lyrical free-verse stanza format of the original. Keep it under 170 words. Always end with "May Divine Will be done."
 
 MANDATORY: Your response MUST open with an "Oh [Divine Name]" invocation (e.g. "Oh Wondrous God," or "Oh Mighty God, Creator of Life,") followed on the next line by "We humbly raise our hearts to Thee".`
-          : `Write a beautiful, structured prayer for a community to recite together for: ${prayer.title}
-${prayer.description ? `Context: ${prayer.description}` : ''}
-
-You MUST closely follow this exact prayer template, using similar terminology and phrases:
-
----
-Oh Wondrous God, Oh Mighty God, Oh God,
-We humbly raise our hearts to Thee
-In prayer for [place/cause]
-Caught in darkness and in need.
-
-Oh Mighty God, may the radiant Light of Divine Love
-Descend now upon this place,
-Bringing wisdom and steadfast courage
-To all who face this hour.
-
-We hold in our hearts the wounded and the grieving,
-The frightened and the lost —
-Oh God, surround them with Thy boundless Love,
-Comfort them with Thy Presence.
-
-Oh Wondrous God, we pray for the leaders,
-Those who hold power in this time —
-May the Light of Peace descend upon their minds,
-Illuminating the noble vision of freedom and peace
-That lives within each human heart.
-
-Oh God, may this be the hour
-When Thy children choose unity and love for all humanity,
-When, guided by Thy boundless Love,
-We step together into a new era of Love and Understanding.
-May Divine Will be done.
----
-
-CRITICAL INSTRUCTIONS - Follow these EXACTLY:
-
-1. USE THESE EXACT PHRASES (adapt to context):
-   - "we humbly raise our hearts to Thee"
-   - "radiant Light of Divine Love"
-   - "wisdom and steadfast courage"
-   - "the wounded and the grieving"
-   - "the frightened and the lost"
-   - "boundless Love"
-   - "Light of Peace descend now"
-   - "noble vision of freedom and peace"
-   - "unity and love for all humanity"
-   - "new era of Love and Understanding"
-   - "May Divine Will be done"
-
-2. USE THESE DIVINE ADDRESSES (choose appropriate ones per stanza):
-   - "Oh Wondrous God"
-   - "Oh Mighty God"
-   - "Oh God"
-   - "Oh Divine Father"
-   - "Oh Divine Creator"
-   Do NOT use deity-specific names such as "Brahma", "Allah", "Jesus", "Krishna", etc.
-
-3. STRUCTURE: Exactly 5 stanzas following this template:
-   - Stanza 1: Invocation — address God, raise hearts in prayer for the specific topic
-   - Stanza 2: Light and wisdom — invoke radiant Light of Divine Love, wisdom and courage for those affected
-   - Stanza 3: Compassion — hold in prayer the wounded, grieving, frightened, and lost
-   - Stanza 4: Leaders / those in power — Light of Peace, noble vision of freedom and peace
-   - Stanza 5: Unity and new era — boundless Love, unity, new era of Love and Understanding, ending with "May Divine Will be done."
-
-4. FORMAT: Each new sentence or phrase that starts with a capital letter should be on its own line
-
-5. ADAPT the specific issue/person/situation into the prayer while keeping the spiritual language intact
-
-6. Always end with "May Divine Will be done."
-
-7. WORD LIMIT: Your response must be 100 words or fewer. Keep each stanza tight and focused.
-
-8. MANDATORY OPENING: Your response MUST begin with three lines:
-   Line 1: An "Oh [Divine Name]" invocation (e.g. "Oh Wondrous God, Oh Mighty God, Oh God,")
-   Line 2: "We humbly raise our hearts to Thee"
-   Line 3: "In prayer for [specific topic/place/cause]"
-
-Do NOT include a title.`;
+          : buildRecitablePrayerPrompt(prayer.title, prayer.description);
 
         const prayerResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",

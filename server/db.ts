@@ -355,3 +355,19 @@ export async function backfillCrisisPrayerFlags(): Promise<void> {
     console.error("[DB] Crisis prayer backfill failed:", error?.message || error);
   }
 }
+
+// One-time, idempotent data fix: the 2026-07-13 "Pray for the Families of Bangkok"
+// daily-crisis prayer was posted while logged out, leaving it owned by "Anonymous"
+// and uneditable. Reassign it to the Pray For Change account. Safe to run on every
+// boot — it only touches that one prayer and only while its author_id is NULL.
+export async function fixLegacyDailyPrayerOwnership(): Promise<void> {
+  const { eq, and, isNull } = await import("drizzle-orm");
+  const OWNER_EMAIL = "jackstaffmail@gmail.com";
+  const PRAYER_ID = "35426f99-9216-4f32-a1a9-9eef557b4135";
+  const [owner] = await db.select().from(schema.users).where(eq(schema.users.email, OWNER_EMAIL));
+  if (!owner) return;
+  await db
+    .update(schema.prayers)
+    .set({ authorId: owner.id, author: "Pray For Change" })
+    .where(and(eq(schema.prayers.id, PRAYER_ID), isNull(schema.prayers.authorId)));
+}
