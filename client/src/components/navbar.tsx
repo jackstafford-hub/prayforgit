@@ -125,7 +125,7 @@ export function Navbar() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="md:hidden cursor-pointer touch-manipulation" 
+            className="cursor-pointer touch-manipulation" 
             onClick={() => setMobileMenuOpen(true)}
             data-testid="button-mobile-menu"
           >
