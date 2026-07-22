@@ -122,13 +122,24 @@ export async function ensureTablesExist(): Promise<void> {
       )
     `);
     console.log("[DB] Users table ensured");
+
+    // Patch any missing columns in case the table was created with an older schema
+    await pool.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS password TEXT,
+        ADD COLUMN IF NOT EXISTS username TEXT,
+        ADD COLUMN IF NOT EXISTS first_name VARCHAR,
+        ADD COLUMN IF NOT EXISTS last_name VARCHAR,
+        ADD COLUMN IF NOT EXISTS profile_image_url VARCHAR,
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW(),
+        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()
+    `);
     
-    // Verify the table has the required columns by doing a simple test query
-    const testResult = await pool.query("SELECT id, email, password, first_name, last_name FROM users LIMIT 0");
+    // Verify the table has the required columns
+    await pool.query("SELECT id, email, password, first_name, last_name FROM users LIMIT 0");
     console.log("[DB] Users table schema verified");
   } catch (error: any) {
     console.error("[DB] Users table error:", error?.message || error);
-    // If schema is wrong, log the issue but don't drop the table
     console.error("[DB] CRITICAL: Users table may have incorrect schema. Manual intervention may be required.");
   }
   

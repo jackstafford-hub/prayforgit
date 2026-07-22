@@ -36,7 +36,7 @@ function getAdminEmails(): string[] {
     .filter((email) => email.length > 0);
 }
 
-async function requireAdmin(req: Request, res: Response, next: NextFunction) {
+export async function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (!req.session.userId) {
     return res.status(401).json({ message: "Unauthorized" });
   }

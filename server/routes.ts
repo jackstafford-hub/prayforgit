@@ -4,7 +4,9 @@ import { storage } from "./storage";
 import { insertPrayerSchema, insertReportSchema } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
+import { PRAYER_SYSTEM_PROMPT, buildPrayerUserContent, finalizePrayerText } from "./prayerPrompt";
 import { setupAuth, isAuthenticated } from "./auth";
+import { requireAdmin } from "./routes/admin";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import express from "express";
 import path from "path";
@@ -850,26 +852,25 @@ Write in first person. Be compassionate, authentic, and inspiring. Use a tone si
 
 WORD LIMIT: Your response must be 125 words or fewer. Be concise and impactful.`;
 
-      const prayerPrompt = instructions && currentPrayer
-        ? `You are revising a community prayer based on user feedback.
-
-Current prayer:
-${currentPrayer}
-
-User's instructions for changes:
-${instructions}
-
-Please revise the prayer incorporating these changes while maintaining the sacred, lyrical free-verse stanza format of the original. Keep it under 170 words. Always end with "May Divine Will be done."
-
-MANDATORY: Your response MUST open with an "Oh [Divine Name]" invocation (e.g. "Oh Wondrous God," or "Oh Mighty God, Creator of Life,") followed on the next line by "We humbly raise our hearts to Thee".`
-        : buildRecitablePrayerPrompt(title, description);
-
       const categoryPrompt = `Classify this prayer request into exactly one of these categories: Health, Family, Employment, World Peace, Community, Faith, Education, Gratitude, General.
 
 Title: ${title}
 ${description ? `Description: ${description}` : ''}
 
 Respond with ONLY the category name, nothing else.`;
+
+      // The prayer call always uses the approved Style Library system prompt; when the
+      // user supplied revision instructions, they are appended to the user content so
+      // revisions still stay inside the approved voice.
+      const prayerUserContent = instructions && currentPrayer
+        ? `${buildPrayerUserContent(title, description)}
+
+CURRENT PRAYER TO REVISE:
+${currentPrayer}
+
+USER'S REVISION INSTRUCTIONS (apply these while keeping the approved voice, register and closing line):
+${instructions}`
+        : buildPrayerUserContent(title, description);
 
       // Run all three GPT calls in parallel for speed
       const [summaryResponse, prayerResponse, categoryResponse] = await Promise.all([
@@ -880,7 +881,10 @@ Respond with ONLY the category name, nothing else.`;
         }),
         openai.chat.completions.create({
           model: "gpt-4o-mini",
-          messages: [{ role: "user", content: prayerPrompt }],
+          messages: [
+            { role: "system", content: PRAYER_SYSTEM_PROMPT },
+            { role: "user", content: prayerUserContent },
+          ],
           temperature: 0.7,
         }),
         openai.chat.completions.create({
@@ -891,7 +895,7 @@ Respond with ONLY the category name, nothing else.`;
       ]);
 
       const aiSummary = summaryResponse.choices[0].message.content || "";
-      const recitablePrayer = ensurePrayerOpening(prayerResponse.choices[0].message.content || "");
+const recitablePrayer = finalizePrayerText(prayerResponse.choices[0].message.content || "");
 
       const refusalPattern = /^I'?m sorry|^I can'?t assist|^I cannot assist|^I'?m unable to|^I'?m not able to|^Sorry,? but/i;
       if (refusalPattern.test(aiSummary.trim()) || refusalPattern.test(recitablePrayer.trim())) {
@@ -1417,27 +1421,27 @@ WORD LIMIT: Your response must be 125 words or fewer. Be concise and impactful.`
       }
 
       if (type === 'prayer' || type === 'both') {
-        const prayerPrompt = instructions && prayer.recitablePrayer
-          ? `You are revising a community prayer based on user feedback.
+// Revisions with user instructions stay inside the approved Style Library voice.
+        const regenUserContent = instructions && prayer.recitablePrayer
+          ? `${buildPrayerUserContent(prayer.title, prayer.description)}
 
-Current prayer:
+CURRENT PRAYER TO REVISE:
 ${prayer.recitablePrayer}
 
-User's instructions for changes:
-${instructions}
-
-Please revise the prayer incorporating these changes while maintaining the sacred, lyrical free-verse stanza format of the original. Keep it under 170 words. Always end with "May Divine Will be done."
-
-MANDATORY: Your response MUST open with an "Oh [Divine Name]" invocation (e.g. "Oh Wondrous God," or "Oh Mighty God, Creator of Life,") followed on the next line by "We humbly raise our hearts to Thee".`
-          : buildRecitablePrayerPrompt(prayer.title, prayer.description);
+USER'S REVISION INSTRUCTIONS (apply these while keeping the approved voice, register and closing line):
+${instructions}`
+          : buildPrayerUserContent(prayer.title, prayer.description);
 
         const prayerResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
-          messages: [{ role: "user", content: prayerPrompt }],
+          messages: [
+            { role: "system", content: PRAYER_SYSTEM_PROMPT },
+            { role: "user", content: regenUserContent },
+          ],
           temperature: 0.7,
         });
 
-        updates.recitablePrayer = ensurePrayerOpening(prayerResponse.choices[0].message.content || "");
+        updates.recitablePrayer = finalizePrayerText(prayerResponse.choices[0].message.content || "");
       }
 
       const updatedPrayer = await storage.updatePrayerContent(req.params.id, updates);
@@ -1445,6 +1449,38 @@ MANDATORY: Your response MUST open with an "Oh [Divine Name]" invocation (e.g. "
     } catch (error: any) {
       console.error("Error regenerating prayer content:", error);
       res.status(500).json({ error: "Failed to regenerate content" });
+    }
+  });
+
+  // Regenerate recitable prayers for all prayers using the current approved prompt (admin endpoint)
+  app.post("/api/admin/regenerate-prayers", requireAdmin, async (req, res) => {
+    try {
+      const allPrayers = await storage.getPrayers();
+      const results = [];
+
+      for (const prayer of allPrayers) {
+        try {
+          const prayerResponse = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: PRAYER_SYSTEM_PROMPT },
+              { role: "user", content: buildPrayerUserContent(prayer.title, prayer.description) },
+            ],
+            temperature: 0.7,
+          });
+
+          const recitablePrayer = finalizePrayerText(prayerResponse.choices[0].message.content || "");
+          await storage.updatePrayerContent(prayer.id, { recitablePrayer });
+          results.push({ id: prayer.id, title: prayer.title, status: "success" });
+        } catch (prayerError: any) {
+          results.push({ id: prayer.id, title: prayer.title, status: "failed", error: prayerError.message });
+        }
+      }
+
+      res.json({ message: "Prayer regeneration complete", results });
+    } catch (error: any) {
+      console.error("Error regenerating prayers:", error);
+      res.status(500).json({ error: "Failed to regenerate prayers" });
     }
   });
 

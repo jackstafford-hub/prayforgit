@@ -4,6 +4,7 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["zip"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -54,7 +55,7 @@ expertMode = true
 SEED_DB = "true"
 
 [userenv.shared]
-ADMIN_EMAILS = "jack.stafford@aetherius.org,mrjackstafford@gmail.com"
+ADMIN_EMAILS = "jack.stafford@aetherius.org,mrjackstafford@gmail.com,jackstaffmail@gmail.com"
 VAPID_PUBLIC_KEY = "BIJYovM8PpFwk9IrtYsv7RdP1pxbSrubPSIdG3M1oOwoXNgaOv8ABaOb3GAisrANyV8_CXRtkAFwt87-y8_IUXU"
 VAPID_SUBJECT = "mailto:support@prayforchange.org"
 SITE_URL = "https://prayforchange.org"

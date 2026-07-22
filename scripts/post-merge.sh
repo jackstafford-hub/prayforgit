@@ -1,4 +1,5 @@
 #!/bin/bash
 set -e
+
 npm install
-npm run db:push
+npm run db:push -- --force
