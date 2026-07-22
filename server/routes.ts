@@ -6,6 +6,7 @@ import { z } from "zod";
 import OpenAI from "openai";
 import { PRAYER_SYSTEM_PROMPT, buildPrayerUserContent, finalizePrayerText } from "./prayerPrompt";
 import { setupAuth, isAuthenticated } from "./auth";
+import { requireAdmin } from "./routes/admin";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import express from "express";
 import path from "path";
@@ -381,6 +382,38 @@ Write in first person. Be compassionate, authentic, and inspiring. Use a tone si
     } catch (error: any) {
       console.error("Error regenerating prayer content:", error);
       res.status(500).json({ error: "Failed to regenerate content" });
+    }
+  });
+
+  // Regenerate recitable prayers for all prayers using the current approved prompt (admin endpoint)
+  app.post("/api/admin/regenerate-prayers", requireAdmin, async (req, res) => {
+    try {
+      const allPrayers = await storage.getPrayers();
+      const results = [];
+
+      for (const prayer of allPrayers) {
+        try {
+          const prayerResponse = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: PRAYER_SYSTEM_PROMPT },
+              { role: "user", content: buildPrayerUserContent(prayer.title, prayer.description) },
+            ],
+            temperature: 0.7,
+          });
+
+          const recitablePrayer = finalizePrayerText(prayerResponse.choices[0].message.content || "");
+          await storage.updatePrayerContent(prayer.id, { recitablePrayer });
+          results.push({ id: prayer.id, title: prayer.title, status: "success" });
+        } catch (prayerError: any) {
+          results.push({ id: prayer.id, title: prayer.title, status: "failed", error: prayerError.message });
+        }
+      }
+
+      res.json({ message: "Prayer regeneration complete", results });
+    } catch (error: any) {
+      console.error("Error regenerating prayers:", error);
+      res.status(500).json({ error: "Failed to regenerate prayers" });
     }
   });
 
