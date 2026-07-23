@@ -33,7 +33,7 @@ if (databaseUrl) {
 export const pool = new Pool({
   connectionString: databaseUrl,
   max: 10,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 15000,
   idleTimeoutMillis: 30000,
   ssl: isProduction ? { rejectUnauthorized: false } : undefined,
 });

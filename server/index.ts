@@ -186,6 +186,11 @@ let appReady = false;
     },
     () => {
       log(`serving on port ${port}`);
+      // Mark ready immediately so the deployment health check passes even if the
+      // database is slow to wake. All DB startup work below is best-effort and must
+      // never block readiness (that was causing boot timeouts -> SIGTERM crash loops).
+      appReady = true;
+      log("HTTP server listening; running background initialization");
 
       (async () => {
         try {
@@ -218,8 +223,7 @@ let appReady = false;
             }
           }
 
-          appReady = true;
-          log("All routes registered and app is fully ready");
+          log("Background database initialization complete");
 
           if (process.env.SEED_DB === 'true') {
             try {

@@ -52,7 +52,7 @@ expertMode = true
 [userenv]
 
 [userenv.production]
-SEED_DB = "true"
+SEED_DB = "false"
 
 [userenv.shared]
 ADMIN_EMAILS = "jack.stafford@aetherius.org,mrjackstafford@gmail.com,jackstaffmail@gmail.com"
