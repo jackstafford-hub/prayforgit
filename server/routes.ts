@@ -1019,7 +1019,16 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
       
       const userId = req.session.userId;
       const userPrayers = await storage.getPrayersByAuthor(userId);
-      res.json(userPrayers);
+      // The dashboard list can be tens of MB if every prayer carries a full inline
+      // base64 image (data URIs are ~800KB each). Strip inline images from the LIST
+      // response — the detail page (GET /api/prayers/:id) still returns the full image.
+      // Prayers whose image is a normal URL keep their thumbnail.
+      const lightweight = userPrayers.map((p: any) => ({
+        ...p,
+        imageUrl: typeof p.imageUrl === "string" && p.imageUrl.startsWith("data:") ? null : p.imageUrl,
+        hasImage: typeof p.imageUrl === "string" && p.imageUrl.length > 0,
+      }));
+      res.json(lightweight);
     } catch (error: any) {
       console.error("Error fetching user prayers:", error?.stack || error);
       res.status(500).json({ error: "Failed to fetch user prayers", details: error?.message || String(error) });
