@@ -63,6 +63,28 @@ export async function requireAdmin(req: Request, res: Response, next: NextFuncti
   }
 }
 
+router.get("/debug-my-prayers", requireAdmin, async (req: Request, res: Response) => {
+  const out: any = { steps: [] };
+  try {
+    const userId = req.session.userId!;
+    out.userId = userId;
+    out.steps.push("querying");
+    const t0 = Date.now();
+    const { storage } = await import("../storage");
+    const rows = await storage.getPrayersByAuthor(userId);
+    out.steps.push("queried in " + (Date.now() - t0) + "ms");
+    out.count = rows.length;
+    const t1 = Date.now();
+    const json = JSON.stringify(rows);
+    out.steps.push("stringified " + json.length + " bytes in " + (Date.now() - t1) + "ms");
+    res.json(out);
+  } catch (e: any) {
+    out.error = e?.message || String(e);
+    out.stack = (e?.stack || "").split("\n").slice(0, 8);
+    res.status(200).json(out);
+  }
+});
+
 router.get("/users", requireAdmin, async (req: Request, res: Response) => {
   try {
     const page = Math.max(1, parseInt(req.query.page as string) || 1);

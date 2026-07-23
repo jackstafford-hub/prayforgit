@@ -9,6 +9,13 @@ import { WebhookHandlers } from './webhookHandlers';
 import adminRoutes from './routes/admin';
 import { startDailyDigestJob } from './dailyDigest';
 
+process.on("uncaughtException", (err) => {
+  console.error("[UNCAUGHT EXCEPTION]", err?.stack || err);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("[UNHANDLED REJECTION]", reason);
+});
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -158,8 +165,10 @@ let appReady = false;
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-    res.status(status).json({ message });
-    throw err;
+    console.error("[EXPRESS ERROR]", err?.stack || err);
+    if (!res.headersSent) {
+      res.status(status).json({ message });
+    }
   });
 
   if (process.env.NODE_ENV === "production") {

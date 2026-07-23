@@ -38,6 +38,12 @@ export const pool = new Pool({
   ssl: isProduction ? { rejectUnauthorized: false } : undefined,
 });
 
+// Cloud databases drop idle connections; without this handler the pg Pool emits an
+// unhandled 'error' event and crashes the whole process (surfacing as empty 500s).
+pool.on("error", (err) => {
+  console.error("[PG POOL] idle client error:", err.message);
+});
+
 export const db = drizzle(pool, { schema });
 
 // Non-blocking DB connectivity check using shared pool
