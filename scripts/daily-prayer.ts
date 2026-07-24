@@ -33,7 +33,12 @@ interface CrisisCandidate {
   tone: number;
   volume: number;
   score: number;
+  publishedAt?: Date | null;
 }
+
+// Maximum age of a news story we will pray about. The pipeline must reflect what is
+// happening NOW, not a month-old event resurfacing in a search index.
+const MAX_STORY_AGE_DAYS = 4;
 
 interface DraftedPrayer {
   title: string;
@@ -236,6 +241,17 @@ async function fetchFromGDELT(): Promise<CrisisCandidate[]> {
 
     const domain = a.domain || 'unknown';
     const volume = domainCounts[domain] || 1;
+    // GDELT seendate is "YYYYMMDDTHHMMSSZ" or "YYYYMMDDHHMMSS"
+    let publishedAt: Date | null = null;
+    const sd = a.seendate;
+    if (sd) {
+      const m = sd.replace(/[^0-9]/g, '');
+      if (m.length >= 8) {
+        const iso = `${m.slice(0,4)}-${m.slice(4,6)}-${m.slice(6,8)}T${(m.slice(8,10)||'00')}:${(m.slice(10,12)||'00')}:${(m.slice(12,14)||'00')}Z`;
+        const d = new Date(iso);
+        if (!isNaN(d.getTime())) publishedAt = d;
+      }
+    }
     deduped.push({
       title: a.title!,
       summary: '',
@@ -243,6 +259,7 @@ async function fetchFromGDELT(): Promise<CrisisCandidate[]> {
       tone,
       volume,
       score: Math.abs(tone) * volume,
+      publishedAt,
     });
   }
 
@@ -256,7 +273,10 @@ async function fetchFromNewsAPI(): Promise<CrisisCandidate[]> {
   // OR-operator query restricted to approved wire/broadcast domains
   const q = 'earthquake OR flood OR hurricane OR famine OR refugees OR "humanitarian crisis" OR "mass casualty" OR "disease outbreak" OR wildfire OR "armed conflict"';
   const domains = 'reuters.com,apnews.com,bbc.com,theguardian.com,npr.org,cnn.com,abc.net.au,channelnewsasia.com,un.org,who.int';
-  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&domains=${domains}&language=en&pageSize=20&sortBy=publishedAt&apiKey=${key}`;
+  // Restrict to the last few days so stale articles never surface.
+  const fromDate = new Date(Date.now() - MAX_STORY_AGE_DAYS * 24 * 60 * 60 * 1000)
+    .toISOString().slice(0, 10);
+  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&domains=${domains}&language=en&pageSize=20&sortBy=publishedAt&from=${fromDate}&apiKey=${key}`;
 
   const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
   if (!res.ok) {
@@ -266,7 +286,7 @@ async function fetchFromNewsAPI(): Promise<CrisisCandidate[]> {
 
   const data = await res.json() as {
     status?: string;
-    articles?: Array<{ title?: string; description?: string; url?: string; source?: { name?: string } }>
+    articles?: Array<{ title?: string; description?: string; url?: string; source?: { name?: string }; publishedAt?: string }>
   };
   if (data.status !== 'ok' || !data.articles?.length) return [];
 
@@ -280,14 +300,18 @@ async function fetchFromNewsAPI(): Promise<CrisisCandidate[]> {
       const text = (a.title + ' ' + (a.description || '')).toLowerCase();
       return CRISIS_TERMS.some(t => text.includes(t));
     })
-    .map(a => ({
-      title: a.title!,
-      summary: a.description || '',
-      url: a.url!,
-      tone: -5,
-      volume: 1,
-      score: 5,
-    }));
+    .map(a => {
+      const d = a.publishedAt ? new Date(a.publishedAt) : null;
+      return {
+        title: a.title!,
+        summary: a.description || '',
+        url: a.url!,
+        tone: -5,
+        volume: 1,
+        score: 5,
+        publishedAt: d && !isNaN(d.getTime()) ? d : null,
+      };
+    });
 }
 
 async function fetchTopCrisis(recentCrises: string[]): Promise<FetchCrisisResult | null> {
@@ -336,19 +360,40 @@ async function fetchTopCrisis(recentCrises: string[]): Promise<FetchCrisisResult
 
   if (!candidates.length) return null;
 
-  const DEDUP_THRESHOLD = 0.4;
+  const DEDUP_THRESHOLD = 0.3;
   const recentLower = recentCrises.map(c => c.toLowerCase());
 
-  const novel = candidates.filter(c => {
+  // RECENCY GATE: drop any story older than MAX_STORY_AGE_DAYS. A candidate with no
+  // parseable date is kept (we can't prove it's stale), but dated-and-old is removed.
+  const ageCutoff = Date.now() - MAX_STORY_AGE_DAYS * 24 * 60 * 60 * 1000;
+  const fresh = candidates.filter(c => !c.publishedAt || c.publishedAt.getTime() >= ageCutoff);
+  const droppedStale = candidates.length - fresh.length;
+  if (droppedStale > 0) console.log(`[RECENCY] Dropped ${droppedStale} stale candidate(s) older than ${MAX_STORY_AGE_DAYS} days`);
+
+  const novel = fresh.filter(c => {
     const titleLower = c.title.toLowerCase();
     return !recentLower.some(recent => {
-      const recentWords = recent.split(/\s+/).filter(w => w.length > 5);
+      // Match on shared significant words (>4 chars). Compare in BOTH directions so a
+      // short generated title ("France's Wildfire Evacuees") still catches a longer
+      // news headline about the same event, and vice-versa.
+      const recentWords = recent.split(/\s+/).filter(w => w.length > 4);
+      if (recentWords.length === 0) return false;
       const matchCount = recentWords.filter(w => titleLower.includes(w)).length;
-      return recentWords.length > 0 && matchCount / recentWords.length > DEDUP_THRESHOLD;
+      const candWords = titleLower.split(/\s+/).filter(w => w.length > 4);
+      const reverseCount = candWords.filter(w => recent.includes(w)).length;
+      const ratio = Math.max(
+        matchCount / recentWords.length,
+        candWords.length ? reverseCount / candWords.length : 0
+      );
+      return ratio > DEDUP_THRESHOLD;
     });
   });
 
-  const candidatePool = novel.length > 0 ? novel : candidates;
+  const candidatePool = novel.length > 0 ? novel : fresh.length > 0 ? fresh : [];
+  if (candidatePool.length === 0) {
+    console.log('[SELECT] No fresh, non-repeat candidates remain — no prayer today');
+    return null;
+  }
   candidatePool.sort((a, b) => b.score - a.score);
 
   // Try candidates in score order; pick first one that reaches Tier 1 or 2
@@ -776,7 +821,15 @@ export async function runPipeline(): Promise<PipelineResult> {
   try {
     // Step 1: Fetch top crisis + validate tier
     console.log('[STEP 1] Fetching top crisis news...');
-    const recentCrises = await storage.getRecentDailyCrisisPrayers(14);
+    // Exclusion list = recent run headlines PLUS recent prayer titles (published AND
+    // rejected). Including rejected titles means a story the approver said no to will
+    // not be drafted again.
+    const [recentRunCrises, recentPrayerTitles] = await Promise.all([
+      storage.getRecentDailyCrisisPrayers(14),
+      storage.getRecentDailyCrisisPrayerTitles(21),
+    ]);
+    const recentCrises = Array.from(new Set([...recentRunCrises, ...recentPrayerTitles]));
+    console.log(`[DEDUP] Excluding ${recentCrises.length} recent stories/titles (incl. rejected)`);
     const fetchResult = await fetchTopCrisis(recentCrises);
 
     if (!fetchResult) {

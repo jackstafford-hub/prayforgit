@@ -71,6 +71,7 @@ export interface IStorage {
   logDailyPrayerRun(data: Omit<InsertDailyPrayerRun, 'id'>): Promise<DailyPrayerRun>;
   updateDailyPrayerRun(id: string, data: Partial<InsertDailyPrayerRun>): Promise<void>;
   getRecentDailyCrisisPrayers(days: number): Promise<string[]>;
+  getRecentDailyCrisisPrayerTitles(days: number): Promise<string[]>;
   getPublishedDailyCrisisPrayers(limit: number): Promise<Prayer[]>;
   getDailyPrayerRunByDraftId(draftId: string): Promise<DailyPrayerRun | undefined>;
 
@@ -477,6 +478,18 @@ export class DatabaseStorage implements IStorage {
       .from(dailyPrayerRuns)
       .where(and(gte(dailyPrayerRuns.runAt, cutoff), sql`${dailyPrayerRuns.crisisChosen} IS NOT NULL`));
     return rows.map(r => r.crisisChosen as string);
+  }
+
+  // Titles of daily-crisis prayers from the last N days, regardless of approval status
+  // (published AND rejected). Feeding rejected titles back into the pipeline's exclusion
+  // list ensures a story the approver rejected is not re-drafted the next day.
+  async getRecentDailyCrisisPrayerTitles(days: number): Promise<string[]> {
+    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    const rows = await db
+      .select({ title: prayers.title })
+      .from(prayers)
+      .where(and(eq(prayers.isDailyCrisisPrayer, true), gte(prayers.createdAt, cutoff)));
+    return rows.map(r => r.title as string);
   }
 
   async getPublishedDailyCrisisPrayers(limit: number): Promise<Prayer[]> {
