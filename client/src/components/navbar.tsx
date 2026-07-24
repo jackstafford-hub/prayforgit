@@ -72,7 +72,7 @@ export function Navbar() {
           </Link>
           
           {isLoading ? (
-            <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+            <div className="w-[72px] h-9 rounded-md bg-muted/60 animate-pulse" />
           ) : isAuthenticated && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

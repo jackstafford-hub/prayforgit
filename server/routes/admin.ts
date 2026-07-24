@@ -263,6 +263,11 @@ router.get("/pipeline-status", requireAdmin, async (_req: Request, res: Response
 
     await initAlertThrottleFromDb();
 
+    // Overdue alerts only make sense if the built-in pipeline is the active generator.
+    // The Claude scheduled task handles daily prayers, so skip the nag emails unless
+    // the pipeline is explicitly enabled.
+    if (process.env.DAILY_PIPELINE_ENABLED !== 'true') return;
+
     const now = Date.now();
     const lastRunAt: Date | null = run?.runAt ? new Date(run.runAt) : null;
     const isOverdue =
