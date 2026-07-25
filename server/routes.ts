@@ -1049,6 +1049,31 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
     }
   });
 
+  // Serve a prayer's image as real image bytes. Prayer images are stored as base64
+  // data URIs inside the record (durable across redeploys); this endpoint decodes
+  // them so RSS feeds, emails and embeds can reference a normal image URL.
+  app.get("/api/prayers/:id/image", async (req, res) => {
+    try {
+      const prayer = await storage.getPrayerBySlugOrId(req.params.id);
+      if (!prayer || !prayer.imageUrl) return res.status(404).json({ error: "No image" });
+      const m = prayer.imageUrl.match(/^data:(image\/[a-z0-9.+-]+);base64,(.+)$/i);
+      if (m) {
+        const buf = Buffer.from(m[2], "base64");
+        res.setHeader("Content-Type", m[1]);
+        res.setHeader("Cache-Control", "public, max-age=86400");
+        return res.send(buf);
+      }
+      // Legacy http(s) or path-based image: redirect
+      const target = prayer.imageUrl.startsWith("http")
+        ? prayer.imageUrl
+        : `${process.env.SITE_URL || "https://prayforchange.org"}${prayer.imageUrl}`;
+      return res.redirect(302, target);
+    } catch (error: any) {
+      console.error("Error serving prayer image:", error?.message || error);
+      res.status(500).json({ error: "Failed to serve image" });
+    }
+  });
+
   // Create new prayer
   app.post("/api/prayers", async (req: any, res) => {
     try {
@@ -1681,7 +1706,13 @@ ${instructions}`
           const link = `${SITE_URL}/prayer/${p.slug || p.id}`;
           const pubDate = p.createdAt ? new Date(p.createdAt).toUTCString() : new Date().toUTCString();
           const description = p.aiSummary || p.description || '';
-          const imageUrl = p.imageUrl ? toAbsoluteUrl(p.imageUrl) : null;
+          // Data-URI images (how prayer photos are stored) must NOT be inlined into the
+          // feed — 50 of them collapse the response. Serve them via the image endpoint.
+          const imageUrl = p.imageUrl
+            ? (p.imageUrl.startsWith('data:')
+                ? `${SITE_URL}/api/prayers/${p.slug || p.id}/image`
+                : toAbsoluteUrl(p.imageUrl))
+            : null;
 
           const enclosure = imageUrl
             ? `<enclosure url="${escapeXml(imageUrl)}" type="image/jpeg" length="0" />`
