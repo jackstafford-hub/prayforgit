@@ -1350,6 +1350,34 @@ ${aiSummary ? `Context: ${aiSummary.substring(0, 800)}` : ''}`
     }
   });
 
+  // Unpublish or republish a prayer (admin only). Soft removal: sets approvalStatus
+  // to 'rejected' so the prayer disappears from the public site, RSS and browse,
+  // but stays in the database and can be restored by setting 'published' again.
+  app.patch("/api/prayers/:id/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const { status } = req.body;
+      if (status !== 'published' && status !== 'rejected') {
+        return res.status(400).json({ error: "status must be 'published' or 'rejected'" });
+      }
+      const userId = req.session?.userId;
+      const userRecord = userId ? await storage.getUser(userId) : null;
+      const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+      const isAdmin = userRecord?.email ? adminEmails.includes(userRecord.email.toLowerCase()) : false;
+      if (!isAdmin) {
+        return res.status(403).json({ error: "Admin only" });
+      }
+      const prayer = await storage.getPrayerById(req.params.id);
+      if (!prayer) {
+        return res.status(404).json({ error: "Prayer not found" });
+      }
+      await storage.setPrayerApprovalStatus(req.params.id, status);
+      res.json({ ok: true, id: req.params.id, approvalStatus: status });
+    } catch (error: any) {
+      console.error("Error updating prayer status:", error);
+      res.status(500).json({ error: "Failed to update prayer status" });
+    }
+  });
+
   // Update prayer goal (author or admin only, must be higher than current)
   app.patch("/api/prayers/:id/goal", isAuthenticated, async (req: any, res) => {
     try {

@@ -150,9 +150,9 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(prayers.topic, options.topic));
     }
 
-    // Crisis prayers always float to the top; then sort by prayer count
+    // Newest first: browse shows prayers in date order of creation
     return await db.select().from(prayers).where(and(...conditions))
-      .orderBy(desc(prayers.isDailyCrisisPrayer), desc(prayers.count));
+      .orderBy(desc(prayers.createdAt));
   }
 
   async getPrayersByAuthor(authorId: string): Promise<Prayer[]> {
