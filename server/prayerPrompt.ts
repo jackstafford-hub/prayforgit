@@ -8,6 +8,7 @@ STEP 2 — WRITE, using ONLY the matching template from the library below. Rules
   (a) Name addresses: "Oh God", "Oh Wondrous God", "Oh Mighty God", "Oh Mighty Creator of All Life", "Oh Divine and Wondrous Creator".
   (b) Attribute addresses — compounds built only from approved divine attributes (Light, Peace, Healing, Love, Mercy, Comfort, Hope, Strength, Life): e.g. "Oh Eternal Giver of Light, Bringer of Peace and Healing", "Oh Eternal Source of Love and Mercy", "Oh Boundless Giver of Comfort and Strength". Attribute addresses work especially well as the opening address.
   Never tradition-specific names (no Brahma, Parabrahma, Lord, Father, Allah). Capitalize Divine Love, Light of Peace, Infinite Power, Divine Will.
+- OPENING ADDRESS (overrides the template examples): the prayer's very first line is always exactly "Almighty God," — whatever address the template shows first. Later stanzas use varied addresses from the pools above.
 - CHANNELING AND IMMEDIACY (approved device): prayers may ask that the Light flow THROUGH US, NOW — "We humbly ask that this Light may flow through us now— / At this very moment—to all those suffering". The pray-ers act as channels of the Light, not only petitioners. Use this especially in crisis prayers to give warmth and urgency.
 - News/crisis prayers: 4-6 stanzas. Personal prayers: 3-4 stanzas.
 - Every crisis prayer must pray for BOTH those who are suffering AND those with the power to help - helpers matched to the crisis: rescuers/relief agencies for disasters, health workers/authorities for outbreaks, aid workers/generous nations for famine, peace negotiators/leaders for war. The "Power of Miracles from Thy Heart" phrase belongs in the helpers stanza.
@@ -30,7 +31,11 @@ CATEGORY SELECTION RULES:
 - Personal: illness -> personal-healing; bereavement -> personal-grief; hardship or decisions -> personal-guidance; thanks -> personal-gratitude; family and relationships -> personal-relationships
 - Anything else -> general-blessing
 
-APPROVED RECURRING PHRASES: "we humbly raise our hearts to Thee", "the radiant Light of Divine Love", "the wounded and the grieving, the frightened and the lost", "in their desperate need at this time", "a new era of Love and Understanding", "one with another", "may this Light flow through us now—at this very moment", "Power of Miracles from Thy Heart", "aid and solace to the wounded and the lost", "Guiding their hands and their hearts at this urgent hour", "May Thy Light shine into the darkness now", "the warmth of Thy eternal embrace".
+APPROVED RECURRING PHRASES (use sparingly — pick a few and vary them between prayers, never the same set in consecutive prayers): "we humbly raise our hearts to Thee", "the radiant Light of Thy Divine Love" (always with "Thy"), "in their desperate need at this time", "one with another", "may this Light flow through us now—at this very moment", "Power of Miracles from Thy Heart", "Guiding their hands and their hearts at this urgent hour", "May Thy Light shine into the darkness now", "the warmth of Thy eternal embrace".
+
+RESERVED PHRASES (use rarely — at most one prayer in five; on other days describe the people and hope in fresh words drawn from the actual event): "the wounded and the grieving, the frightened and the lost", "aid and solace to the wounded and the lost", "a new era of Love and Understanding", "we are one family upon this Earth".
+
+VARIED CLOSINGS: do not close every prayer on "a new era of Love and Understanding" or "one family upon this Earth" — these had become formulaic and overpromising. Vary the closing sentiment from prayer to prayer and keep it humble: quiet comfort and strength; courage for the days ahead; kindness rekindled between neighbours; healing and rest for the weary; hope taking root where it was lost. The final-line rule above is unchanged.
 
 === TEMPLATE LIBRARY ===
 
@@ -42,7 +47,7 @@ In [the lands in conflict], and in every war-torn land—
 May courage and mercy strengthen all
 In their call for freedom, healing and harmony.
 
-May this radiant Light of Divine Love
+May this radiant Light of Thy Divine Love
 Fill the hearts of all who yearn for peace
 With unwavering resolve and compassion,
 With wisdom and steadfast courage,
@@ -51,9 +56,8 @@ With unity and love for all humanity.
 Oh Wondrous God, may Thy boundless Love
 Flow through us now—at this very moment—
 To all those suffering in conflict,
-May it find the wounded and the grieving,
-The frightened and the lost—
-Bringing aid and solace to the wounded and the lost
+May it find [describe the affected in fresh words drawn from this conflict],
+Bringing aid and solace
 In their desperate need at this time.
 
 May Thy Light of Peace descend now
@@ -66,8 +70,7 @@ To act for the greatest good of all.
 
 Oh God, may all peoples unite
 In their noble vision of freedom and peace,
-So that we may together see the dawning of
-A new era of Love and Understanding
+[Close with a humble hope suited to this conflict — vary the wording each time; "a new era of Love and Understanding" only occasionally]
 Upon our sacred Mother Earth.
 
 May Divine Will be done.
@@ -80,7 +83,7 @@ Whose lives have been struck by [the earthquake / the floods / the storm]—
 May it find these ones now wherever they may be,
 In this hour of loss and need.
 
-May the radiant Light of Divine Love
+May the radiant Light of Thy Divine Love
 Flow now to the injured and the bereaved,
 The frightened and the homeless—
 Strengthening, protecting and healing them,
@@ -114,7 +117,7 @@ In [the fire / the tragedy] of [event]—
 May they be held in Thy boundless Love
 In this hour of shock and sorrow.
 
-May the radiant Light of Divine Love
+May the radiant Light of Thy Divine Love
 Flow through us now—at this very moment—
 To all who mourn and all who suffer,
 Bringing comfort to every grieving heart,
@@ -145,7 +148,7 @@ Now touched by [the outbreak / the illness]—
 May Thy healing Light surround them
 In this time of fear and uncertainty.
 
-May the radiant Light of Divine Love
+May the radiant Light of Thy Divine Love
 Flow through us now—at this very moment—
 To every sufferer and every bedside,
 To the frail, the elderly and the young—
@@ -174,7 +177,7 @@ In prayer for the people of [place],
 May they be sustained and protected
 In their desperate need at this time.
 
-May the radiant Light of Divine Love
+May the radiant Light of Thy Divine Love
 Flow through us now—at this very moment—
 To every family on the road,
 To the mothers, the children and the elders—
@@ -205,7 +208,7 @@ In body and in spirit—
 May Thy healing Light flow through us now
 To find them wherever they may be.
 
-May the radiant Light of Divine Love
+May the radiant Light of Thy Divine Love
 Fill every part of their being,
 Bringing strength where there is weakness,
 Peace where there is fear,
@@ -226,7 +229,7 @@ Who has passed onwards from this world—
 May they be received into Thy Light,
 Into peace, and into joy.
 
-May the radiant Light of Divine Love
+May the radiant Light of Thy Divine Love
 Surround all those who mourn them,
 Softening sorrow with sweet remembrance,
 And filling every grieving heart
@@ -269,7 +272,7 @@ For [the blessing received],
 For life, for love, for light,
 We give our heartfelt thanks.
 
-May the radiant Light of Divine Love
+May the radiant Light of Thy Divine Love
 That has so blessed us
 Flow onwards through our lives to others,
 That every gift received
@@ -290,7 +293,7 @@ May harmony and understanding
 Dwell among them,
 And Thy Love unite their hearts.
 
-May the radiant Light of Divine Love
+May the radiant Light of Thy Divine Love
 Soften all hardness between them,
 Replacing hurt with forgiveness,
 Distance with closeness,
@@ -310,7 +313,7 @@ In prayer for [the subject of the request]—
 May Thy blessings descend upon them
 In fullness and in grace.
 
-May the radiant Light of Divine Love
+May the radiant Light of Thy Divine Love
 Flow through us now—at this very moment—
 To surround, protect and uplift them,
 Bringing peace to their hearts
